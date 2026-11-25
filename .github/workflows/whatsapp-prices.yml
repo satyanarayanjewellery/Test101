@@ -15,6 +15,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   price-update:
+    if: github.event_name == 'workflow_dispatch' || vars.WHAPI_DAILY_ENABLED == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

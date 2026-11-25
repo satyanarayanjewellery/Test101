@@ -1,0 +1,38 @@
+name: Individual WhatsApp price updates
+on:
+  schedule:
+    - cron: '30 3 * * *' # 9:00 AM India time
+  workflow_dispatch:
+    inputs:
+      send:
+        description: 'Send to opted-in customers (unchecked previews only)'
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: whatsapp-individual-prices
+  cancel-in-progress: false
+jobs:
+  update:
+    # Scheduled sending is deliberately opt-in. Manual send still requires explicit confirmation.
+    if: github.event_name == 'workflow_dispatch' || vars.META_DAILY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test
+      - name: Preview or send individual updates
+        run: node bot/individual-prices.mjs
+        env:
+          META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}
+          META_PHONE_NUMBER_ID: ${{ secrets.META_PHONE_NUMBER_ID }}
+          META_RECIPIENTS_JSON: ${{ secrets.META_RECIPIENTS_JSON }}
+          META_TEMPLATE_NAME: ${{ vars.META_TEMPLATE_NAME }}
+          META_TEMPLATE_LANGUAGE: ${{ vars.META_TEMPLATE_LANGUAGE }}
+          META_GRAPH_VERSION: ${{ vars.META_GRAPH_VERSION }}
+          PRICE_OFFSET_PERCENT: ${{ vars.PRICE_OFFSET_PERCENT }}
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.send != true && 'true' || 'false' }}
