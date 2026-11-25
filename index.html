@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Satyanarayan Jewellers live gold & silver price desk for Cuttack — retail rates per gram, 10g and tola for 999/995/916/750 purity, ex-GST and incl. 3% GST, plus charts, calculator and Mintu assistant." />
+  <meta name="description" content="Satyanarayan Jewellers live gold & silver price desk for Cuttack — retail rates per gram and 10g for 999/995/916/750 purity, ex-GST and incl. 3% GST, plus charts, calculator and Mintu assistant." />
   <meta name="author" content="Satyanarayan Jewellers, Cuttack" />
   <meta name="robots" content="index, follow" />
   <meta name="theme-color" content="#090607" />
@@ -13,11 +13,11 @@
   <meta name="apple-mobile-web-app-title" content="SJ Price Desk" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Satyanarayan Jewellers — Live Gold & Silver Price Desk" />
-  <meta property="og:description" content="Live Cuttack gold & silver rates per gram / 10g / tola (999, 995, 916, 750), ex-GST & incl. 3% GST. Charts, calculator & Mintu assistant." />
+  <meta property="og:description" content="Live Cuttack gold & silver rates per gram / 10g (999, 995, 916, 750), ex-GST & incl. 3% GST. Charts, calculator & Mintu assistant." />
   <meta property="og:locale" content="en_IN" />
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="Satyanarayan Jewellers — Live Gold & Silver Price Desk" />
-  <meta name="twitter:description" content="Live Cuttack gold & silver rates per gram / 10g / tola, ex-GST & incl. 3% GST." />
+  <meta name="twitter:description" content="Live Cuttack gold & silver rates per gram / 10g, ex-GST & incl. 3% GST." />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"JewelryStore","name":"Satyanarayan Jewellers","description":"Live gold & silver price desk for Cuttack with retail and GST rates.","address":{"@type":"PostalAddress","addressLocality":"Cuttack","addressRegion":"Odisha","addressCountry":"IN"},"currenciesAccepted":"INR","priceRange":"₹₹"}</script>
@@ -81,7 +81,7 @@
     .view-fade-in{animation:viewFadeIn 0.22s cubic-bezier(0.22,1,0.36,1) forwards}
     @keyframes mintuFloat{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(0,-3px,0)}}
     .mintu-hero-avatar{box-shadow:0 0 20px rgba(212,175,55,0.3);animation:mintuFloat 3.4s ease-in-out infinite}
-    .grid-cols-6{grid-template-columns:repeat(6,minmax(0,1fr))}.col-span-1{grid-column:span 1/span 1}.col-span-2{grid-column:span 2/span 2}.text-xl{font-size:1.25rem;line-height:1.75rem}.py-8{padding-top:2rem;padding-bottom:2rem}@media (min-width:640px){.sm\:grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}.sm\:col-span-6{grid-column:span 6/span 6}.sm\:w-64{width:16rem}}.tool-panel{position:relative}.tool-panel-agent{height:clamp(430px,calc(100dvh - 16rem),760px)}
+    .grid-cols-6{grid-template-columns:repeat(6,minmax(0,1fr))}.col-span-1{grid-column:span 1/span 1}.col-span-2{grid-column:span 2/span 2}.text-xl{font-size:1.25rem;line-height:1.75rem}.py-8{padding-top:2rem;padding-bottom:2rem}@media (min-width:640px){.sm\:grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}.sm\:grid-cols-5{grid-template-columns:repeat(5,minmax(0,1fr))}.sm\:col-span-6{grid-column:span 6/span 6}.sm\:w-64{width:16rem}}.tool-panel{position:relative}.tool-panel-agent{height:clamp(430px,calc(100dvh - 16rem),760px)}
   
     /* --- Accessibility & print (added) --- */
     .skip-link{position:absolute;left:-9999px;top:0;z-index:60;background:#F59E0B;color:#090607;font-weight:700;font-size:13px;padding:10px 16px;border-radius:0 0 12px 0}
@@ -705,73 +705,6 @@
         <p id="print-board-meta" style="font-size:12px;color:#444">Cuttack · Indicative estimates, not firm quotes. Excludes making charges.</p>
       </div>
 
-      <!-- Share / copy / print + freshness -->
-      <section class="glass-card rounded-2xl p-3.5 sm:p-4 no-print" aria-label="Share today's rates">
-        <div class="flex flex-wrap items-center justify-between gap-2">
-          <div>
-            <h2 class="text-xs sm:text-sm font-semibold text-white">Share today's rates</h2>
-            <p id="rates-updated-label" class="text-[11px] text-slate-400 mt-0.5">Waiting for live rates…</p>
-          </div>
-          <span id="rates-stale-badge" class="hidden text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">Stale — showing last known rates</span>
-        </div>
-        <div class="flex flex-wrap gap-2 mt-3">
-          <button id="btn-share-rates" type="button" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition-colors duration-150">
-            <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="m16 6-4-4-4 4"/><path d="M12 2v13"/></svg> Share
-          </button>
-          <button id="btn-share-whatsapp" type="button" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-200 text-xs font-semibold transition-colors duration-150">
-            <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg> WhatsApp
-          </button>
-          <button id="btn-copy-rates" type="button" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-100 text-xs font-semibold transition-colors duration-150">
-            <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg> Copy
-          </button>
-          <button id="btn-print-rates" type="button" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-100 text-xs font-semibold transition-colors duration-150">
-            <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg> Print board
-          </button>
-        </div>
-      </section>
-
-      <!-- Per-tola quick values (11.66 g — standard Indian trade weight) -->
-      <section class="glass-card rounded-2xl p-3.5 sm:p-4" aria-label="Per tola quick rates">
-        <h2 class="text-xs sm:text-sm font-semibold text-white mb-2.5">Per tola <span class="text-slate-400 font-normal">(11.66 g)</span></h2>
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          <div class="rate-tile rate-tile-gold rounded-xl px-2 py-2 text-center">
-            <p class="text-[10px] text-amber-200/75">Gold 999 ex-GST</p>
-            <p id="tola-gold-999-exgst" class="text-xs sm:text-sm font-bold text-white tabular-nums mt-0.5">--</p>
-          </div>
-          <div class="rate-tile rate-tile-gold rounded-xl px-2 py-2 text-center">
-            <p class="text-[10px] text-amber-200/75">Gold 999 incl. GST</p>
-            <p id="tola-gold-999-gst" class="text-xs sm:text-sm font-bold text-white tabular-nums mt-0.5">--</p>
-          </div>
-          <div class="rate-tile rate-tile-gold rounded-xl px-2 py-2 text-center">
-            <p class="text-[10px] text-amber-200/75">Gold 916 ex-GST</p>
-            <p id="tola-gold-916-exgst" class="text-xs sm:text-sm font-bold text-white tabular-nums mt-0.5">--</p>
-          </div>
-          <div class="rate-tile rate-tile-silver rounded-xl px-2 py-2 text-center">
-            <p class="text-[10px] text-slate-300/80">Silver 999 ex-GST</p>
-            <p id="tola-silver-999-exgst" class="text-xs sm:text-sm font-bold text-white tabular-nums mt-0.5">--</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- Local price alerts -->
-      <section class="glass-card rounded-2xl p-3.5 sm:p-4 no-print" aria-label="Price alerts">
-        <h2 class="text-xs sm:text-sm font-semibold text-white">Price alerts <span class="text-slate-400 font-normal">(this device only)</span></h2>
-        <p class="text-[11px] text-slate-400 mt-0.5">Get a toast when Gold 999 or Silver 999 (per gram, ex-GST) crosses your level.</p>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-3">
-          <label class="text-[11px] text-slate-400">Gold 999 alert (₹/g)
-            <input id="alert-gold-input" type="number" min="0" step="1" inputmode="numeric" placeholder="e.g. 12000" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-sm text-white tabular-nums placeholder-slate-500 focus:outline-none focus:border-amber-500" />
-          </label>
-          <label class="text-[11px] text-slate-400">Silver 999 alert (₹/g)
-            <input id="alert-silver-input" type="number" min="0" step="1" inputmode="numeric" placeholder="e.g. 120" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-sm text-white tabular-nums placeholder-slate-500 focus:outline-none focus:border-amber-500" />
-          </label>
-        </div>
-        <div class="flex flex-wrap items-center gap-2 mt-3">
-          <button id="btn-save-alerts" type="button" class="px-3 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition-colors duration-150">Save alerts</button>
-          <button id="btn-clear-alerts" type="button" class="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-100 text-xs font-semibold transition-colors duration-150">Clear</button>
-          <p id="alert-status" class="text-[11px] text-slate-400">No alerts set.</p>
-        </div>
-      </section>
-
       <footer class="text-[11px] text-slate-500 flex flex-wrap items-center justify-between gap-2 px-1">
         <span id="footer-sources">Live 1g Bullion Rates &middot; Retail &amp; GST</span>
         <span class="text-amber-300/75 font-mono select-none">GSTIN: 21AFNPP7926E1ZC</span>
@@ -973,11 +906,12 @@
               <h2 id="tools-active-heading" class="text-xs sm:text-sm font-semibold text-amber-300">Jewellery &amp; Bullion Price Calculator</h2>
             </div>
           </div>
-          <div id="tools-subtab-list" class="grid grid-cols-4 gap-1 bg-slate-950/90 p-1 rounded-xl border border-slate-800" role="tablist" aria-label="Bullion Tool Selector">
+          <div id="tools-subtab-list" class="grid grid-cols-3 sm:grid-cols-5 gap-1 bg-slate-950/90 p-1 rounded-xl border border-slate-800" role="tablist" aria-label="Bullion Tool Selector">
             <button data-tool-tab="calculator" type="button" role="tab" aria-selected="true" class="tool-tab-btn px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold bg-amber-500 text-slate-950 transition-colors duration-150 whitespace-nowrap">Calculator</button>
             <button data-tool-tab="old-gold" type="button" role="tab" aria-selected="false" class="tool-tab-btn px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium text-slate-300 hover:text-white transition-colors duration-150 whitespace-nowrap">Old Gold</button>
             <button data-tool-tab="old-silver" type="button" role="tab" aria-selected="false" class="tool-tab-btn px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium text-slate-300 hover:text-white transition-colors duration-150 whitespace-nowrap">Old Silver</button>
             <button data-tool-tab="mintu" type="button" role="tab" aria-selected="false" class="tool-tab-btn px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium text-slate-300 hover:text-white transition-colors duration-150 whitespace-nowrap">Mintu</button>
+            <button data-tool-tab="share" type="button" role="tab" aria-selected="false" class="tool-tab-btn px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium text-slate-300 hover:text-white transition-colors duration-150 whitespace-nowrap">Share</button>
           </div>
         </div>
 
@@ -1011,7 +945,6 @@
                   <select id="calc-unit" class="w-full rounded-xl bg-slate-900 border border-slate-700 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500">
                     <option value="g" selected>Grams (g)</option>
                     <option value="10g">10 Grams</option>
-                    <option value="tola">Tola (11.66g)</option>
                     <option value="oz">Troy Oz (31.10g)</option>
                     <option value="kg">Kilogram (1000g)</option>
                   </select>
@@ -1125,7 +1058,6 @@
                   <select id="og-unit" class="w-full rounded-xl bg-slate-900 border border-slate-700 px-2.5 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500">
                     <option value="g" selected>Grams (g)</option>
                     <option value="10g">10g</option>
-                    <option value="tola">Tola</option>
                     <option value="oz">Troy Oz</option>
                   </select>
                 </div>
@@ -1242,7 +1174,6 @@
                   <select id="os-unit" class="w-full rounded-xl bg-slate-900 border border-slate-700 px-2.5 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500">
                     <option value="g" selected>Grams (g)</option>
                     <option value="kg">Kilogram (kg)</option>
-                    <option value="tola">Tola</option>
                     <option value="oz">Troy Oz</option>
                   </select>
                 </div>
@@ -1362,6 +1293,34 @@
         </div>
       </form>
     </section>
+        </div>
+
+        <!-- TAB 5: SHARE / COPY / PRINT TODAY'S RATES -->
+        <div id="panel-share" class="tool-panel hidden p-4 sm:p-5" role="tabpanel" aria-label="Share today's rates">
+          <section class="rounded-2xl border border-slate-800 bg-slate-950/50 p-4 sm:p-5 no-print" aria-label="Share today's rates">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h3 class="text-sm font-semibold text-white">Share today's rates</h3>
+                <p id="rates-updated-label" class="text-[11px] text-slate-400 mt-0.5">Waiting for live rates…</p>
+              </div>
+              <span id="rates-stale-badge" class="hidden text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">Stale — showing last known rates</span>
+            </div>
+            <p class="text-[11px] text-slate-400 mt-2">Send the latest Cuttack gold and silver rates, copy the text, or print the rate board.</p>
+            <div class="flex flex-wrap gap-2 mt-3">
+              <button id="btn-share-rates" type="button" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition-colors duration-150">
+                <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="m16 6-4-4-4 4"/><path d="M12 2v13"/></svg> Share
+              </button>
+              <button id="btn-share-whatsapp" type="button" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-200 text-xs font-semibold transition-colors duration-150">
+                <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg> WhatsApp
+              </button>
+              <button id="btn-copy-rates" type="button" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-100 text-xs font-semibold transition-colors duration-150">
+                <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg> Copy
+              </button>
+              <button id="btn-print-rates" type="button" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-100 text-xs font-semibold transition-colors duration-150">
+                <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg> Print board
+              </button>
+            </div>
+          </section>
         </div>
       </section>
     </div>
@@ -2624,9 +2583,7 @@
     function renderAllViews(flashDirs = null, animateReveal = false) {
       renderLiveStatusUI();
       if (!state.prices) return;
-      updateTolaTiles();
       updateRatesUpdatedLabel();
-      checkPriceAlerts();
       renderPriceCards(flashDirs, animateReveal);
       if (state.activeView === 'charts') renderChart();
       if (state.activeView === 'news' || animateReveal) renderNewsTicker();
@@ -4162,7 +4119,6 @@
 
     function unitToGrams(unit) {
       if (unit === '10g') return 10;
-      if (unit === 'tola') return 11.6638;
       if (unit === 'oz') return TROY_OZ_TO_GRAMS;
       if (unit === 'kg') return 1000;
       return 1;
@@ -4224,7 +4180,7 @@
     }
 
     function switchToolTab(tabName) {
-      const tabs = ['calculator', 'old-gold', 'old-silver', 'mintu'];
+      const tabs = ['calculator', 'old-gold', 'old-silver', 'mintu', 'share'];
       if (!tabs.includes(tabName)) return;
       state.activeToolTab = tabName;
 
@@ -4232,7 +4188,8 @@
         calculator: 'Jewellery & Bullion Price Calculator',
         'old-gold': 'Old Gold Exchange Valuation',
         'old-silver': 'Old Silver Exchange Valuation',
-        mintu: 'Mintu — Jewellery & Bullion AI'
+        mintu: 'Mintu — Jewellery & Bullion AI',
+        share: "Share Today's Rates"
       };
       const headEl = document.getElementById('tools-active-heading');
       if (headEl) headEl.textContent = headings[tabName] || headings.calculator;
@@ -4516,7 +4473,7 @@
     // =========================================================================
     const OFF_TOPIC_REPLY = "I can only assist with **jewellery and gold/silver price topics** — such as live bullion rates, purity (24K/995/22K/18K/999/925), jewellery quotes, making charges, BIS hallmarking/HUID, or market trends. Please ask a jewellery or bullion price question!";
 
-    const JEWELLERY_PRICE_RE = /\b(gold|silver|bullion|jewel\w*|ornament\w*|ring|rings|necklace\w*|chain\w*|bangle\w*|bracelet\w*|earring\w*|stud\w*|pendant\w*|mangalsutra|payal|anklet\w*|nosepin|choker|haar|bridal|wedding|kundan|polki|jadau|meenakari|temple|antique|filigree|tarkashi|diamond\w*|solitaire|platinum|rose gold|white gold|rhodium|gemstone\w*|pearl\w*|emerald|ruby|sapphire|hallmark\w*|huid|bis|purity|karat|carat|24k|22k|18k|14k|999|995|916|750|925|sterling|coin\w*|bar|bars|biscuit\w*|tola|bhori|gram\w*|gm|kg|kilo\w*|ounce|oz|making|wastage|gst|gstin|bill|quote|price\w*|rate\w*|bhav|daam|cost\w*|budget|buy|sell|exchange|buyback|resale|vatav|touch|xrf|deduction|lac|solder|melt\w*|casting|polish\w*|clean\w*|tarnish|mcx|spot|xau|xag|usd|inr|rupee|rbi|dollar|forex|news|headline|market|trend\w*|chart\w*|cagr|ratio|cuttack|bhubaneswar|odisha|mumbai|delhi|chennai|kolkata|bengaluru|bangalore|hyderabad|ahmedabad|pune|jaipur|lucknow|patna|satyanarayan|sona|suna|chandi|rupa|gehena|goyna|pola|sakha|etf|sgb|sovereign|dip|rally|forecast|today|live|open|close|switch|city|location|nifty|sensex|stock|stocks|share|equity|bse|nse|fii|dii)\b/i;
+    const JEWELLERY_PRICE_RE = /\b(gold|silver|bullion|jewel\w*|ornament\w*|ring|rings|necklace\w*|chain\w*|bangle\w*|bracelet\w*|earring\w*|stud\w*|pendant\w*|mangalsutra|payal|anklet\w*|nosepin|choker|haar|bridal|wedding|kundan|polki|jadau|meenakari|temple|antique|filigree|tarkashi|diamond\w*|solitaire|platinum|rose gold|white gold|rhodium|gemstone\w*|pearl\w*|emerald|ruby|sapphire|hallmark\w*|huid|bis|purity|karat|carat|24k|22k|18k|14k|999|995|916|750|925|sterling|coin\w*|bar|bars|biscuit\w*|bhori|gram\w*|gm|kg|kilo\w*|ounce|oz|making|wastage|gst|gstin|bill|quote|price\w*|rate\w*|bhav|daam|cost\w*|budget|buy|sell|exchange|buyback|resale|vatav|touch|xrf|deduction|lac|solder|melt\w*|casting|polish\w*|clean\w*|tarnish|mcx|spot|xau|xag|usd|inr|rupee|rbi|dollar|forex|news|headline|market|trend\w*|chart\w*|cagr|ratio|cuttack|bhubaneswar|odisha|mumbai|delhi|chennai|kolkata|bengaluru|bangalore|hyderabad|ahmedabad|pune|jaipur|lucknow|patna|satyanarayan|sona|suna|chandi|rupa|gehena|goyna|pola|sakha|etf|sgb|sovereign|dip|rally|forecast|today|live|open|close|switch|city|location|nifty|sensex|stock|stocks|share|equity|bse|nse|fii|dii)\b/i;
 
     const GREETING_ONLY_RE = /^(hi|hello|hey|namaste|namaskar|good morning|good afternoon|good evening|thanks|thank you|ok|okay|help|who are you|what can you do|your name)[!.?\s]*$/i;
 
@@ -4698,11 +4655,11 @@
 
       if (state.prices) {
         const city = getCurrentCity();
-        const weightMatch = q.match(/(\d+(?:\.\d+)?)\s*(g|gm|gram|grams|kg|kilo|tola|oz|ounce)\b/i);
+        const weightMatch = q.match(/(\d+(?:\.\d+)?)\s*(g|gm|gram|grams|kg|kilo|oz|ounce)\b/i);
         if (weightMatch) {
           const w = parseFloat(weightMatch[1]);
           const uRaw = weightMatch[2].toLowerCase();
-          const unit = uRaw.startsWith('kg') || uRaw.startsWith('kilo') ? 'kg' : uRaw.startsWith('tola') ? 'tola' : uRaw.startsWith('oz') || uRaw.startsWith('ounce') ? 'oz' : 'g';
+          const unit = uRaw.startsWith('kg') || uRaw.startsWith('kilo') ? 'kg' : uRaw.startsWith('oz') || uRaw.startsWith('ounce') ? 'oz' : 'g';
           let metal = '22K';
           if (lower.includes('silver') || lower.includes('chandi') || lower.includes('rupa')) metal = lower.includes('750') ? '750S' : (lower.includes('925') ? '925' : '999');
           else if (lower.includes('999') || lower.includes('24k')) metal = '24K';
@@ -5386,12 +5343,9 @@
     
     
     // =========================================================================
-    // RATES EXTRAS: TOLA, SHARE/COPY/PRINT, FRESHNESS, ALERTS, KEYBOARD NAV
+    // TOOLS EXTRAS: SHARE/COPY/PRINT, FRESHNESS, KEYBOARD NAV
     // =========================================================================
-    const TOLA_GRAMS = 11.66;
-    const ALERT_STORAGE_KEY = 'satyanarayan_price_alerts_v1';
     let lastAnnouncedRatesMs = 0;
-    let lastAlertSide = { gold: null, silver: null };
 
     function formatRelativeAge(ms) {
       if (!Number.isFinite(ms) || ms < 0) return 'just now';
@@ -5402,21 +5356,6 @@
       if (m < 60) return `${m}m ago`;
       const h = Math.floor(m / 60);
       return `${h}h ${m % 60}m ago`;
-    }
-
-    function updateTolaTiles() {
-      const pr = state.prices;
-      if (!pr) return;
-      const map = {
-        'tola-gold-999-exgst': pr.gold999ExGstGram * TOLA_GRAMS,
-        'tola-gold-999-gst': pr.gold999Gram * TOLA_GRAMS,
-        'tola-gold-916-exgst': pr.gold916ExGstGram * TOLA_GRAMS,
-        'tola-silver-999-exgst': pr.silver999ExGstGram * TOLA_GRAMS
-      };
-      Object.entries(map).forEach(([id, val]) => {
-        const el = document.getElementById(id);
-        if (el && Number.isFinite(val)) el.textContent = fmtINR(val);
-      });
     }
 
     function updateRatesUpdatedLabel() {
@@ -5454,7 +5393,6 @@
         `995: ${fmtINR(pr.gold995ExGst)} / ${fmtINR(pr.gold995)}`,
         `916 (22K): ${fmtINR(pr.gold916ExGst)} / ${fmtINR(pr.gold916)}`,
         `750 (18K): ${fmtINR(pr.gold18ExGst)} / ${fmtINR(pr.gold18)}`,
-        `Gold 999 per tola (11.66g): ${fmtINR(pr.gold999ExGstGram * TOLA_GRAMS)} ex-GST / ${fmtINR(pr.gold999Gram * TOLA_GRAMS)} incl. GST`,
         '',
         'Silver (per kg, ex-GST / incl. 3% GST):',
         `999: ${fmtINR(pr.silver999ExGst)} / ${fmtINR(pr.silver999)}`,
@@ -5512,78 +5450,11 @@
       window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank', 'noopener,noreferrer');
     }
 
-    function loadPriceAlerts() {
-      try {
-        const raw = lsGet(ALERT_STORAGE_KEY, '');
-        if (!raw) return { gold: null, silver: null };
-        const parsed = JSON.parse(raw);
-        const clean = (v) => (Number.isFinite(Number(v)) && Number(v) > 0 ? Number(v) : null);
-        return { gold: clean(parsed.gold), silver: clean(parsed.silver) };
-      } catch { return { gold: null, silver: null }; }
-    }
-
-    function renderAlertStatus() {
-      const el = document.getElementById('alert-status');
-      if (!el) return;
-      const alerts = loadPriceAlerts();
-      const parts = [];
-      if (alerts.gold) parts.push(`Gold ≥ ${fmtINR(alerts.gold)}/g`);
-      if (alerts.silver) parts.push(`Silver ≥ ${fmtINR(alerts.silver)}/g`);
-      el.textContent = parts.length ? `Alerts on: ${parts.join(' · ')}` : 'No alerts set.';
-    }
-
-    function checkPriceAlerts() {
-      const pr = state.prices;
-      if (!pr) return;
-      const alerts = loadPriceAlerts();
-      const checks = [
-        { key: 'gold', label: 'Gold 999', rate: pr.gold999ExGstGram, threshold: alerts.gold },
-        { key: 'silver', label: 'Silver 999', rate: pr.silver999ExGstGram, threshold: alerts.silver }
-      ];
-      checks.forEach(({ key, label, rate, threshold }) => {
-        if (!threshold || !Number.isFinite(rate)) { lastAlertSide[key] = null; return; }
-        const side = rate >= threshold ? 'above' : 'below';
-        if (lastAlertSide[key] && lastAlertSide[key] !== side) {
-          showToast(`${label} is now ${side === 'above' ? 'at or above' : 'below'} your alert of ${fmtINR(threshold)}/g (now ${fmtINR(rate)}/g).`, 'alert');
-        }
-        lastAlertSide[key] = side;
-      });
-    }
-
-    function initRatesExtras() {
+    function initToolsExtras() {
       document.getElementById('btn-share-rates')?.addEventListener('click', shareRates);
       document.getElementById('btn-share-whatsapp')?.addEventListener('click', shareRatesWhatsApp);
       document.getElementById('btn-copy-rates')?.addEventListener('click', copyRatesText);
       document.getElementById('btn-print-rates')?.addEventListener('click', () => window.print());
-
-      const goldInput = document.getElementById('alert-gold-input');
-      const silverInput = document.getElementById('alert-silver-input');
-      const saved = loadPriceAlerts();
-      if (goldInput && saved.gold) goldInput.value = String(saved.gold);
-      if (silverInput && saved.silver) silverInput.value = String(saved.silver);
-      renderAlertStatus();
-
-      document.getElementById('btn-save-alerts')?.addEventListener('click', () => {
-        const g = goldInput ? Number(goldInput.value) : NaN;
-        const s = silverInput ? Number(silverInput.value) : NaN;
-        const alerts = {
-          gold: Number.isFinite(g) && g > 0 ? g : null,
-          silver: Number.isFinite(s) && s > 0 ? s : null
-        };
-        lsSet(ALERT_STORAGE_KEY, JSON.stringify(alerts));
-        lastAlertSide = { gold: null, silver: null };
-        renderAlertStatus();
-        checkPriceAlerts();
-        showToast(alerts.gold || alerts.silver ? 'Price alerts saved on this device.' : 'Alerts cleared.', 'success');
-      });
-      document.getElementById('btn-clear-alerts')?.addEventListener('click', () => {
-        lsRemove(ALERT_STORAGE_KEY);
-        if (goldInput) goldInput.value = '';
-        if (silverInput) silverInput.value = '';
-        lastAlertSide = { gold: null, silver: null };
-        renderAlertStatus();
-        showToast('Price alerts cleared.', 'info');
-      });
 
       // Arrow-key navigation for tool tabs (roving focus, WAI-ARIA pattern)
       const tablist = document.getElementById('tools-subtab-list');
@@ -5601,14 +5472,13 @@
       // Announce rates to screen readers at most every 30s (REST syncs, not WS ticks)
       setInterval(() => { if (state.live && state.live.lastSync && Date.now() - new Date(state.live.lastSync).getTime() < 20000) announceRates(); }, 30000);
 
-      updateTolaTiles();
       updateRatesUpdatedLabel();
     }
 
     (function bootApp() {
-      // Remove obsolete browser-local credentials and retail override from earlier versions.
+      // Remove obsolete browser-local credentials, retail override and alert settings from earlier versions.
       try {
-        ['satyanarayan_admin_pass_v1', 'satyanarayan_admin_offset_v1', 'sj_admin_totp_secret_v1'].forEach(key => localStorage.removeItem(key));
+        ['satyanarayan_admin_pass_v1', 'satyanarayan_admin_offset_v1', 'sj_admin_totp_secret_v1', 'satyanarayan_price_alerts_v1'].forEach(key => localStorage.removeItem(key));
         sessionStorage.removeItem('sj_totp_pending');
       } catch { /* Storage may be unavailable. */ }
       // 1. Paint cached rates & start 3-exchange WebSocket race + parallel REST sync FIRST
@@ -5619,7 +5489,7 @@
 
       // 2. Bind UI events immediately so taps work at T=0ms
       bindEvents();
-      initRatesExtras();
+      initToolsExtras();
       setInterval(renderMarketHoursUI, 30000);
       setInterval(updateRatesUpdatedLabel, 10000);
       if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {

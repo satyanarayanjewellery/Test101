@@ -24,19 +24,39 @@ test('head has SEO, social and PWA hooks', async () => {
   ]) assert.ok(html.includes(part), part);
 });
 
-test('rates extras UI is present (share, tola, alerts, skip link, live region)', async () => {
+test('share and freshness controls live in the tools view, not on the rates board', async () => {
   const html = await loadHtml();
+  const toolsStart = html.indexOf('<div id="view-tools"');
+  const toolsEnd = html.indexOf('<!-- Mobile Bottom Navigation', toolsStart);
+  assert.ok(toolsStart >= 0 && toolsEnd > toolsStart);
+  const toolsView = html.slice(toolsStart, toolsEnd);
+
   for (const id of [
     'btn-share-rates', 'btn-share-whatsapp', 'btn-copy-rates', 'btn-print-rates',
-    'rates-updated-label', 'rates-stale-badge',
-    'tola-gold-999-exgst', 'tola-gold-999-gst', 'tola-gold-916-exgst', 'tola-silver-999-exgst',
-    'alert-gold-input', 'alert-silver-input', 'btn-save-alerts', 'btn-clear-alerts', 'alert-status',
-    'rates-live-region'
-  ]) assert.ok(html.includes(`id="${id}"`), id);
+    'rates-updated-label', 'rates-stale-badge', 'panel-share'
+  ]) assert.ok(toolsView.includes(`id="${id}"`), `tools view: ${id}`);
+  assert.ok(toolsView.includes('data-tool-tab="share"'));
+  assert.match(html, /const tabs = \['calculator', 'old-gold', 'old-silver', 'mintu', 'share'\]/);
+
+  const ratesView = html.slice(html.indexOf('<div id="view-rates"'), html.indexOf('<div id="view-products"'));
+  for (const id of ['btn-share-rates', 'btn-share-whatsapp', 'btn-copy-rates', 'btn-print-rates', 'rates-updated-label', 'rates-stale-badge']) {
+    assert.ok(!ratesView.includes(`id="${id}"`), `share control still on rates view: ${id}`);
+  }
+  assert.ok(html.includes('id="rates-live-region"'));
   assert.ok(html.includes('class="skip-link"'));
   assert.ok(html.includes('Skip to live rates'));
   assert.ok(html.includes('@media print'));
   assert.ok(html.includes('prefers-reduced-motion'));
+});
+
+test('tola units and price alerts are removed', async () => {
+  const html = await loadHtml();
+  assert.ok(!html.toLowerCase().includes('tola'), 'no tola references remain');
+  for (const absent of [
+    'alert-gold-input', 'alert-silver-input', 'btn-save-alerts', 'btn-clear-alerts', 'alert-status',
+    'loadPriceAlerts', 'renderAlertStatus', 'checkPriceAlerts', 'updateTolaTiles', 'TOLA_GRAMS'
+  ]) assert.ok(!html.includes(absent), absent);
+  assert.match(html, /'satyanarayan_price_alerts_v1'\]\.forEach\(key => localStorage\.removeItem\(key\)\)/);
 });
 
 test('WhatsApp channel link and its styling are preserved', async () => {
@@ -64,7 +84,7 @@ test('manifest and service worker are valid and referenced', async () => {
 test('relative-age helper formats ages correctly', async () => {
   const html = await loadHtml();
   const start = html.indexOf('    function formatRelativeAge(');
-  const end = html.indexOf('    function updateTolaTiles(', start);
+  const end = html.indexOf('    function updateRatesUpdatedLabel()', start);
   assert.ok(start >= 0 && end > start);
   const source = html.slice(start, end);
   const fn = vm.runInNewContext(`${source}\nformatRelativeAge`, {});
@@ -76,7 +96,7 @@ test('relative-age helper formats ages correctly', async () => {
   assert.equal(fn(-1), 'just now');
 });
 
-test('share-text builder includes tola, GST and spot lines', async () => {
+test('share-text builder includes GST and spot lines without tola', async () => {
   const html = await loadHtml();
   const start = html.indexOf('    function buildRatesShareText()');
   const end = html.indexOf('    function announceRates()', start);
@@ -94,15 +114,15 @@ test('share-text builder includes tola, GST and spot lines', async () => {
     state: { prices, live: { lastSync: new Date('2026-11-25T03:30:00Z') } },
     getCurrentCity: () => ({ name: 'Cuttack', state: 'Odisha' }),
     fmtINR: (n) => '₹' + Math.round(n).toLocaleString('en-IN'),
-    fmtUSD: (n) => '$' + Number(n).toFixed(2),
-    TOLA_GRAMS: 11.66
+    fmtUSD: (n) => '$' + Number(n).toFixed(2)
   };
   const build = vm.runInNewContext(`${source}\nbuildRatesShareText`, context);
   const text = build();
-  for (const part of ['Satyanarayan Jewellers', 'Cuttack', 'Gold (per 10g', '999:', '916 (22K):', 'per tola (11.66g)', 'Silver (per kg', 'MCX estimate', 'Spot:', 'Indicative estimates']) {
+  for (const part of ['Satyanarayan Jewellers', 'Cuttack', 'Gold (per 10g', '999:', '916 (22K):', 'Silver (per kg', 'MCX estimate', 'Spot:', 'Indicative estimates']) {
     assert.ok(text.includes(part), part);
   }
-  assert.match(text, /₹1,52,7/); // 13100 * 11.66 = 152,746 ex-GST per tola
+  assert.match(text, /₹1,31,000/); // 999 gold per 10g, ex-GST
+  assert.ok(!text.toLowerCase().includes('tola'));
 });
 
 test('admin tools and two-factor authentication are removed', async () => {
@@ -115,7 +135,7 @@ test('admin tools and two-factor authentication are removed', async () => {
   for (const key of ['satyanarayan_admin_pass_v1', 'satyanarayan_admin_offset_v1', 'sj_admin_totp_secret_v1', 'sj_totp_pending']) {
     assert.ok(html.includes(key), `cleanup for ${key}`);
   }
-  for (const tab of ['calculator', 'old-gold', 'old-silver', 'mintu']) {
+  for (const tab of ['calculator', 'old-gold', 'old-silver', 'mintu', 'share']) {
     assert.ok(html.includes(`data-tool-tab="${tab}"`));
     assert.ok(html.includes(`id="panel-${tab}"`));
   }
