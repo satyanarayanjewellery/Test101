@@ -1,0 +1,32 @@
+name: Daily WhatsApp price update
+on:
+  schedule:
+    - cron: '30 3 * * *' # 09:00 Asia/Kolkata (UTC+05:30)
+  workflow_dispatch:
+    inputs:
+      send:
+        description: 'Post to the Channel (leave false to preview only)'
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: whatsapp-price-channel
+  cancel-in-progress: false
+jobs:
+  price-update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test
+      - name: Prepare or send update
+        run: node bot/price-channel.mjs
+        env:
+          WHAPI_TOKEN: ${{ secrets.WHAPI_TOKEN }}
+          WHAPI_CHANNEL_ID: ${{ secrets.WHAPI_CHANNEL_ID }}
+          PRICE_OFFSET_PERCENT: ${{ vars.PRICE_OFFSET_PERCENT }}
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.send != true && 'true' || 'false' }}
