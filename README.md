@@ -1,6 +1,20 @@
-# Daily WhatsApp Channel price bot
+# Satyanarayan Jewellers — Live Price Desk + Daily WhatsApp Bots
 
 Prefer official individual WhatsApp messages instead of Channel posts? See the [individual messaging setup](docs/individual-messages.md).
+
+## The price desk (`index.html`)
+
+A single-file live gold & silver price desk for Cuttack (Rates, Charts, News, Products, Tools with Calculator, Old Gold/Silver exchange, Mintu assistant and Admin). New in this version:
+
+- **Share today's rates** — one-tap Share (Web Share API), WhatsApp, Copy-to-clipboard, and a print-friendly rate board for the shop counter.
+- **Per-tola quick rates** (11.66 g) for Gold 999/916 and Silver 999, alongside the existing per-gram / per-10g / per-kg tiles.
+- **Freshness label** — “Updated Xs ago” with a stale badge when live data is older than 5 minutes.
+- **Local price alerts** — set Gold 999 / Silver 999 (₹/g, ex-GST) thresholds on the Rates screen; a toast fires when the rate crosses your level. Stored only in this browser.
+- **Installable & offline-capable (PWA)** — `manifest.webmanifest` + `sw.js` cache the app shell (page, manifest, icons) so the desk reloads offline and shows last-known rates from the page’s own cache. Live APIs always go to the network. Serve over HTTPS (or localhost) to enable install/service worker.
+- **Accessibility** — skip link, screen-reader live region for rates, visible focus, `prefers-reduced-motion` support, `aria-current`/`aria-pressed` states, and arrow-key navigation for tool tabs.
+- **SEO / social previews** — meta description, Open Graph/Twitter cards, theme colour and `JewelryStore` JSON-LD so WhatsApp/Google previews show the shop name and summary.
+
+Serve the folder with any static host (e.g. `python3 -m http.server`) or open `index.html` directly. Live prices need internet access to the providers listed below.
 
 This repository's static price desk cannot send scheduled messages by itself. The bot in `bot/price-channel.mjs` runs separately on GitHub Actions and can publish one gold and silver update daily at **9:00 AM India time**. GitHub may delay or occasionally skip scheduled runs. No post has been activated or sent just by adding these files.
 
