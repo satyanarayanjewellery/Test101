@@ -59,6 +59,32 @@ test('tola units and price alerts are removed', async () => {
   assert.match(html, /'satyanarayan_price_alerts_v1'\]\.forEach\(key => localStorage\.removeItem\(key\)\)/);
 });
 
+test('header date/time is rendered at boot and ticks every second', async () => {
+  const html = await loadHtml();
+  assert.ok(html.includes('id="header-live-datetime"'));
+
+  const bootStart = html.indexOf('(function bootApp() {');
+  const bootEnd = html.indexOf('    })();', bootStart);
+  assert.ok(bootStart >= 0 && bootEnd > bootStart);
+  const boot = html.slice(bootStart, bootEnd);
+  assert.match(boot, /^ {6}renderHeaderDateTime\(\);$/m);
+  assert.match(boot, /setInterval\(renderHeaderDateTime, 1000\)/);
+  assert.ok(!html.slice(0, bootStart).includes('setInterval(renderHeaderDateTime, 1000)'), 'clock interval is only started once');
+
+  const start = html.indexOf('    const HEADER_DT_FORMATTER =');
+  const end = html.indexOf('    function renderMarketHoursUI()', start);
+  assert.ok(start >= 0 && end > start);
+  const el = { id: 'header-live-datetime', textContent: '--' };
+  const context = {
+    getEl: (id) => (id === el.id ? el : null),
+    setText: (node, value) => { node.textContent = value; }
+  };
+  const render = vm.runInNewContext(`${html.slice(start, end)}\nrenderHeaderDateTime`, context);
+  render();
+  assert.match(el.textContent, /IST$/);
+  assert.match(el.textContent, /\d{2}:\d{2}:\d{2}/);
+});
+
 test('WhatsApp channel link and its styling are preserved', async () => {
   const html = await loadHtml();
   assert.match(html, /id="whatsapp-channel-link" href="https:\/\/whatsapp\.com\/channel\/0029Vb9XXVnKgsNmtesNKy1A"/);

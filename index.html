@@ -5049,8 +5049,6 @@
         if (inrSec) inrSec.classList.add('hidden');
         if (usdSec) usdSec.classList.remove('hidden');
       }
-      renderHeaderDateTime();
-      setInterval(renderHeaderDateTime, 1000);
       renderMarketHoursUI();
       renderLiveStatusUI();
       renderPriceCards();
@@ -5490,6 +5488,9 @@
       // 2. Bind UI events immediately so taps work at T=0ms
       bindEvents();
       initToolsExtras();
+      // Paint the IST date/time in the header immediately and keep it ticking.
+      renderHeaderDateTime();
+      setInterval(renderHeaderDateTime, 1000);
       setInterval(renderMarketHoursUI, 30000);
       setInterval(updateRatesUpdatedLabel, 10000);
       if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
