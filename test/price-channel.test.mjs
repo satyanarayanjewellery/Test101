@@ -23,21 +23,22 @@ test('fetch and validate all three timestamped quotes', async () => {
   await assert.rejects(getQuotes(async () => reply({}, false, 503), now), /503/);
 });
 
-test('calculations match the website Cuttack function including offsets', async () => {
+test('website Cuttack calculations match the bot without a retail offset', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   const source = html.slice(html.indexOf('    function computeCityPrices('), html.indexOf('    function formatIndianInt('));
-  for (const offset of [0, 2.5, -4]) {
-    const website = vm.runInNewContext(`${source}\ncomputeCityPrices('cuttack', 4100, 48, 85)`, {
-      CITIES: { cuttack: { factor: 1 } }, state: { admin: { offsetPct: offset } }, TROY_OZ_TO_GRAMS: 31.1034768,
-      INDIA_IMPORT_DUTY_MULTIPLIER: 1.15, INDIA_GST_MULTIPLIER: 1.03, GOLD_RETAIL_PREMIUM: 1.0317,
-      SILVER_MCX_PREMIUM: 1.0802, SILVER_RETAIL_PREMIUM: 1.1462
-    });
-    const actual = calculate(q, offset);
-    assert.equal(Math.round(actual.goldBase), website.gold999ExGst);
-    assert.equal(Math.round(actual.goldBase * 1.03 * 22 / 24), website.gold916);
-    assert.equal(Math.round(actual.silverBase * 0.925), website.silver925ExGst);
-    assert.equal(Math.round(actual.mcxBase * 1.03), website.silverMCXGst);
-  }
+  const website = vm.runInNewContext(`${source}\ncomputeCityPrices('cuttack', 4100, 48, 85)`, {
+    CITIES: { cuttack: { factor: 1 } }, TROY_OZ_TO_GRAMS: 31.1034768,
+    INDIA_IMPORT_DUTY_MULTIPLIER: 1.15, INDIA_GST_MULTIPLIER: 1.03, GOLD_RETAIL_PREMIUM: 1.0317,
+    SILVER_MCX_PREMIUM: 1.0802, SILVER_RETAIL_PREMIUM: 1.1462
+  });
+  const actual = calculate(q, 0);
+  assert.equal(Math.round(actual.goldBase), website.gold999ExGst);
+  assert.equal(Math.round(actual.goldBase * 1.03 * 22 / 24), website.gold916);
+  assert.equal(Math.round(actual.silverBase * 0.925), website.silver925ExGst);
+  assert.equal(Math.round(actual.mcxBase * 1.03), website.silverMCXGst);
+  // The independent messaging bot still supports its own configured offset.
+  assert.ok(calculate(q, 2.5).goldBase > actual.goldBase);
+  assert.ok(calculate(q, -4).goldBase < actual.goldBase);
   assert.throws(() => calculate(q, NaN));
 });
 

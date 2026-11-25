@@ -36,7 +36,7 @@ export async function getQuotes(fetchImpl = fetch, now = Date.now()) {
   };
 }
 
-// Mirrors index.html's Cuttack, zero-admin-offset computeCityPrices calculation.
+// Mirrors index.html's Cuttack, computeCityPrices calculation.
 export function calculate(q, offset = 0) {
   if (!Number.isFinite(offset) || offset < -100 || offset > 100) throw new Error('PRICE_OFFSET_PERCENT must be between -100 and 100');
   const adjustment = 1 + offset / 100;

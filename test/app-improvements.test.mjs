@@ -54,7 +54,7 @@ test('manifest and service worker are valid and referenced', async () => {
   assert.ok(manifest.icons.some(i => i.sizes === '192x192'));
   assert.ok(manifest.icons.some(i => i.sizes === '512x512'));
   const sw = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
-  assert.match(sw, /sj-price-desk-v1/);
+  assert.match(sw, /sj-price-desk-v2/);
   assert.match(sw, /index\.html/);
   assert.match(sw, /skipWaiting/);
   const html = await loadHtml();
@@ -103,4 +103,20 @@ test('share-text builder includes tola, GST and spot lines', async () => {
     assert.ok(text.includes(part), part);
   }
   assert.match(text, /₹1,52,7/); // 13100 * 11.66 = 152,746 ex-GST per tola
+});
+
+test('admin tools and two-factor authentication are removed', async () => {
+  const html = await loadHtml();
+  for (const absent of [
+    'id="admin-login-modal"', 'id="panel-admin"', 'data-tool-tab="admin"',
+    'id="twofa-setup"', 'id="twofa-login-wrap"', 'state.admin', 'adminMult',
+    'openAdminModal', 'renderAdminUI', 'Ctrl+Shift+A'
+  ]) assert.ok(!html.includes(absent), absent);
+  for (const key of ['satyanarayan_admin_pass_v1', 'satyanarayan_admin_offset_v1', 'sj_admin_totp_secret_v1', 'sj_totp_pending']) {
+    assert.ok(html.includes(key), `cleanup for ${key}`);
+  }
+  for (const tab of ['calculator', 'old-gold', 'old-silver', 'mintu']) {
+    assert.ok(html.includes(`data-tool-tab="${tab}"`));
+    assert.ok(html.includes(`id="panel-${tab}"`));
+  }
 });

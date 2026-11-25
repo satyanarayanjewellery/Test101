@@ -4,7 +4,7 @@ Prefer official individual WhatsApp messages instead of Channel posts? See the [
 
 ## The price desk (`index.html`)
 
-A single-file live gold & silver price desk for Cuttack (Rates, Charts, News, Products, Tools with Calculator, Old Gold/Silver exchange, Mintu assistant and Admin). New in this version:
+A single-file live gold & silver price desk for Cuttack (Rates, Charts, News, Products, Tools with Calculator, Old Gold/Silver exchange, and Mintu assistant). New in this version:
 
 - **Share today's rates** — one-tap Share (Web Share API), WhatsApp, Copy-to-clipboard, and a print-friendly rate board for the shop counter.
 - **Per-tola quick rates** (11.66 g) for Gold 999/916 and Silver 999, alongside the existing per-gram / per-10g / per-kg tiles.
