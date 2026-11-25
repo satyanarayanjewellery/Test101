@@ -1,0 +1,19 @@
+{
+  "name": "Satyanarayan Jewellers — Live Gold & Silver Price Desk",
+  "short_name": "SJ Price Desk",
+  "description": "Live gold & silver rates for Cuttack with retail/GST breakdowns, charts, calculator and Mintu assistant.",
+  "id": "./index.html",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#090607",
+  "theme_color": "#090607",
+  "categories": ["finance", "shopping"],
+  "lang": "en-IN",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
