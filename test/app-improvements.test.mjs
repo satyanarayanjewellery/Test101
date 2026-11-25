@@ -39,6 +39,13 @@ test('rates extras UI is present (share, tola, alerts, skip link, live region)',
   assert.ok(html.includes('prefers-reduced-motion'));
 });
 
+test('WhatsApp channel link and its styling are preserved', async () => {
+  const html = await loadHtml();
+  assert.match(html, /id="whatsapp-channel-link" href="https:\/\/whatsapp\.com\/channel\/0029Vb9XXVnKgsNmtesNKy1A"/);
+  assert.ok(html.includes('.bg-emerald-500\\/20{background-color:rgba(16,185,129,0.2)}'));
+  assert.ok(html.includes('S.browser_fallback_url='));
+});
+
 test('manifest and service worker are valid and referenced', async () => {
   const manifest = JSON.parse(await readFile(new URL('../manifest.webmanifest', import.meta.url), 'utf8'));
   assert.equal(manifest.name, 'Satyanarayan Jewellers — Live Gold & Silver Price Desk');
