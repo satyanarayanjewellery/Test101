@@ -163,6 +163,9 @@
             <span id="header-market-pill" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-800 text-slate-300 border border-slate-700">
               <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Checking...
             </span>
+            <a id="whatsapp-channel-link" href="https://whatsapp.com/channel/0029Vb9XXVnKgsNmtesNKy1A" target="_blank" rel="noopener noreferrer" title="Follow on WhatsApp" aria-label="Follow on WhatsApp" class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 no-underline transition-colors duration-150 shrink-0">
+              <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91C21.95 6.45 17.5 2 12.04 2zm5.82 14.01c-.24.68-1.41 1.3-1.95 1.38-.5.08-1.13.11-1.82-.11-.42-.13-.96-.31-1.65-.61-2.9-1.25-4.79-4.17-4.93-4.36-.14-.19-1.18-1.57-1.18-3 0-1.43.75-2.13 1.01-2.42.27-.29.58-.36.78-.36.19 0 .39 0 .56.01.18.01.42-.07.66.5.24.58.82 2.01.89 2.15.07.15.12.32.02.51-.1.19-.15.32-.29.49-.15.17-.31.38-.44.51-.15.15-.3.31-.13.6.17.29.76 1.25 1.63 2.03 1.12 1 2.06 1.31 2.35 1.46.29.15.46.12.63-.07.17-.19.73-.85.92-1.14.19-.29.39-.24.66-.15.27.1 1.7.8 1.99.95.29.14.49.22.56.34.07.12.07.7-.17 1.38z"/></svg>
+            </a>
           </div>
           <div class="flex flex-wrap items-center gap-x-2 gap-y-1 mt-0.5">
             <p id="header-location-subtitle" class="text-xs text-slate-400">Cuttack, Odisha &middot; Connecting...</p>
@@ -6053,6 +6056,26 @@ document.getElementById('twofa-confirm').onclick=async()=>{const secret=sessionS
 document.getElementById('twofa-disable').onclick=()=>{if(confirm('Disable authenticator-based two-factor authentication?')){localStorage.removeItem(KEY);refresh()}};
 let totpPass=false;document.addEventListener('submit',async e=>{if(e.target.id!=='admin-login-form'||!enabled()||totpPass)return;e.preventDefault();e.stopImmediatePropagation();const er=document.getElementById('admin-login-error');const ok=await valid(enabled(),document.getElementById('twofa-login-code').value.trim());if(!ok){er.textContent='Invalid or expired authenticator code.';er.classList.remove('hidden');return}document.getElementById('twofa-login-code').value='';totpPass=true;e.target.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));totpPass=false},true);
 refresh();
+})();
+</script>
+<script>
+(function () {
+  var link = document.getElementById('whatsapp-channel-link');
+  if (!link) return;
+  var channelId = '0029Vb9XXVnKgsNmtesNKy1A';
+  var webUrl = 'https://whatsapp.com/channel/' + channelId;
+  var ua = navigator.userAgent || '';
+  if (/Android/i.test(ua)) {
+    link.href = 'intent://whatsapp.com/channel/' + channelId +
+      '#Intent;scheme=https;package=com.whatsapp;action=android.intent.action.VIEW;' +
+      'S.browser_fallback_url=' + encodeURIComponent(webUrl) + ';end';
+    link.removeAttribute('target');
+    link.removeAttribute('rel');
+  } else if (/iPhone|iPad|iPod/i.test(ua)) {
+    link.href = webUrl;
+    link.removeAttribute('target');
+    link.removeAttribute('rel');
+  }
 })();
 </script>
 
