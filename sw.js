@@ -2,7 +2,7 @@
    Caches only the static shell (page, manifest, icons). Live price APIs,
    WebSockets and news feeds always go to the network; the page itself
    keeps its own last-rates cache in localStorage for offline display. */
-const CACHE = 'sj-price-desk-v1';
+const CACHE = 'sj-price-desk-v2';
 const SHELL = ['./index.html', './manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
 
 self.addEventListener('install', (event) => {
