@@ -82,6 +82,30 @@
     @keyframes mintuFloat{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(0,-3px,0)}}
     .mintu-hero-avatar{box-shadow:0 0 20px rgba(212,175,55,0.3);animation:mintuFloat 3.4s ease-in-out infinite}
     .grid-cols-6{grid-template-columns:repeat(6,minmax(0,1fr))}.col-span-1{grid-column:span 1/span 1}.col-span-2{grid-column:span 2/span 2}.text-xl{font-size:1.25rem;line-height:1.75rem}.py-8{padding-top:2rem;padding-bottom:2rem}@media (min-width:640px){.sm\:grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}.sm\:grid-cols-5{grid-template-columns:repeat(5,minmax(0,1fr))}.sm\:col-span-6{grid-column:span 6/span 6}.sm\:w-64{width:16rem}}.tool-panel{position:relative}.tool-panel-agent{height:clamp(430px,calc(100dvh - 16rem),760px)}
+    .jewel-grid{display:grid;grid-template-columns:repeat(1,minmax(0,1fr));gap:1rem}@media (min-width:640px){.jewel-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media (min-width:1024px){.jewel-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    .jewel-card{background:linear-gradient(165deg,rgba(24,13,17,0.95) 0%,rgba(11,7,9,0.98) 100%);border:1px solid rgba(212,175,55,0.18);border-radius:1rem;overflow:hidden;display:flex;flex-direction:column;transition:border-color 180ms ease,transform 180ms ease}
+    .jewel-card:hover{border-color:rgba(212,175,55,0.4)}
+    .jewel-media-frame{position:relative;aspect-ratio:4/3;background:#070506;overflow:hidden;display:flex;align-items:center;justify-content:center}
+    .jewel-media-frame img,.jewel-media-frame video{width:100%;height:100%;object-fit:cover;display:block}
+    .jewel-thumbs{display:flex;gap:0.375rem;padding:0.5rem 0.75rem 0;overflow-x:auto}
+    .jewel-thumb{width:2.75rem;height:2.75rem;border-radius:0.5rem;overflow:hidden;border:1.5px solid rgba(58,35,42,0.9);background:#070506;padding:0;flex-shrink:0;position:relative}
+    .jewel-thumb.is-active{border-color:#E5C55B;box-shadow:0 0 0 1px rgba(229,197,91,0.5)}
+    .jewel-thumb img,.jewel-thumb video{width:100%;height:100%;object-fit:cover;pointer-events:none}
+    .jewel-dropzone{border:1.5px dashed rgba(212,175,55,0.35);background:rgba(7,5,6,0.55);border-radius:0.875rem;padding:1.1rem;text-align:center;transition:border-color 160ms ease,background-color 160ms ease}
+    .jewel-dropzone.is-dragover{border-color:#E5C55B;background:rgba(212,175,55,0.1)}
+    .jewel-modal-backdrop{position:fixed;inset:0;z-index:60;background:rgba(4,2,3,0.84);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:1rem}
+    .jewel-modal-backdrop.hidden{display:none}
+    .jewel-modal-card{width:100%;max-width:28rem;max-height:90dvh;overflow-y:auto;background:linear-gradient(165deg,#180D11 0%,#0B0709 100%);border:1px solid rgba(212,175,55,0.28);border-radius:1.125rem;padding:1.25rem;box-shadow:0 24px 60px rgba(0,0,0,0.85)}
+    .jewel-lightbox-card{width:100%;max-width:56rem;max-height:92dvh;display:flex;flex-direction:column;gap:0.75rem;background:#090607;border:1px solid rgba(212,175,55,0.28);border-radius:1.125rem;padding:1rem;box-shadow:0 24px 60px rgba(0,0,0,0.9)}
+    .jewel-lightbox-stage{position:relative;background:#050304;border-radius:0.75rem;overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:240px;max-height:68dvh}
+    .jewel-lightbox-stage img,.jewel-lightbox-stage video{max-width:100%;max-height:68dvh;width:auto;height:auto;object-fit:contain}
+    .jewel-progress-track{height:0.375rem;border-radius:9999px;background:rgba(58,35,42,0.8);overflow:hidden}
+    .jewel-progress-fill{height:100%;background:linear-gradient(90deg,#D4AF37,#F2DC88);transition:width 180ms ease}
+    .jewel-badge-overlay{position:absolute;top:0.5rem;left:0.5rem;z-index:2;display:inline-flex;align-items:center;gap:0.25rem;padding:0.15rem 0.5rem;border-radius:9999px;font-size:10px;font-weight:600;background:rgba(7,5,6,0.78);border:1px solid rgba(212,175,55,0.35);color:#F9EBB8}
+    .jewel-expand-btn{position:absolute;top:0.5rem;right:0.5rem;z-index:2;padding:0.3rem 0.55rem;border-radius:0.5rem;font-size:10px;font-weight:600;background:rgba(7,5,6,0.78);border:1px solid rgba(255,255,255,0.18);color:#F7F3F4}
+    .jewel-expand-btn:hover{border-color:#E5C55B;color:#F9EBB8}
+    .space-y-3 > :not([hidden]) ~ :not([hidden]){margin-top:0.75rem}.w-7{width:1.75rem}.ml-auto{margin-left:auto}.hover\:bg-rose-500\/10:hover{background-color:rgba(244,63,94,0.1)}@media (min-width:640px){.sm\:col-span-5{grid-column:span 5/span 5}}
+    textarea{font-family:inherit;font-size:100%;color:inherit}
   
     /* --- Accessibility & print (added) --- */
     .skip-link{position:absolute;left:-9999px;top:0;z-index:60;background:#F59E0B;color:#090607;font-weight:700;font-size:13px;padding:10px 16px;border-radius:0 0 12px 0}
@@ -712,59 +736,186 @@
       </footer>
     </div>
 
-    <!-- VIEW: PRODUCT CATALOG / INVENTORY -->
+    <!-- VIEW: JEWELLERY COLLECTION SHOWCASE (OWNER-ONLY UPLOAD STUDIO) -->
     <div id="view-products" class="app-view hidden flex flex-col gap-4">
       <section class="glass-card rounded-2xl p-4 sm:p-5">
-        <div class="flex items-center justify-between gap-3 mb-1">
-          <div><h2 class="text-base sm:text-lg font-semibold text-white">Product Catalogue</h2>
-            <p class="text-xs text-slate-400 mt-1">Manage jewellery items and maintain a local stock list.</p></div>
-          <span class="text-[10px] rounded-full px-2.5 py-1 bg-amber-500/15 border border-amber-500/25 text-amber-200">Inventory</span>
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 class="text-base sm:text-lg font-semibold text-white">Jewellery Collection</h2>
+            <p class="text-xs text-slate-400 mt-1">Explore handcrafted gold, silver &amp; diamond pieces with photos and videos.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="owner-mode-pill" class="hidden inline-flex items-center gap-1.5 text-[10px] font-semibold rounded-full px-2.5 py-1 bg-emerald-500/15 border border-emerald-500/30 text-emerald-300">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Owner Mode
+            </span>
+            <button id="btn-owner-access" type="button" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-900/80 hover:bg-slate-800 border border-slate-700 text-[11px] font-medium text-slate-300 hover:text-amber-200 transition-colors duration-150" title="Shop owner upload access">
+              <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <span id="btn-owner-access-label">Owner</span>
+            </button>
+          </div>
         </div>
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4">
-          <div class="rate-tile rounded-xl p-3"><p class="text-[10px] text-slate-400">Products</p><p id="product-count" class="text-xl font-bold text-white tabular-nums">0</p></div>
-          <div class="rate-tile rounded-xl p-3"><p class="text-[10px] text-slate-400">Total stock</p><p id="product-stock-total" class="text-xl font-bold text-amber-300 tabular-nums">0</p></div>
-          <div class="rate-tile rounded-xl p-3 col-span-2 sm:col-span-2"><p class="text-[10px] text-slate-400">Estimated catalogue value</p><p id="product-value-total" class="text-xl font-bold text-white tabular-nums">₹0.00</p></div>
+
+        <div class="flex flex-wrap items-center justify-between gap-2.5 mt-4">
+          <div id="product-category-pills" class="flex flex-wrap gap-1.5" role="group" aria-label="Filter jewellery by category">
+            <button type="button" data-prod-cat="all" class="prod-cat-btn px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-amber-500 text-slate-950">All</button>
+            <button type="button" data-prod-cat="Gold" class="prod-cat-btn px-2.5 py-1 rounded-lg text-[11px] font-medium bg-slate-900/90 border border-slate-800 text-slate-300 hover:text-white">Gold</button>
+            <button type="button" data-prod-cat="Silver" class="prod-cat-btn px-2.5 py-1 rounded-lg text-[11px] font-medium bg-slate-900/90 border border-slate-800 text-slate-300 hover:text-white">Silver</button>
+            <button type="button" data-prod-cat="Diamond" class="prod-cat-btn px-2.5 py-1 rounded-lg text-[11px] font-medium bg-slate-900/90 border border-slate-800 text-slate-300 hover:text-white">Diamond</button>
+            <button type="button" data-prod-cat="Platinum" class="prod-cat-btn px-2.5 py-1 rounded-lg text-[11px] font-medium bg-slate-900/90 border border-slate-800 text-slate-300 hover:text-white">Platinum</button>
+            <button type="button" data-prod-cat="Gemstone" class="prod-cat-btn px-2.5 py-1 rounded-lg text-[11px] font-medium bg-slate-900/90 border border-slate-800 text-slate-300 hover:text-white">Gemstone</button>
+            <button type="button" data-prod-cat="Other" class="prod-cat-btn px-2.5 py-1 rounded-lg text-[11px] font-medium bg-slate-900/90 border border-slate-800 text-slate-300 hover:text-white">Other</button>
+          </div>
+          <input id="product-search" type="search" placeholder="Search jewellery, purity or code..." class="w-full sm:w-64 rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" />
         </div>
       </section>
 
-      <section class="glass-card rounded-2xl p-4 sm:p-5">
-        <h3 class="text-sm font-semibold text-amber-200 mb-3">Add a product</h3>
-        <form id="product-form" class="grid grid-cols-2 sm:grid-cols-12 gap-2.5">
-          <label class="col-span-2 sm:col-span-4 text-[11px] text-slate-400">Product name
-            <input id="product-name" required maxlength="80" placeholder="e.g. 22K Gold Chain" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" />
-          </label>
-          <label class="col-span-1 sm:col-span-2 text-[11px] text-slate-400">Category
-            <select id="product-category" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-2 py-2.5 text-sm text-white"><option>Gold</option><option>Silver</option><option>Diamond</option><option>Platinum</option><option>Gemstone</option><option>Other</option></select>
-          </label>
-          <label class="col-span-1 sm:col-span-2 text-[11px] text-slate-400">Purity
-            <input id="product-purity" maxlength="20" placeholder="22K / 925" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" />
-          </label>
-          <label class="col-span-1 sm:col-span-2 text-[11px] text-slate-400">Weight (g)
-            <input id="product-weight" type="number" min="0" step="0.001" placeholder="0.000" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" />
-          </label>
-          <label class="col-span-1 sm:col-span-2 text-[11px] text-slate-400">Selling price (₹)
-            <input id="product-price" required type="number" min="0" step="0.01" placeholder="0.00" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" />
-          </label>
-          <label class="col-span-1 sm:col-span-3 text-[11px] text-slate-400">Stock quantity
-            <input id="product-stock" required type="number" min="0" step="1" value="1" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500" />
-          </label>
-          <label class="col-span-1 sm:col-span-3 text-[11px] text-slate-400">SKU / Item code
-            <input id="product-sku" maxlength="40" placeholder="Optional" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" />
-          </label>
-          <div class="col-span-2 sm:col-span-6 flex items-end">
-            <button type="submit" class="w-full rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm py-2.5">＋ Add product</button>
+      <!-- OWNER-ONLY UPLOAD STUDIO (Hidden for all customers until Owner Mode is unlocked) -->
+      <section id="owner-studio" class="hidden glass-card rounded-2xl p-4 sm:p-5 border-amber-500/35">
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-4 border-b border-slate-800">
+          <div>
+            <h3 class="text-sm font-semibold text-amber-200">Owner Upload Studio</h3>
+            <p id="owner-sync-status" class="text-[11px] text-slate-400 mt-0.5">Local device mode · Save drafts on this device or connect GitHub to publish live.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="text-[10px] px-2 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 tabular-nums">Live: <strong id="owner-published-count" class="text-emerald-300">0</strong> · Drafts: <strong id="owner-draft-count" class="text-amber-300">0</strong></span>
+            <button id="btn-publish-all-drafts" type="button" class="hidden px-2.5 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-200 text-[11px] font-semibold">Publish All Drafts</button>
+            <button id="btn-owner-settings" type="button" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-[11px] font-medium">Website Sync / PIN</button>
+            <button id="btn-owner-lock" type="button" class="px-2.5 py-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-500/10 border border-rose-500/30 text-rose-200 text-[11px] font-semibold">Lock</button>
+          </div>
+        </div>
+
+        <form id="product-form" class="space-y-3">
+          <div>
+            <div id="product-dropzone" class="jewel-dropzone cursor-pointer">
+              <input id="product-media-input" type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime" class="hidden" />
+              <div class="flex flex-col items-center gap-1.5">
+                <svg viewBox="0 0 24 24" class="w-7 h-7 text-amber-400" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+                <p class="text-xs sm:text-sm font-semibold text-white">Tap or drop jewellery photos &amp; videos here</p>
+                <p class="text-[10px] text-slate-400">JPG, PNG, WebP, GIF (up to 12 MB) · MP4, WebM, MOV video (up to 20 MB for website publish, 50 MB local) · Up to 6 files per item</p>
+              </div>
+            </div>
+            <div id="product-media-previews" class="hidden flex flex-wrap gap-2 mt-2.5"></div>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-12 gap-2.5">
+            <label class="col-span-2 sm:col-span-5 text-[11px] text-slate-400">Jewellery name
+              <input id="product-name" required maxlength="80" placeholder="e.g. 22K Bridal Temple Necklace" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" />
+            </label>
+            <label class="col-span-1 sm:col-span-3 text-[11px] text-slate-400">Category
+              <select id="product-category" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-2 py-2.5 text-sm text-white"><option>Gold</option><option>Silver</option><option>Diamond</option><option>Platinum</option><option>Gemstone</option><option>Other</option></select>
+            </label>
+            <label class="col-span-1 sm:col-span-2 text-[11px] text-slate-400">Purity
+              <input id="product-purity" maxlength="20" placeholder="22K HUID" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" />
+            </label>
+            <label class="col-span-1 sm:col-span-2 text-[11px] text-slate-400">Weight (g)
+              <input id="product-weight" type="number" min="0" step="0.001" placeholder="0.000" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" />
+            </label>
+            <label class="col-span-1 sm:col-span-3 text-[11px] text-slate-400">Price ₹ (optional)
+              <input id="product-price" type="number" min="0" step="0.01" placeholder="Blank = On request" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" />
+            </label>
+            <label class="col-span-1 sm:col-span-3 text-[11px] text-slate-400">Item code / SKU
+              <input id="product-sku" maxlength="40" placeholder="Optional" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" />
+            </label>
+            <label class="col-span-2 sm:col-span-6 text-[11px] text-slate-400">Short note (optional)
+              <input id="product-note" maxlength="160" placeholder="e.g. BIS 916 Hallmarked · Ready in showroom" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" />
+            </label>
+          </div>
+
+          <div id="product-upload-progress" class="hidden space-y-1">
+            <div class="flex items-center justify-between text-[11px] text-amber-200">
+              <span id="product-upload-status-text">Uploading...</span>
+              <span id="product-upload-pct" class="tabular-nums">0%</span>
+            </div>
+            <div class="jewel-progress-track"><div id="product-upload-bar" class="jewel-progress-fill" style="width:0%"></div></div>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-end gap-2 pt-1">
+            <button id="btn-save-local-product" type="submit" data-action="local" class="px-4 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-100 font-semibold text-xs sm:text-sm">Save to This Device</button>
+            <button id="btn-publish-product" type="button" class="hidden px-4 py-2.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs sm:text-sm">Upload &amp; Publish to Website</button>
           </div>
         </form>
-        <p class="text-[10px] text-slate-500 mt-3">Products are saved in this browser on this device. This is not a cloud-synced or multi-user inventory.</p>
       </section>
 
+      <!-- CUSTOMER SHOWCASE GALLERY -->
       <section class="glass-card rounded-2xl p-4 sm:p-5">
-        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-          <h3 class="text-sm font-semibold text-white">Your products</h3>
-          <input id="product-search" type="search" placeholder="Search name, category or SKU..." class="w-full sm:w-64 rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" />
+        <div id="product-list" class="jewel-grid">
+          <div class="text-center text-xs text-slate-400 py-8" style="grid-column:1/-1">Loading jewellery collection...</div>
         </div>
-        <div id="product-list" class="space-y-2"><div class="text-center text-xs text-slate-500 py-8">No products added yet. Add your first item above.</div></div>
       </section>
+
+      <!-- OWNER ACCESS MODAL -->
+      <div id="owner-auth-modal" class="jewel-modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="owner-auth-title">
+        <div class="jewel-modal-card">
+          <div class="flex items-center justify-between gap-2 mb-3">
+            <div>
+              <h3 id="owner-auth-title" class="text-sm sm:text-base font-semibold text-white">Shop Owner Access</h3>
+              <p class="text-[11px] text-slate-400 mt-0.5">Only the owner can upload or delete jewellery photos &amp; videos.</p>
+            </div>
+            <button id="btn-close-owner-modal" type="button" class="px-2 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs text-slate-300" aria-label="Close">✕</button>
+          </div>
+
+          <div class="grid grid-cols-2 gap-1.5 bg-slate-950 p-1 rounded-lg border border-slate-800 mb-4">
+            <button id="owner-tab-github" type="button" class="px-2.5 py-1.5 rounded-md text-xs font-semibold bg-amber-500 text-slate-950">Website Publish (GitHub)</button>
+            <button id="owner-tab-pin" type="button" class="px-2.5 py-1.5 rounded-md text-xs font-medium text-slate-300 hover:text-white">This Device (PIN)</button>
+          </div>
+
+          <!-- GitHub Token Panel -->
+          <div id="owner-panel-github" class="space-y-3">
+            <div class="rounded-xl bg-slate-950/60 border border-slate-800 p-3 text-[11px] text-slate-300 space-y-1">
+              <p class="font-semibold text-amber-200">Publish directly to all customers</p>
+              <p class="text-slate-400">Uses your GitHub Fine-Grained Personal Access Token scoped to <span class="font-mono text-amber-200">satyanarayanjewellery/shop</span> (<span class="text-slate-200">Contents: Read and write</span>). GitHub verifies write permission server-side so nobody else can upload.</p>
+            </div>
+            <label class="block text-[11px] text-slate-400">GitHub Personal Access Token
+              <input id="owner-gh-token" type="password" autocomplete="off" placeholder="github_pat_..." class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 font-mono" />
+            </label>
+            <label class="inline-flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
+              <input id="owner-gh-remember" type="checkbox" class="accent-amber-500" />
+              Remember token on this device (otherwise clears when tab closes)
+            </label>
+            <p id="owner-gh-error" class="hidden text-xs text-rose-300"></p>
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+              <button id="btn-owner-gh-disconnect" type="button" class="hidden px-3 py-2 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-200 text-xs font-semibold">Disconnect Token</button>
+              <button id="btn-owner-gh-verify" type="button" class="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs ml-auto">Verify &amp; Unlock</button>
+            </div>
+          </div>
+
+          <!-- Local Device PIN Panel -->
+          <div id="owner-panel-pin" class="hidden space-y-3">
+            <div class="rounded-xl bg-slate-950/60 border border-slate-800 p-3 text-[11px] text-slate-400">
+              <p id="owner-pin-hint">Set a private Owner PIN on this device to save local jewellery photo &amp; video drafts offline in IndexedDB.</p>
+            </div>
+            <label class="block text-[11px] text-slate-400"><span id="owner-pin-label">Owner PIN (4–12 characters)</span>
+              <input id="owner-pin-input" type="password" inputmode="text" minlength="4" maxlength="12" autocomplete="off" placeholder="Enter PIN" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" />
+            </label>
+            <label id="owner-pin-confirm-wrap" class="hidden block text-[11px] text-slate-400">Confirm Owner PIN
+              <input id="owner-pin-confirm" type="password" inputmode="text" minlength="4" maxlength="12" autocomplete="off" placeholder="Re-enter PIN" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" />
+            </label>
+            <p id="owner-pin-error" class="hidden text-xs text-rose-300"></p>
+            <div class="flex items-center justify-end gap-2 pt-1">
+              <button id="btn-owner-pin-submit" type="button" class="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs">Unlock Local Studio</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FULLSCREEN JEWELLERY MEDIA LIGHTBOX -->
+      <div id="product-lightbox" class="jewel-modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="lightbox-title">
+        <div class="jewel-lightbox-card">
+          <div class="flex items-center justify-between gap-2">
+            <div class="min-w-0">
+              <h3 id="lightbox-title" class="text-sm sm:text-base font-semibold text-white truncate">Jewellery Preview</h3>
+              <p id="lightbox-meta" class="text-[11px] text-slate-400 truncate"></p>
+            </div>
+            <button id="btn-close-lightbox" type="button" class="shrink-0 px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs text-slate-200" aria-label="Close preview">✕</button>
+          </div>
+          <div id="lightbox-stage" class="jewel-lightbox-stage"></div>
+          <div id="lightbox-nav" class="hidden flex items-center justify-between gap-2">
+            <button id="btn-lightbox-prev" type="button" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs text-slate-200">← Previous</button>
+            <span id="lightbox-counter" class="text-xs text-slate-400 tabular-nums">1 / 1</span>
+            <button id="btn-lightbox-next" type="button" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs text-slate-200">Next →</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- VIEW: LIVE GOLD, SILVER & RUPEE NEWS -->
@@ -5060,6 +5211,8 @@
         });
       } else if (viewName === 'news') {
         ensureNewsLoaded();
+      } else if (viewName === 'products') {
+        ensureProductsLoaded();
       } else if (viewName === 'tools') {
         if (isAgentAlias) switchToolTab('mintu');
         updateAllTools();
@@ -5116,75 +5269,1121 @@
     }
 
     // =========================================================================
-    // EVENT LISTENERS & STARTUP
+    // JEWELLERY COLLECTION & OWNER-ONLY MEDIA UPLOAD STUDIO (PHOTOS + VIDEOS)
     // =========================================================================
+    const CATALOG_REPO_OWNER = 'satyanarayanjewellery';
+    const CATALOG_REPO_NAME = 'shop';
+    const CATALOG_REPO_BRANCH = 'main';
+    const CATALOG_MANIFEST_PATH = 'catalog/products.json';
+    const CATALOG_MEDIA_PREFIX = 'catalog/media/';
     const PRODUCT_STORAGE_KEY = 'satyanarayan-jewellers-products-v1';
-    let productItems = [];
-    try {
-      const savedProducts = JSON.parse(localStorage.getItem(PRODUCT_STORAGE_KEY) || '[]');
-      productItems = Array.isArray(savedProducts) ? savedProducts.filter((p) => p && typeof p === 'object') : [];
-    } catch { productItems = []; }
+    const OWNER_PIN_STORAGE_KEY = 'sj_product_owner_pin_v1';
+    const OWNER_GH_TOKEN_KEY = 'sj_product_owner_gh_token_v1';
+    const MAX_MEDIA_PER_ITEM = 6;
+    const MAX_IMAGE_BYTES = 12 * 1024 * 1024;
+    const MAX_VIDEO_PUBLISH_BYTES = 20 * 1024 * 1024;
+    const MAX_VIDEO_LOCAL_BYTES = 50 * 1024 * 1024;
+    const ALLOWED_IMAGE_MIME = /^image\/(jpeg|png|webp|gif)$/i;
+    const ALLOWED_VIDEO_MIME = /^video\/(mp4|webm|quicktime)$/i;
 
-    function saveProducts() {
-      try { localStorage.setItem(PRODUCT_STORAGE_KEY, JSON.stringify(productItems)); }
-      catch { showToast?.('Could not save products. Browser storage may be full or disabled.', 'alert'); }
+    const productOwner = {
+      unlocked: false,
+      ghConnected: false,
+      ghLogin: '',
+      ghToken: '',
+      busy: false,
+      activeCategory: 'all',
+      catalogLoaded: false,
+      publishedItems: [],
+      localItems: [],
+      pendingFiles: [],
+      activeMediaIndex: new Map(),
+      objectUrls: [],
+      lightboxItem: null,
+      lightboxIdx: 0
+    };
+
+    function sanitizeCatalogMediaUrl(src) {
+      if (typeof src !== 'string') return '';
+      const trimmed = src.trim();
+      if (/^catalog\/media\/[a-zA-Z0-9._-]+$/.test(trimmed)) return trimmed;
+      if (/^blob:/i.test(trimmed)) return trimmed;
+      if (/^data:image\/(png|jpe?g|webp|gif);base64,[A-Za-z0-9+/=\s]+$/i.test(trimmed)) return trimmed;
+      return '';
+    }
+
+    function mediaExtFromFile(file) {
+      const mime = (file?.type || '').toLowerCase();
+      if (mime === 'image/jpeg') return 'jpg';
+      if (mime === 'image/png') return 'png';
+      if (mime === 'image/webp') return 'webp';
+      if (mime === 'image/gif') return 'gif';
+      if (mime === 'video/mp4') return 'mp4';
+      if (mime === 'video/webm') return 'webm';
+      if (mime === 'video/quicktime') return 'mov';
+      return 'bin';
+    }
+
+    function formatFileBytes(bytes) {
+      if (!Number.isFinite(bytes) || bytes <= 0) return '0 B';
+      if (bytes < 1024) return `${bytes} B`;
+      if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+      return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    }
+
+    async function sha256Hex(text) {
+      const data = new TextEncoder().encode(String(text));
+      if (window.crypto && window.crypto.subtle) {
+        const buf = await window.crypto.subtle.digest('SHA-256', data);
+        return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('');
+      }
+      // Fallback hash only if SubtleCrypto is unavailable in insecure file:// contexts
+      let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+      for (let i = 0; i < data.length; i++) {
+        h1 = Math.imul(h1 ^ data[i], 2654435761);
+        h2 = Math.imul(h2 ^ data[i], 1597334677);
+      }
+      h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+      h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+      return (h2 >>> 0).toString(16).padStart(8, '0') + (h1 >>> 0).toString(16).padStart(8, '0');
+    }
+
+    function generateRandomSalt() {
+      const bytes = new Uint8Array(16);
+      if (window.crypto && window.crypto.getRandomValues) {
+        window.crypto.getRandomValues(bytes);
+      } else {
+        for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256);
+      }
+      return Array.from(bytes).map((b) => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function readStoredPinRecord() {
+      try {
+        const raw = localStorage.getItem(OWNER_PIN_STORAGE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed.salt === 'string' && typeof parsed.hash === 'string') return parsed;
+      } catch { /* ignore */ }
+      return null;
+    }
+
+    function openCatalogDB() {
+      return new Promise((resolve, reject) => {
+        if (!window.indexedDB) return reject(new Error('IndexedDB unavailable'));
+        const req = indexedDB.open('satyanarayan_catalog_db', 1);
+        req.onupgradeneeded = () => {
+          if (!req.result.objectStoreNames.contains('local_products')) {
+            req.result.createObjectStore('local_products', { keyPath: 'id' });
+          }
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    async function loadLocalProductsFromDB() {
+      const items = [];
+      try {
+        const db = await openCatalogDB();
+        const rows = await new Promise((resolve, reject) => {
+          const tx = db.transaction('local_products', 'readonly');
+          const req = tx.objectStore('local_products').getAll();
+          req.onsuccess = () => resolve(Array.isArray(req.result) ? req.result : []);
+          req.onerror = () => reject(req.error);
+        });
+        rows.sort((a, b) => Date.parse(b.createdAt || 0) - Date.parse(a.createdAt || 0));
+        items.push(...rows);
+      } catch { /* ignore */ }
+
+      // One-time migration of legacy localStorage text-only products into IndexedDB
+      try {
+        const legacy = JSON.parse(localStorage.getItem(PRODUCT_STORAGE_KEY) || '[]');
+        if (Array.isArray(legacy) && legacy.length > 0) {
+          const existingIds = new Set(items.map((x) => x.id));
+          for (const p of legacy) {
+            if (!p || typeof p !== 'object' || !p.name) continue;
+            const migrated = {
+              id: String(p.id || `prod-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`),
+              name: String(p.name).slice(0, 80),
+              category: String(p.category || 'Gold'),
+              purity: String(p.purity || ''),
+              weight: Math.max(0, Number(p.weight) || 0),
+              price: Math.max(0, Number(p.price) || 0),
+              sku: String(p.sku || ''),
+              note: String(p.note || ''),
+              media: [],
+              createdAt: p.createdAt || new Date().toISOString()
+            };
+            if (!existingIds.has(migrated.id)) {
+              await saveLocalProductToDB(migrated).catch(() => {});
+              items.push(migrated);
+            }
+          }
+          localStorage.removeItem(PRODUCT_STORAGE_KEY);
+        }
+      } catch { /* ignore */ }
+
+      productOwner.localItems = items;
+    }
+
+    async function saveLocalProductToDB(item) {
+      const db = await openCatalogDB();
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction('local_products', 'readwrite');
+        tx.objectStore('local_products').put(item);
+        tx.oncomplete = resolve;
+        tx.onerror = () => reject(tx.error);
+      });
+    }
+
+    async function deleteLocalProductFromDB(id) {
+      const db = await openCatalogDB();
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction('local_products', 'readwrite');
+        tx.objectStore('local_products').delete(id);
+        tx.oncomplete = resolve;
+        tx.onerror = () => reject(tx.error);
+      });
+    }
+
+    async function loadPublishedCatalog(force = false) {
+      if (productOwner.catalogLoaded && !force) return;
+      try {
+        const res = await fetch(`${CATALOG_MANIFEST_PATH}?t=${Date.now()}`, { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data)) {
+            productOwner.publishedItems = data
+              .filter((p) => p && typeof p === 'object' && typeof p.id === 'string' && typeof p.name === 'string')
+              .map((p) => ({
+                ...p,
+                media: Array.isArray(p.media)
+                  ? p.media
+                      .map((m) => ({
+                        type: m && m.type === 'video' ? 'video' : 'image',
+                        src: sanitizeCatalogMediaUrl(m && m.src),
+                        mime: typeof (m && m.mime) === 'string' ? m.mime : ''
+                      }))
+                      .filter((m) => Boolean(m.src))
+                  : []
+              }));
+          }
+        }
+      } catch { /* offline or not published yet */ }
+      productOwner.catalogLoaded = true;
+    }
+
+    async function ensureProductsLoaded() {
+      await Promise.all([loadPublishedCatalog(false), loadLocalProductsFromDB()]);
+      renderProducts();
+    }
+
+    function getStoredGitHubToken() {
+      try {
+        return sessionStorage.getItem(OWNER_GH_TOKEN_KEY) || localStorage.getItem(OWNER_GH_TOKEN_KEY) || '';
+      } catch {
+        return '';
+      }
+    }
+
+    function storeGitHubToken(token, remember) {
+      try {
+        sessionStorage.removeItem(OWNER_GH_TOKEN_KEY);
+        localStorage.removeItem(OWNER_GH_TOKEN_KEY);
+        if (!token) return;
+        if (remember) localStorage.setItem(OWNER_GH_TOKEN_KEY, token);
+        else sessionStorage.setItem(OWNER_GH_TOKEN_KEY, token);
+      } catch { /* ignore */ }
+    }
+
+    async function verifyGitHubToken(token) {
+      const clean = String(token || '').trim();
+      if (!clean) throw new Error('Enter your GitHub Personal Access Token.');
+      const headers = {
+        Authorization: `Bearer ${clean}`,
+        Accept: 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28'
+      };
+      const repoRes = await fetch(`https://api.github.com/repos/${CATALOG_REPO_OWNER}/${CATALOG_REPO_NAME}`, { headers, cache: 'no-store' });
+      if (repoRes.status === 401) throw new Error('Token is invalid or expired.');
+      if (repoRes.status === 403 || repoRes.status === 404) throw new Error('Token does not have access to satyanarayanjewellery/shop.');
+      if (!repoRes.ok) throw new Error(`GitHub verification failed (HTTP ${repoRes.status}).`);
+      const repo = await repoRes.json();
+      if (!repo.permissions || repo.permissions.push !== true) {
+        throw new Error('This token is read-only. Grant "Contents: Read and write" on satyanarayanjewellery/shop.');
+      }
+      let login = CATALOG_REPO_OWNER;
+      try {
+        const userRes = await fetch('https://api.github.com/user', { headers, cache: 'no-store' });
+        if (userRes.ok) {
+          const u = await userRes.json();
+          if (u && u.login) login = u.login;
+        }
+      } catch { /* fine-grained token may omit user read scope */ }
+      return { token: clean, login };
+    }
+
+    function blobToBase64(blob) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const str = String(reader.result || '');
+          const idx = str.indexOf(',');
+          resolve(idx >= 0 ? str.slice(idx + 1) : str);
+        };
+        reader.onerror = () => reject(reader.error || new Error('Failed to read media file'));
+        reader.readAsDataURL(blob);
+      });
+    }
+
+    function utf8ToBase64(text) {
+      const bytes = new TextEncoder().encode(text);
+      let bin = '';
+      const chunk = 0x8000;
+      for (let i = 0; i < bytes.length; i += chunk) {
+        bin += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+      }
+      return btoa(bin);
+    }
+
+    function base64ToUtf8(b64) {
+      const bin = atob(String(b64 || '').replace(/\s+/g, ''));
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      return new TextDecoder().decode(bytes);
+    }
+
+    async function optimizeImageForPublish(blob, mime) {
+      if (mime === 'image/gif' || blob.size <= 350 * 1024) {
+        return { blob, mime, ext: mediaExtFromFile({ type: mime }) };
+      }
+      try {
+        const url = URL.createObjectURL(blob);
+        try {
+          const img = await new Promise((resolve, reject) => {
+            const el = new Image();
+            el.onload = () => resolve(el);
+            el.onerror = reject;
+            el.src = url;
+          });
+          const maxDim = 1600;
+          const scale = Math.min(1, maxDim / Math.max(img.naturalWidth || 1, img.naturalHeight || 1));
+          const w = Math.max(1, Math.round((img.naturalWidth || 1) * scale));
+          const h = Math.max(1, Math.round((img.naturalHeight || 1) * scale));
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          const outBlob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/webp', 0.86));
+          if (outBlob && outBlob.size > 0 && outBlob.size < blob.size) {
+            return { blob: outBlob, mime: 'image/webp', ext: 'webp' };
+          }
+        } finally {
+          URL.revokeObjectURL(url);
+        }
+      } catch { /* fallback to original */ }
+      return { blob, mime, ext: mediaExtFromFile({ type: mime }) };
+    }
+
+    async function ghContentsRequest(method, repoPath, body = null) {
+      const url = `https://api.github.com/repos/${CATALOG_REPO_OWNER}/${CATALOG_REPO_NAME}/contents/${repoPath}`;
+      const options = {
+        method,
+        headers: {
+          Authorization: `Bearer ${productOwner.ghToken}`,
+          Accept: 'application/vnd.github+json',
+          'X-GitHub-Api-Version': '2022-11-28'
+        },
+        cache: 'no-store'
+      };
+      if (body) {
+        options.headers['Content-Type'] = 'application/json';
+        options.body = JSON.stringify(body);
+      }
+      const res = await fetch(url, options);
+      if (!res.ok) {
+        let detail = `HTTP ${res.status}`;
+        try {
+          const errJson = await res.json();
+          if (errJson && errJson.message) detail = errJson.message;
+        } catch { /* ignore */ }
+        throw new Error(`GitHub publish error: ${detail}`);
+      }
+      return res.json();
+    }
+
+    function setUploadProgress(visible, text = '', pct = 0) {
+      const wrap = document.getElementById('product-upload-progress');
+      const txt = document.getElementById('product-upload-status-text');
+      const pctEl = document.getElementById('product-upload-pct');
+      const bar = document.getElementById('product-upload-bar');
+      if (wrap) wrap.classList.toggle('hidden', !visible);
+      if (txt) txt.textContent = text;
+      if (pctEl) pctEl.textContent = `${Math.round(pct)}%`;
+      if (bar) bar.style.width = `${Math.max(0, Math.min(100, pct))}%`;
+    }
+
+    async function fetchRemoteCatalogFromGitHub() {
+      try {
+        const file = await ghContentsRequest('GET', `${CATALOG_MANIFEST_PATH}?ref=${CATALOG_REPO_BRANCH}`);
+        const list = JSON.parse(base64ToUtf8(file.content));
+        return { sha: file.sha, items: Array.isArray(list) ? list : [] };
+      } catch (err) {
+        if (/404|Not Found/i.test(err.message || '')) return { sha: null, items: [] };
+        throw err;
+      }
+    }
+
+    async function publishItemToGitHub(item, mediaBlobs) {
+      if (!productOwner.ghConnected || !productOwner.ghToken) {
+        throw new Error('Connect your GitHub Owner Token first.');
+      }
+      const safeId = String(item.id).replace(/[^a-zA-Z0-9_-]/g, '');
+      const totalSteps = mediaBlobs.length + 2;
+      let doneSteps = 0;
+      const publishedMedia = [];
+
+      for (let i = 0; i < mediaBlobs.length; i++) {
+        const entry = mediaBlobs[i];
+        const isVideo = entry.type === 'video';
+        if (isVideo && entry.blob.size > MAX_VIDEO_PUBLISH_BYTES) {
+          throw new Error(`Video "${entry.name || 'clip'}" exceeds the 20 MB website publish limit.`);
+        }
+        setUploadProgress(true, `Uploading ${isVideo ? 'video' : 'photo'} ${i + 1} of ${mediaBlobs.length}...`, (doneSteps / totalSteps) * 100);
+        let uploadBlob = entry.blob;
+        let uploadMime = entry.mime || entry.blob.type || (isVideo ? 'video/mp4' : 'image/jpeg');
+        let ext = mediaExtFromFile({ type: uploadMime });
+        if (!isVideo) {
+          const opt = await optimizeImageForPublish(entry.blob, uploadMime);
+          uploadBlob = opt.blob;
+          uploadMime = opt.mime;
+          ext = opt.ext;
+        }
+        const mediaPath = `${CATALOG_MEDIA_PREFIX}${safeId}-${i}.${ext}`;
+        const contentB64 = await blobToBase64(uploadBlob);
+        await ghContentsRequest('PUT', mediaPath, {
+          message: `Add jewellery media for ${item.name}`,
+          content: contentB64,
+          branch: CATALOG_REPO_BRANCH
+        });
+        publishedMedia.push({ type: isVideo ? 'video' : 'image', src: mediaPath, mime: uploadMime });
+        doneSteps += 1;
+      }
+
+      setUploadProgress(true, 'Updating live website catalogue...', (doneSteps / totalSteps) * 100);
+      const remote = await fetchRemoteCatalogFromGitHub();
+      doneSteps += 1;
+
+      const publishedRecord = {
+        id: safeId,
+        name: item.name,
+        category: item.category,
+        purity: item.purity || '',
+        weight: Number(item.weight) || 0,
+        price: Number(item.price) || 0,
+        sku: item.sku || '',
+        note: item.note || '',
+        media: publishedMedia,
+        createdAt: item.createdAt || new Date().toISOString()
+      };
+      const updatedList = [publishedRecord, ...remote.items.filter((x) => x && x.id !== safeId)];
+      const putPayload = {
+        message: `Publish jewellery item: ${item.name}`,
+        content: utf8ToBase64(JSON.stringify(updatedList, null, 2) + '\n'),
+        branch: CATALOG_REPO_BRANCH
+      };
+      if (remote.sha) putPayload.sha = remote.sha;
+      await ghContentsRequest('PUT', CATALOG_MANIFEST_PATH, putPayload);
+      setUploadProgress(true, 'Published!', 100);
+
+      // Update local preview immediately (with temporary blob URLs until GitHub Pages CDN refreshes)
+      const immediatePreviewMedia = publishedMedia.map((m, idx) => ({
+        ...m,
+        _previewBlob: mediaBlobs[idx]?.blob || null
+      }));
+      productOwner.publishedItems = [
+        { ...publishedRecord, media: immediatePreviewMedia },
+        ...productOwner.publishedItems.filter((x) => x.id !== safeId)
+      ];
+      return publishedRecord;
+    }
+
+    async function deletePublishedItemFromGitHub(item) {
+      if (!productOwner.ghConnected || !productOwner.ghToken) {
+        throw new Error('Connect your GitHub Owner Token to delete published items.');
+      }
+      const remote = await fetchRemoteCatalogFromGitHub();
+      const target = remote.items.find((x) => x && x.id === item.id) || item;
+      const updatedList = remote.items.filter((x) => x && x.id !== item.id);
+      const putPayload = {
+        message: `Remove jewellery item: ${item.name}`,
+        content: utf8ToBase64(JSON.stringify(updatedList, null, 2) + '\n'),
+        branch: CATALOG_REPO_BRANCH
+      };
+      if (remote.sha) putPayload.sha = remote.sha;
+      await ghContentsRequest('PUT', CATALOG_MANIFEST_PATH, putPayload);
+
+      // Best-effort cleanup of uploaded media files
+      const mediaPaths = (target.media || [])
+        .map((m) => sanitizeCatalogMediaUrl(m && m.src))
+        .filter((s) => s.startsWith(CATALOG_MEDIA_PREFIX));
+      for (const p of mediaPaths) {
+        try {
+          const meta = await ghContentsRequest('GET', `${p}?ref=${CATALOG_REPO_BRANCH}`);
+          if (meta && meta.sha) {
+            await ghContentsRequest('DELETE', p, {
+              message: `Clean up media for removed item: ${item.name}`,
+              sha: meta.sha,
+              branch: CATALOG_REPO_BRANCH
+            });
+          }
+        } catch { /* ignore cleanup failure */ }
+      }
+      productOwner.publishedItems = productOwner.publishedItems.filter((x) => x.id !== item.id);
+    }
+
+    function revokeGalleryObjectUrls() {
+      productOwner.objectUrls.forEach((u) => { try { URL.revokeObjectURL(u); } catch { /* ignore */ } });
+      productOwner.objectUrls = [];
+    }
+
+    function trackObjectUrl(blob) {
+      const url = URL.createObjectURL(blob);
+      productOwner.objectUrls.push(url);
+      return url;
+    }
+
+    function resolveItemMediaList(item) {
+      const list = Array.isArray(item.media) ? item.media : [];
+      return list.map((m) => {
+        if (m && m._previewBlob instanceof Blob) {
+          return { type: m.type === 'video' ? 'video' : 'image', src: trackObjectUrl(m._previewBlob), mime: m.mime || m._previewBlob.type || '' };
+        }
+        if (m && m.blob instanceof Blob) {
+          return { type: m.type === 'video' ? 'video' : 'image', src: trackObjectUrl(m.blob), mime: m.mime || m.blob.type || '' };
+        }
+        const safe = sanitizeCatalogMediaUrl(m && m.src);
+        return safe ? { type: m.type === 'video' ? 'video' : 'image', src: safe, mime: m.mime || '' } : null;
+      }).filter(Boolean);
+    }
+
+    function updateOwnerStudioUI() {
+      const studio = document.getElementById('owner-studio');
+      const pill = document.getElementById('owner-mode-pill');
+      const btnLabel = document.getElementById('btn-owner-access-label');
+      const syncStatus = document.getElementById('owner-sync-status');
+      const pubBtn = document.getElementById('btn-publish-product');
+      const pubAllBtn = document.getElementById('btn-publish-all-drafts');
+      const pubCount = document.getElementById('owner-published-count');
+      const draftCount = document.getElementById('owner-draft-count');
+
+      if (studio) studio.classList.toggle('hidden', !productOwner.unlocked);
+      if (pill) pill.classList.toggle('hidden', !productOwner.unlocked);
+      if (btnLabel) btnLabel.textContent = productOwner.unlocked ? 'Owner Settings' : 'Owner';
+      if (pubCount) pubCount.textContent = String(productOwner.publishedItems.length);
+      if (draftCount) draftCount.textContent = String(productOwner.localItems.length);
+      if (pubBtn) pubBtn.classList.toggle('hidden', !productOwner.ghConnected);
+      if (pubAllBtn) pubAllBtn.classList.toggle('hidden', !(productOwner.ghConnected && productOwner.localItems.length > 0));
+      if (syncStatus) {
+        syncStatus.textContent = productOwner.ghConnected
+          ? `Connected to live website as @${productOwner.ghLogin} · Uploads publish to all customers.`
+          : 'Local device mode · Save drafts on this device or connect GitHub to publish live.';
+      }
+    }
+
+    function renderPendingMediaPreviews() {
+      const wrap = document.getElementById('product-media-previews');
+      if (!wrap) return;
+      if (!productOwner.pendingFiles.length) {
+        wrap.classList.add('hidden');
+        wrap.innerHTML = '';
+        return;
+      }
+      wrap.classList.remove('hidden');
+      wrap.innerHTML = productOwner.pendingFiles.map((entry, idx) => {
+        const previewTag = entry.type === 'video'
+          ? `<video src="${escapeHtml(entry.previewUrl)}" muted playsinline class="w-16 h-16 object-cover rounded-lg bg-slate-950"></video>`
+          : `<img src="${escapeHtml(entry.previewUrl)}" alt="${escapeHtml(entry.file.name)}" class="w-16 h-16 object-cover rounded-lg bg-slate-950" />`;
+        return `
+          <div class="relative rounded-lg border border-slate-700 bg-slate-950 p-1 flex flex-col items-center gap-1">
+            ${previewTag}
+            <span class="text-[9px] text-slate-400 truncate w-16 text-center">${entry.type === 'video' ? 'VID' : 'IMG'} · ${escapeHtml(formatFileBytes(entry.file.size))}</span>
+            <button type="button" data-remove-pending="${idx}" class="pending-remove absolute -top-0.5 -right-1 w-5 h-5 rounded-full bg-rose-500/15 border border-rose-500/35 text-rose-200 text-[10px] font-bold flex items-center justify-center" aria-label="Remove file">✕</button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function clearPendingMedia() {
+      productOwner.pendingFiles.forEach((f) => { try { URL.revokeObjectURL(f.previewUrl); } catch { /* ignore */ } });
+      productOwner.pendingFiles = [];
+      const input = document.getElementById('product-media-input');
+      if (input) input.value = '';
+      renderPendingMediaPreviews();
+    }
+
+    function addPendingMediaFiles(fileList) {
+      const files = Array.from(fileList || []);
+      if (!files.length) return;
+      for (const file of files) {
+        if (productOwner.pendingFiles.length >= MAX_MEDIA_PER_ITEM) {
+          showToast(`Maximum ${MAX_MEDIA_PER_ITEM} photos/videos per jewellery item.`, 'alert');
+          break;
+        }
+        const isImg = ALLOWED_IMAGE_MIME.test(file.type || '');
+        const isVid = ALLOWED_VIDEO_MIME.test(file.type || '');
+        if (!isImg && !isVid) {
+          showToast(`Unsupported file "${file.name}". Use JPG, PNG, WebP, GIF, MP4, WebM, or MOV.`, 'alert');
+          continue;
+        }
+        if (isImg && file.size > MAX_IMAGE_BYTES) {
+          showToast(`Image "${file.name}" is larger than 12 MB.`, 'alert');
+          continue;
+        }
+        if (isVid && file.size > MAX_VIDEO_LOCAL_BYTES) {
+          showToast(`Video "${file.name}" is larger than 50 MB.`, 'alert');
+          continue;
+        }
+        productOwner.pendingFiles.push({
+          file,
+          type: isVid ? 'video' : 'image',
+          mime: file.type,
+          previewUrl: URL.createObjectURL(file)
+        });
+      }
+      renderPendingMediaPreviews();
+    }
+
+    function getVisibleCatalogItems() {
+      const published = productOwner.publishedItems.map((p) => ({ ...p, _source: 'published' }));
+      if (!productOwner.unlocked) return published;
+      const drafts = productOwner.localItems.map((p) => ({ ...p, _source: 'local' }));
+      return [...drafts, ...published];
     }
 
     function renderProducts() {
+      updateOwnerStudioUI();
       const list = document.getElementById('product-list');
       if (!list) return;
+      revokeGalleryObjectUrls();
+
+      const allItems = getVisibleCatalogItems();
       const query = (document.getElementById('product-search')?.value || '').trim().toLowerCase();
-      const filtered = productItems.filter((p) => [p.name, p.category, p.purity, p.sku].some((v) => String(v || '').toLowerCase().includes(query)));
-      const count = document.getElementById('product-count');
-      const stockTotal = document.getElementById('product-stock-total');
-      const valueTotal = document.getElementById('product-value-total');
-      if (count) count.textContent = String(productItems.length);
-      if (stockTotal) stockTotal.textContent = String(productItems.reduce((n, p) => n + (Number(p.stock) || 0), 0));
-      if (valueTotal) valueTotal.textContent = '₹' + productItems.reduce((n, p) => n + (Number(p.price) || 0) * (Number(p.stock) || 0), 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const cat = productOwner.activeCategory;
+      const filtered = allItems.filter((p) => {
+        if (cat !== 'all' && String(p.category || 'Other') !== cat) return false;
+        if (!query) return true;
+        return [p.name, p.category, p.purity, p.sku, p.note].some((v) => String(v || '').toLowerCase().includes(query));
+      });
+
       if (!filtered.length) {
-        list.innerHTML = `<div class="text-center text-xs text-slate-500 py-8">${productItems.length ? 'No matching products found.' : 'No products added yet. Add your first item above.'}</div>`;
+        const emptyText = allItems.length
+          ? 'No jewellery matches your filter.'
+          : (productOwner.unlocked
+              ? 'No jewellery uploaded yet. Add photos or videos in the Owner Upload Studio above.'
+              : 'New jewellery designs coming soon. Visit our showroom in Cuttack or check back shortly.');
+        list.innerHTML = `<div class="text-center text-xs text-slate-400 py-8" style="grid-column:1/-1">${emptyText}</div>`;
         return;
       }
-      list.innerHTML = filtered.map((p) => `<article class="rounded-xl border border-slate-700/90 bg-slate-950/60 p-3 flex items-center justify-between gap-3">
-        <div class="min-w-0 flex-1"><div class="flex flex-wrap items-center gap-2"><h4 class="text-sm font-semibold text-white truncate">${escapeHtml(p.name)}</h4><span class="text-[9px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-200 border border-amber-500/20">${escapeHtml(p.category || 'Other')}</span></div>
-        <p class="text-[10px] text-slate-400 mt-1">${escapeHtml(p.purity || 'Purity not set')} · ${Number(p.weight) > 0 ? `${Number(p.weight).toLocaleString('en-IN')} g · ` : ''}Stock: ${Number(p.stock) || 0}${p.sku ? ` · SKU: ${escapeHtml(p.sku)}` : ''}</p>
-        <p class="text-sm font-bold text-amber-300 mt-1">₹${(Number(p.price) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p></div>
-        <button type="button" class="product-delete shrink-0 rounded-lg border border-rose-500/30 bg-rose-500/10 text-rose-300 px-3 py-2 text-[10px]" data-product-id="${escapeHtml(p.id)}" aria-label="Delete ${escapeHtml(p.name)}">Delete</button>
-      </article>`).join('');
+
+      list.innerHTML = filtered.map((p) => {
+        const mediaList = resolveItemMediaList(p);
+        const activeIdx = Math.min(productOwner.activeMediaIndex.get(p.id) || 0, Math.max(0, mediaList.length - 1));
+        const activeMedia = mediaList[activeIdx] || null;
+
+        let mediaHtml = `<div class="flex flex-col items-center justify-center gap-1.5 text-slate-500 p-4 text-center">
+          <svg viewBox="0 0 24 24" class="w-8 h-8 text-amber-500/40" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/></svg>
+          <span class="text-[10px]">No media uploaded</span>
+        </div>`;
+        if (activeMedia) {
+          if (activeMedia.type === 'video') {
+            mediaHtml = `
+              <span class="jewel-badge-overlay">▶ VIDEO</span>
+              <button type="button" class="jewel-expand-btn product-open-lightbox" data-product-id="${escapeHtml(p.id)}" data-source="${p._source}" data-media-idx="${activeIdx}" aria-label="Expand video">⛶ Fullscreen</button>
+              <video src="${escapeHtml(activeMedia.src)}" controls playsinline preload="metadata"></video>
+            `;
+          } else {
+            mediaHtml = `
+              ${mediaList.length > 1 ? `<span class="jewel-badge-overlay">${activeIdx + 1} / ${mediaList.length}</span>` : ''}
+              <button type="button" class="jewel-expand-btn product-open-lightbox" data-product-id="${escapeHtml(p.id)}" data-source="${p._source}" data-media-idx="${activeIdx}" aria-label="Zoom image">⛶ View</button>
+              <img loading="lazy" decoding="async" src="${escapeHtml(activeMedia.src)}" alt="${escapeHtml(p.name)}" class="product-open-lightbox cursor-pointer" data-product-id="${escapeHtml(p.id)}" data-source="${p._source}" data-media-idx="${activeIdx}" />
+            `;
+          }
+        }
+
+        const thumbsHtml = mediaList.length > 1
+          ? `<div class="jewel-thumbs">${mediaList.map((m, idx) => `
+              <button type="button" class="jewel-thumb product-thumb-btn ${idx === activeIdx ? 'is-active' : ''}" data-product-id="${escapeHtml(p.id)}" data-media-idx="${idx}" aria-label="View media ${idx + 1}">
+                ${m.type === 'video'
+                  ? `<video src="${escapeHtml(m.src)}" muted playsinline preload="metadata"></video><span class="absolute inset-0 flex items-center justify-center bg-black/45 text-[10px] text-amber-200 font-bold">▶</span>`
+                  : `<img loading="lazy" decoding="async" src="${escapeHtml(m.src)}" alt="" />`}
+              </button>`).join('')}</div>`
+          : '';
+
+        const metaParts = [];
+        if (p.purity) metaParts.push(escapeHtml(p.purity));
+        if (Number(p.weight) > 0) metaParts.push(`${Number(p.weight).toLocaleString('en-IN')} g`);
+        if (p.sku) metaParts.push(`Code: ${escapeHtml(p.sku)}`);
+
+        const priceNum = Number(p.price) || 0;
+        const priceHtml = priceNum > 0
+          ? `<p class="text-sm font-bold text-amber-300 tabular-nums">₹${priceNum.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>`
+          : `<p class="text-[11px] font-medium text-amber-200/80">Price on request</p>`;
+
+        const ownerBar = productOwner.unlocked
+          ? `<div class="flex flex-wrap items-center justify-between gap-2 pt-2.5 mt-2.5 border-t border-slate-800/90">
+              <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full ${p._source === 'published' ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'}">${p._source === 'published' ? 'Live on Website' : 'Local Draft'}</span>
+              <div class="flex items-center gap-1.5">
+                ${p._source === 'local' && productOwner.ghConnected ? `<button type="button" class="product-publish-draft px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-200 text-[10px] font-semibold" data-product-id="${escapeHtml(p.id)}">Publish</button>` : ''}
+                <button type="button" class="product-delete px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/15 text-rose-300 text-[10px] font-semibold" data-product-id="${escapeHtml(p.id)}" data-source="${p._source}" aria-label="Delete ${escapeHtml(p.name)}">Delete</button>
+              </div>
+            </div>`
+          : '';
+
+        return `
+          <article class="jewel-card">
+            <div class="jewel-media-frame">${mediaHtml}</div>
+            ${thumbsHtml}
+            <div class="p-3.5 flex-1 flex flex-col justify-between">
+              <div>
+                <div class="flex items-start justify-between gap-2">
+                  <h4 class="text-sm font-semibold text-white leading-tight">${escapeHtml(p.name)}</h4>
+                  <span class="shrink-0 text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-200 border border-amber-500/25">${escapeHtml(p.category || 'Gold')}</span>
+                </div>
+                ${metaParts.length ? `<p class="text-[11px] text-slate-400 mt-1">${metaParts.join(' · ')}</p>` : ''}
+                ${p.note ? `<p class="text-[11px] text-slate-300/80 mt-1.5 leading-relaxed">${escapeHtml(p.note)}</p>` : ''}
+              </div>
+              <div class="mt-2.5">${priceHtml}${ownerBar}</div>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    function openProductLightbox(itemId, source, startIdx = 0) {
+      const pool = source === 'local' ? productOwner.localItems : productOwner.publishedItems;
+      const item = pool.find((x) => x.id === itemId);
+      if (!item) return;
+      const media = resolveItemMediaList(item);
+      if (!media.length) return;
+      productOwner.lightboxItem = { item, media };
+      productOwner.lightboxIdx = Math.max(0, Math.min(startIdx, media.length - 1));
+      renderLightboxStage();
+      document.getElementById('product-lightbox')?.classList.remove('hidden');
+    }
+
+    function renderLightboxStage() {
+      const ctx = productOwner.lightboxItem;
+      if (!ctx) return;
+      const stage = document.getElementById('lightbox-stage');
+      const title = document.getElementById('lightbox-title');
+      const meta = document.getElementById('lightbox-meta');
+      const nav = document.getElementById('lightbox-nav');
+      const counter = document.getElementById('lightbox-counter');
+      const m = ctx.media[productOwner.lightboxIdx];
+      if (!stage || !m) return;
+
+      if (title) title.textContent = ctx.item.name;
+      const parts = [ctx.item.category, ctx.item.purity, Number(ctx.item.weight) > 0 ? `${ctx.item.weight} g` : ''].filter(Boolean);
+      if (meta) meta.textContent = parts.join(' · ');
+
+      stage.innerHTML = m.type === 'video'
+        ? `<video src="${escapeHtml(m.src)}" controls autoplay playsinline></video>`
+        : `<img src="${escapeHtml(m.src)}" alt="${escapeHtml(ctx.item.name)}" />`;
+      if (nav) nav.classList.toggle('hidden', ctx.media.length <= 1);
+      if (counter) counter.textContent = `${productOwner.lightboxIdx + 1} / ${ctx.media.length}`;
+    }
+
+    function closeProductLightbox() {
+      const modal = document.getElementById('product-lightbox');
+      const stage = document.getElementById('lightbox-stage');
+      if (modal) modal.classList.add('hidden');
+      if (stage) stage.innerHTML = '';
+      productOwner.lightboxItem = null;
+    }
+
+    function switchOwnerAuthTab(tab) {
+      const isGh = tab === 'github';
+      document.getElementById('owner-panel-github')?.classList.toggle('hidden', !isGh);
+      document.getElementById('owner-panel-pin')?.classList.toggle('hidden', isGh);
+      const ghTab = document.getElementById('owner-tab-github');
+      const pinTab = document.getElementById('owner-tab-pin');
+      if (ghTab) ghTab.className = `px-2.5 py-1.5 rounded-md text-xs ${isGh ? 'font-semibold bg-amber-500 text-slate-950' : 'font-medium text-slate-300 hover:text-white'}`;
+      if (pinTab) pinTab.className = `px-2.5 py-1.5 rounded-md text-xs ${!isGh ? 'font-semibold bg-amber-500 text-slate-950' : 'font-medium text-slate-300 hover:text-white'}`;
+
+      if (!isGh) {
+        const hasPin = Boolean(readStoredPinRecord());
+        const confirmWrap = document.getElementById('owner-pin-confirm-wrap');
+        const label = document.getElementById('owner-pin-label');
+        const hint = document.getElementById('owner-pin-hint');
+        const submitBtn = document.getElementById('btn-owner-pin-submit');
+        if (confirmWrap) confirmWrap.classList.toggle('hidden', hasPin);
+        if (label) label.textContent = hasPin ? 'Enter Owner PIN' : 'Create Owner PIN (4–12 characters)';
+        if (hint) hint.textContent = hasPin
+          ? 'Enter your device Owner PIN to unlock local jewellery uploads & drafts.'
+          : 'First time on this device: create a private Owner PIN to save jewellery photo & video drafts offline.';
+        if (submitBtn) submitBtn.textContent = hasPin ? 'Unlock Local Studio' : 'Set PIN & Unlock';
+      }
+    }
+
+    function openOwnerAuthModal(defaultTab = 'github') {
+      const modal = document.getElementById('owner-auth-modal');
+      const errGh = document.getElementById('owner-gh-error');
+      const errPin = document.getElementById('owner-pin-error');
+      const tokenInput = document.getElementById('owner-gh-token');
+      const disconnectBtn = document.getElementById('btn-owner-gh-disconnect');
+      if (errGh) { errGh.classList.add('hidden'); errGh.textContent = ''; }
+      if (errPin) { errPin.classList.add('hidden'); errPin.textContent = ''; }
+      if (tokenInput) tokenInput.value = productOwner.ghToken || getStoredGitHubToken() || '';
+      if (disconnectBtn) disconnectBtn.classList.toggle('hidden', !(productOwner.ghConnected || getStoredGitHubToken()));
+      switchOwnerAuthTab(defaultTab);
+      modal?.classList.remove('hidden');
+    }
+
+    function closeOwnerAuthModal() {
+      document.getElementById('owner-auth-modal')?.classList.add('hidden');
+      const pinIn = document.getElementById('owner-pin-input');
+      const pinConf = document.getElementById('owner-pin-confirm');
+      if (pinIn) pinIn.value = '';
+      if (pinConf) pinConf.value = '';
+    }
+
+    function collectProductFormData() {
+      const name = (document.getElementById('product-name')?.value || '').trim();
+      const rawPrice = (document.getElementById('product-price')?.value || '').trim();
+      const price = rawPrice === '' ? 0 : Number(rawPrice);
+      if (!name) {
+        showToast('Enter a jewellery name.', 'alert');
+        return null;
+      }
+      if (!Number.isFinite(price) || price < 0) {
+        showToast('Enter a valid price or leave blank for "Price on request".', 'alert');
+        return null;
+      }
+      if (!productOwner.pendingFiles.length) {
+        showToast('Please select at least one jewellery photo or video.', 'alert');
+        return null;
+      }
+      return {
+        id: `prod-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        name,
+        category: document.getElementById('product-category')?.value || 'Gold',
+        purity: (document.getElementById('product-purity')?.value || '').trim(),
+        weight: Math.max(0, Number(document.getElementById('product-weight')?.value) || 0),
+        price,
+        sku: (document.getElementById('product-sku')?.value || '').trim(),
+        note: (document.getElementById('product-note')?.value || '').trim(),
+        createdAt: new Date().toISOString()
+      };
+    }
+
+    async function handleSaveLocalProduct() {
+      if (!productOwner.unlocked || productOwner.busy) return;
+      const item = collectProductFormData();
+      if (!item) return;
+      productOwner.busy = true;
+      try {
+        item.media = productOwner.pendingFiles.map((f) => ({
+          type: f.type,
+          mime: f.mime,
+          name: f.file.name,
+          blob: f.file
+        }));
+        await saveLocalProductToDB(item);
+        productOwner.localItems.unshift(item);
+        document.getElementById('product-form')?.reset();
+        clearPendingMedia();
+        renderProducts();
+        showToast('Jewellery saved locally on this device.', 'success');
+      } catch (err) {
+        showToast(err?.message || 'Could not save jewellery locally.', 'alert');
+      } finally {
+        productOwner.busy = false;
+      }
+    }
+
+    async function handlePublishNewProduct() {
+      if (!productOwner.unlocked || !productOwner.ghConnected || productOwner.busy) return;
+      const item = collectProductFormData();
+      if (!item) return;
+      productOwner.busy = true;
+      const mediaBlobs = productOwner.pendingFiles.map((f) => ({ type: f.type, mime: f.mime, name: f.file.name, blob: f.file }));
+      try {
+        await publishItemToGitHub(item, mediaBlobs);
+        document.getElementById('product-form')?.reset();
+        clearPendingMedia();
+        renderProducts();
+        showToast('Published! All customers will see this jewellery once GitHub Pages refreshes (~1 min).', 'success');
+      } catch (err) {
+        showToast(err?.message || 'Could not publish jewellery to website.', 'alert');
+      } finally {
+        productOwner.busy = false;
+        setTimeout(() => setUploadProgress(false), 1200);
+      }
+    }
+
+    async function handlePublishSingleDraft(draftId) {
+      if (!productOwner.ghConnected || productOwner.busy) return;
+      const draft = productOwner.localItems.find((x) => x.id === draftId);
+      if (!draft) return;
+      productOwner.busy = true;
+      try {
+        const mediaBlobs = (draft.media || [])
+          .filter((m) => m && m.blob instanceof Blob)
+          .map((m) => ({ type: m.type === 'video' ? 'video' : 'image', mime: m.mime || m.blob.type, name: m.name || '', blob: m.blob }));
+        await publishItemToGitHub(draft, mediaBlobs);
+        await deleteLocalProductFromDB(draft.id);
+        productOwner.localItems = productOwner.localItems.filter((x) => x.id !== draft.id);
+        renderProducts();
+        showToast(`Published "${draft.name}" to the live website!`, 'success');
+      } catch (err) {
+        showToast(err?.message || 'Publish failed.', 'alert');
+      } finally {
+        productOwner.busy = false;
+        setTimeout(() => setUploadProgress(false), 1200);
+      }
+    }
+
+    async function initProductsCatalog() {
+      await ensureProductsLoaded();
+      // Silently restore verified GitHub Owner session if the owner previously chose to remember their token
+      const savedToken = getStoredGitHubToken();
+      if (savedToken) {
+        try {
+          const verified = await verifyGitHubToken(savedToken);
+          productOwner.ghToken = verified.token;
+          productOwner.ghLogin = verified.login;
+          productOwner.ghConnected = true;
+          productOwner.unlocked = true;
+          renderProducts();
+        } catch {
+          storeGitHubToken('', false);
+        }
+      }
     }
 
     function bindEvents() {
-      document.getElementById('product-form')?.addEventListener('submit', (event) => {
-        event.preventDefault();
-        const name = document.getElementById('product-name').value.trim();
-        const price = Number(document.getElementById('product-price').value);
-        const stock = Number(document.getElementById('product-stock').value);
-        if (!name || !Number.isFinite(price) || price < 0 || !Number.isInteger(stock) || stock < 0) {
-          showToast('Enter a product name, valid selling price and whole-number stock quantity.', 'alert');
+      // --- Jewellery Collection & Owner Upload Studio Events ---
+      document.getElementById('btn-owner-access')?.addEventListener('click', () => openOwnerAuthModal(productOwner.ghConnected ? 'github' : 'github'));
+      document.getElementById('btn-owner-settings')?.addEventListener('click', () => openOwnerAuthModal('github'));
+      document.getElementById('btn-close-owner-modal')?.addEventListener('click', closeOwnerAuthModal);
+      document.getElementById('owner-auth-modal')?.addEventListener('click', (e) => {
+        if (e.target.id === 'owner-auth-modal') closeOwnerAuthModal();
+      });
+      document.getElementById('owner-tab-github')?.addEventListener('click', () => switchOwnerAuthTab('github'));
+      document.getElementById('owner-tab-pin')?.addEventListener('click', () => switchOwnerAuthTab('pin'));
+
+      document.getElementById('btn-owner-gh-verify')?.addEventListener('click', async () => {
+        const tokenInput = document.getElementById('owner-gh-token');
+        const remember = Boolean(document.getElementById('owner-gh-remember')?.checked);
+        const errEl = document.getElementById('owner-gh-error');
+        const btn = document.getElementById('btn-owner-gh-verify');
+        if (errEl) { errEl.classList.add('hidden'); errEl.textContent = ''; }
+        if (btn) { btn.disabled = true; btn.textContent = 'Verifying...'; }
+        try {
+          const verified = await verifyGitHubToken(tokenInput?.value || '');
+          productOwner.ghToken = verified.token;
+          productOwner.ghLogin = verified.login;
+          productOwner.ghConnected = true;
+          productOwner.unlocked = true;
+          storeGitHubToken(verified.token, remember);
+          closeOwnerAuthModal();
+          await loadLocalProductsFromDB();
+          renderProducts();
+          showToast(`Owner verified (@${verified.login}). You can now publish jewellery live!`, 'success');
+        } catch (err) {
+          if (errEl) {
+            errEl.textContent = err?.message || 'Verification failed.';
+            errEl.classList.remove('hidden');
+          }
+        } finally {
+          if (btn) { btn.disabled = false; btn.textContent = 'Verify & Unlock'; }
+        }
+      });
+
+      document.getElementById('btn-owner-gh-disconnect')?.addEventListener('click', () => {
+        storeGitHubToken('', false);
+        productOwner.ghToken = '';
+        productOwner.ghLogin = '';
+        productOwner.ghConnected = false;
+        productOwner.unlocked = false;
+        closeOwnerAuthModal();
+        renderProducts();
+        showToast('GitHub token removed and Owner Mode locked.', 'info');
+      });
+
+      document.getElementById('btn-owner-pin-submit')?.addEventListener('click', async () => {
+        const pin = (document.getElementById('owner-pin-input')?.value || '').trim();
+        const confirmPin = (document.getElementById('owner-pin-confirm')?.value || '').trim();
+        const errEl = document.getElementById('owner-pin-error');
+        const showPinErr = (msg) => {
+          if (errEl) { errEl.textContent = msg; errEl.classList.remove('hidden'); }
+        };
+        if (errEl) errEl.classList.add('hidden');
+        if (pin.length < 4 || pin.length > 12) {
+          showPinErr('PIN must be 4 to 12 characters.');
           return;
         }
-        productItems.unshift({
-          id: `prod-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-          name, category: document.getElementById('product-category').value,
-          purity: document.getElementById('product-purity').value.trim(),
-          weight: Math.max(0, Number(document.getElementById('product-weight').value) || 0),
-          price, stock, sku: document.getElementById('product-sku').value.trim()
-        });
-        saveProducts();
-        event.target.reset();
-        document.getElementById('product-stock').value = '1';
+        const stored = readStoredPinRecord();
+        if (!stored) {
+          if (pin !== confirmPin) {
+            showPinErr('PINs do not match.');
+            return;
+          }
+          const salt = generateRandomSalt();
+          const hash = await sha256Hex(`${salt}:${pin}`);
+          try {
+            localStorage.setItem(OWNER_PIN_STORAGE_KEY, JSON.stringify({ salt, hash }));
+          } catch {
+            showPinErr('Browser storage is unavailable.');
+            return;
+          }
+          productOwner.unlocked = true;
+          closeOwnerAuthModal();
+          await loadLocalProductsFromDB();
+          renderProducts();
+          showToast('Owner PIN set. Local Upload Studio unlocked!', 'success');
+          return;
+        }
+        const checkHash = await sha256Hex(`${stored.salt}:${pin}`);
+        if (checkHash !== stored.hash) {
+          showPinErr('Incorrect Owner PIN.');
+          return;
+        }
+        productOwner.unlocked = true;
+        closeOwnerAuthModal();
+        await loadLocalProductsFromDB();
         renderProducts();
-        showToast('Product added to your catalogue.', 'success');
+        showToast('Local Upload Studio unlocked.', 'success');
+      });
+
+      document.getElementById('btn-owner-lock')?.addEventListener('click', () => {
+        productOwner.unlocked = false;
+        clearPendingMedia();
+        renderProducts();
+        showToast('Owner Mode locked. Showing customer gallery view.', 'info');
+      });
+
+      const dropzone = document.getElementById('product-dropzone');
+      const mediaInput = document.getElementById('product-media-input');
+      dropzone?.addEventListener('click', () => mediaInput && mediaInput.click());
+      dropzone?.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('is-dragover'); });
+      dropzone?.addEventListener('dragleave', () => dropzone.classList.remove('is-dragover'));
+      dropzone?.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('is-dragover');
+        addPendingMediaFiles(e.dataTransfer?.files);
+      });
+      mediaInput?.addEventListener('change', (e) => {
+        addPendingMediaFiles(e.target.files);
+        e.target.value = '';
+      });
+
+      document.getElementById('product-media-previews')?.addEventListener('click', (e) => {
+        const btn = e.target.closest('.pending-remove');
+        if (!btn) return;
+        const idx = Number(btn.dataset.removePending);
+        if (Number.isInteger(idx) && productOwner.pendingFiles[idx]) {
+          try { URL.revokeObjectURL(productOwner.pendingFiles[idx].previewUrl); } catch { /* ignore */ }
+          productOwner.pendingFiles.splice(idx, 1);
+          renderPendingMediaPreviews();
+        }
+      });
+
+      document.getElementById('product-form')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        handleSaveLocalProduct();
+      });
+      document.getElementById('btn-publish-product')?.addEventListener('click', handlePublishNewProduct);
+      document.getElementById('btn-publish-all-drafts')?.addEventListener('click', async () => {
+        if (!productOwner.ghConnected || productOwner.busy) return;
+        const ids = productOwner.localItems.map((x) => x.id);
+        for (const id of ids) {
+          await handlePublishSingleDraft(id);
+        }
+      });
+
+      document.getElementById('product-category-pills')?.addEventListener('click', (e) => {
+        const btn = e.target.closest('.prod-cat-btn');
+        if (!btn) return;
+        productOwner.activeCategory = btn.dataset.prodCat || 'all';
+        document.querySelectorAll('.prod-cat-btn').forEach((b) => {
+          const on = (b.dataset.prodCat || 'all') === productOwner.activeCategory;
+          b.className = `prod-cat-btn px-2.5 py-1 rounded-lg text-[11px] ${on ? 'font-semibold bg-amber-500 text-slate-950' : 'font-medium bg-slate-900/90 border border-slate-800 text-slate-300 hover:text-white'}`;
+        });
+        renderProducts();
       });
       document.getElementById('product-search')?.addEventListener('input', renderProducts);
-      document.getElementById('product-list')?.addEventListener('click', (event) => {
-        const button = event.target.closest('.product-delete');
-        if (!button) return;
-        const id = button.dataset.productId;
-        productItems = productItems.filter((p) => String(p.id) !== id);
-        saveProducts();
-        renderProducts();
-        showToast('Product removed from your catalogue.', 'success');
+
+      document.getElementById('product-list')?.addEventListener('click', async (event) => {
+        const thumbBtn = event.target.closest('.product-thumb-btn');
+        if (thumbBtn) {
+          productOwner.activeMediaIndex.set(thumbBtn.dataset.productId, Number(thumbBtn.dataset.mediaIdx) || 0);
+          renderProducts();
+          return;
+        }
+        const lightboxTrigger = event.target.closest('.product-open-lightbox');
+        if (lightboxTrigger) {
+          openProductLightbox(lightboxTrigger.dataset.productId, lightboxTrigger.dataset.source, Number(lightboxTrigger.dataset.mediaIdx) || 0);
+          return;
+        }
+        const publishBtn = event.target.closest('.product-publish-draft');
+        if (publishBtn) {
+          await handlePublishSingleDraft(publishBtn.dataset.productId);
+          return;
+        }
+        const deleteBtn = event.target.closest('.product-delete');
+        if (deleteBtn && productOwner.unlocked && !productOwner.busy) {
+          const id = deleteBtn.dataset.productId;
+          const source = deleteBtn.dataset.source;
+          if (source === 'local') {
+            await deleteLocalProductFromDB(id).catch(() => {});
+            productOwner.localItems = productOwner.localItems.filter((p) => p.id !== id);
+            renderProducts();
+            showToast('Local draft removed.', 'success');
+          } else if (source === 'published') {
+            const target = productOwner.publishedItems.find((p) => p.id === id);
+            if (!target) return;
+            productOwner.busy = true;
+            try {
+              setUploadProgress(true, `Removing "${target.name}" from live website...`, 55);
+              await deletePublishedItemFromGitHub(target);
+              setUploadProgress(true, 'Removed!', 100);
+              renderProducts();
+              showToast('Item removed from live website catalogue.', 'success');
+            } catch (err) {
+              showToast(err?.message || 'Could not remove published item.', 'alert');
+            } finally {
+              productOwner.busy = false;
+              setTimeout(() => setUploadProgress(false), 1000);
+            }
+          }
+        }
+      });
+
+      document.getElementById('btn-close-lightbox')?.addEventListener('click', closeProductLightbox);
+      document.getElementById('product-lightbox')?.addEventListener('click', (e) => {
+        if (e.target.id === 'product-lightbox') closeProductLightbox();
+      });
+      document.getElementById('btn-lightbox-prev')?.addEventListener('click', () => {
+        if (!productOwner.lightboxItem) return;
+        const n = productOwner.lightboxItem.media.length;
+        productOwner.lightboxIdx = (productOwner.lightboxIdx - 1 + n) % n;
+        renderLightboxStage();
+      });
+      document.getElementById('btn-lightbox-next')?.addEventListener('click', () => {
+        if (!productOwner.lightboxItem) return;
+        const n = productOwner.lightboxItem.media.length;
+        productOwner.lightboxIdx = (productOwner.lightboxIdx + 1) % n;
+        renderLightboxStage();
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closeProductLightbox();
+          closeOwnerAuthModal();
+        }
       });
       renderProducts();
       document.getElementById('btn-retry-connection').addEventListener('click', () => { syncLiveAPIs(true, true); connectLiveWebSocket(); });
@@ -5578,6 +6777,7 @@
         initChat();
         loadMintuAvatar();
         hydrateCachedNews();
+        initProductsCatalog();
       };
       if (typeof requestIdleCallback === 'function') {
         requestIdleCallback(deferNonCritical, { timeout: 250 });

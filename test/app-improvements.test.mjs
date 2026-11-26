@@ -145,7 +145,7 @@ test('manifest and service worker are valid, referenced, and prevent cache poiso
   assert.ok(manifest.icons.some(i => i.sizes === '192x192'));
   assert.ok(manifest.icons.some(i => i.sizes === '512x512'));
   const sw = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
-  assert.match(sw, /sj-price-desk-v4/);
+  assert.match(sw, /sj-price-desk-v5/);
   assert.match(sw, /index\.html/);
   assert.match(sw, /skipWaiting/);
   const html = await loadHtml();
@@ -429,4 +429,63 @@ test('computeCityPrices computes Cuttack and city-adjusted gold & silver rates a
 
   const delhi = computeCityPrices('delhi', 4100, 48, 85);
   assert.ok(delhi.gold999ExGst > cuttack.gold999ExGst);
+});
+
+test('jewellery collection supports image/video uploads with owner-only access and safe media URLs', async () => {
+  const html = await loadHtml();
+  const catalogJson = JSON.parse(await readFile(new URL('../catalog/products.json', import.meta.url), 'utf8'));
+  assert.ok(Array.isArray(catalogJson), 'catalog/products.json must be a JSON array');
+
+  // Upload studio and owner modal stay hidden by default for regular visitors
+  assert.match(html, /<section id="owner-studio" class="hidden /);
+  assert.match(html, /<div id="owner-auth-modal" class="jewel-modal-backdrop hidden"/);
+  assert.match(html, /<div id="product-lightbox" class="jewel-modal-backdrop hidden"/);
+  assert.ok(html.includes('accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime"'));
+
+  // Test sanitizeCatalogMediaUrl()
+  const sanStart = html.indexOf('    function sanitizeCatalogMediaUrl(');
+  const sanEnd = html.indexOf('    function mediaExtFromFile(', sanStart);
+  assert.ok(sanStart >= 0 && sanEnd > sanStart);
+  const sanitizeCatalogMediaUrl = vm.runInNewContext(`${html.slice(sanStart, sanEnd)}\nsanitizeCatalogMediaUrl`, {});
+  assert.equal(sanitizeCatalogMediaUrl('catalog/media/prod-123-0.webp'), 'catalog/media/prod-123-0.webp');
+  assert.equal(sanitizeCatalogMediaUrl('catalog/media/prod-123-1.mp4'), 'catalog/media/prod-123-1.mp4');
+  assert.equal(sanitizeCatalogMediaUrl('blob:https://example.com/abc-123'), 'blob:https://example.com/abc-123');
+  assert.equal(sanitizeCatalogMediaUrl('catalog/media/../index.html'), '');
+  assert.equal(sanitizeCatalogMediaUrl('javascript:alert(1)'), '');
+  assert.equal(sanitizeCatalogMediaUrl('data:image/svg+xml;base64,PHN2Zz4='), '');
+  assert.equal(sanitizeCatalogMediaUrl('https://evil.example/a.jpg'), '');
+
+  // Test verifyGitHubToken() requires repository push permission
+  const verStart = html.indexOf('    async function verifyGitHubToken(');
+  const verEnd = html.indexOf('    function blobToBase64(', verStart);
+  assert.ok(verStart >= 0 && verEnd > verStart);
+  const makeVerify = (mockFetch) => vm.runInNewContext(
+    `const CATALOG_REPO_OWNER = 'satyanarayanjewellery'; const CATALOG_REPO_NAME = 'shop';\n${html.slice(verStart, verEnd)}\nverifyGitHubToken`,
+    { fetch: mockFetch }
+  );
+  const verifyPush = makeVerify(async (url) => {
+    if (url.includes('/repos/')) return { ok: true, status: 200, json: async () => ({ permissions: { push: true } }) };
+    return { ok: true, status: 200, json: async () => ({ login: 'satyanarayanjewellery' }) };
+  });
+  const okRes = await verifyPush('github_pat_valid');
+  assert.equal(okRes.login, 'satyanarayanjewellery');
+
+  const verifyReadOnly = makeVerify(async () => ({ ok: true, status: 200, json: async () => ({ permissions: { push: false } }) }));
+  await assert.rejects(verifyReadOnly('github_pat_ro'), /read-only/i);
+
+  const verifyBad = makeVerify(async () => ({ ok: false, status: 401, json: async () => ({}) }));
+  await assert.rejects(verifyBad('github_pat_bad'), /invalid or expired/i);
+
+  // Test getVisibleCatalogItems() hides local drafts when locked
+  const visStart = html.indexOf('    function getVisibleCatalogItems()');
+  const visEnd = html.indexOf('    function renderProducts()', visStart);
+  assert.ok(visStart >= 0 && visEnd > visStart);
+  const lockedItems = vm.runInNewContext(`${html.slice(visStart, visEnd)}\ngetVisibleCatalogItems()`, {
+    productOwner: { unlocked: false, publishedItems: [{ id: 'pub-1' }], localItems: [{ id: 'loc-1' }] }
+  });
+  assert.deepEqual(Array.from(lockedItems, (x) => x.id), ['pub-1']);
+  const unlockedItems = vm.runInNewContext(`${html.slice(visStart, visEnd)}\ngetVisibleCatalogItems()`, {
+    productOwner: { unlocked: true, publishedItems: [{ id: 'pub-1' }], localItems: [{ id: 'loc-1' }] }
+  });
+  assert.deepEqual(Array.from(unlockedItems, (x) => x.id), ['loc-1', 'pub-1']);
 });
