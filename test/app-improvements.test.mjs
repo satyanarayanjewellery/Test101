@@ -9,6 +9,51 @@ async function loadHtml() {
   return readFile(htmlUrl, 'utf8');
 }
 
+function makeFakeDom(values = {}) {
+  const nodes = new Map();
+  const getNode = (id) => {
+    if (!nodes.has(id)) {
+      const init = values[id];
+      const node = {
+        id,
+        value: typeof init === 'object' && init !== null && 'value' in init ? init.value : (init ?? ''),
+        checked: typeof init === 'object' && init !== null && 'checked' in init ? init.checked : false,
+        textContent: '',
+        className: '',
+        classList: {
+          hidden: false,
+          toggle(cls, force) { if (cls === 'hidden') this.hidden = Boolean(force); },
+          add() {},
+          remove() {}
+        }
+      };
+      nodes.set(id, node);
+    }
+    return nodes.get(id);
+  };
+  return {
+    document: { getElementById: (id) => getNode(id) },
+    getNode
+  };
+}
+
+const samplePrices = {
+  gold999ExGst: 131000, gold999: 134930, gold995ExGst: 130869, gold995: 134795,
+  gold916ExGst: 120083, gold916: 123686, gold18ExGst: 98250, gold18: 101177,
+  gold999ExGstGram: 13100, gold999Gram: 13493,
+  gold995ExGstGram: 13086.9, gold995Gram: 13479.5,
+  gold916ExGstGram: 12008.3, gold916Gram: 12368.6,
+  gold18ExGstGram: 9825, gold18Gram: 10117.7,
+  silver999ExGst: 124000, silver999: 127720,
+  silver999ExGstGram: 124, silver999Gram: 127.72,
+  silver925ExGst: 114700, silver925: 118141,
+  silver925ExGstGram: 114.7, silver925Gram: 118.141,
+  silver750ExGst: 93000, silver750: 95790,
+  silver750ExGstGram: 93, silver750Gram: 95.79,
+  silverMCX: 108000, silverMCXGst: 111240,
+  spotGold: 4100, spotSilver: 48, usdInr: 85
+};
+
 test('head has SEO, social and PWA hooks', async () => {
   const html = await loadHtml();
   for (const part of [
@@ -92,7 +137,7 @@ test('WhatsApp channel link and its styling are preserved', async () => {
   assert.ok(html.includes('S.browser_fallback_url='));
 });
 
-test('manifest and service worker are valid and referenced', async () => {
+test('manifest and service worker are valid, referenced, and prevent cache poisoning', async () => {
   const manifest = JSON.parse(await readFile(new URL('../manifest.webmanifest', import.meta.url), 'utf8'));
   assert.equal(manifest.name, 'Satyanarayan Jewellers — Live Gold & Silver Price Desk');
   assert.equal(manifest.theme_color, '#090607');
@@ -100,11 +145,57 @@ test('manifest and service worker are valid and referenced', async () => {
   assert.ok(manifest.icons.some(i => i.sizes === '192x192'));
   assert.ok(manifest.icons.some(i => i.sizes === '512x512'));
   const sw = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
-  assert.match(sw, /sj-price-desk-v2/);
+  assert.match(sw, /sj-price-desk-v3/);
   assert.match(sw, /index\.html/);
   assert.match(sw, /skipWaiting/);
   const html = await loadHtml();
   assert.ok(html.includes("navigator.serviceWorker.register('sw.js')"));
+
+  // Execute sw.js in a mock ServiceWorkerGlobalScope to verify non-OK responses are not cached
+  const listeners = {};
+  const cacheStore = new Map([['./index.html', { ok: true, type: 'basic', body: 'cached-shell' }]]);
+  const cacheApi = {
+    put: async (k, v) => { cacheStore.set(typeof k === 'string' ? k : k.url, v); },
+    match: async (k) => cacheStore.get(typeof k === 'string' ? k : k.url)
+  };
+  let nextFetchRes = { ok: false, status: 500, type: 'basic', clone() { return { ...this }; } };
+  const swContext = {
+    URL,
+    self: {
+      location: { origin: 'https://example.com' },
+      addEventListener: (type, fn) => { listeners[type] = fn; },
+      skipWaiting: () => {},
+      clients: { claim: () => {} }
+    },
+    caches: {
+      open: async () => cacheApi,
+      match: async (k) => cacheStore.get(typeof k === 'string' ? k : k.url),
+      keys: async () => [],
+      delete: async () => true
+    },
+    fetch: async () => nextFetchRes
+  };
+  vm.runInNewContext(sw, swContext);
+
+  // 1. Navigation returning HTTP 500 should fall back to cached shell and NOT overwrite cache
+  let responded;
+  listeners.fetch({
+    request: { method: 'GET', mode: 'navigate', url: 'https://example.com/' },
+    respondWith: (p) => { responded = p; }
+  });
+  const navRes = await responded;
+  assert.equal(navRes.body, 'cached-shell');
+  assert.equal(cacheStore.get('./index.html').body, 'cached-shell');
+
+  // 2. Navigation returning HTTP 200 same-origin updates the cache
+  nextFetchRes = { ok: true, status: 200, type: 'basic', body: 'fresh-shell', clone() { return { ...this }; } };
+  listeners.fetch({
+    request: { method: 'GET', mode: 'navigate', url: 'https://example.com/' },
+    respondWith: (p) => { responded = p; }
+  });
+  const freshRes = await responded;
+  assert.equal(freshRes.body, 'fresh-shell');
+  assert.equal(cacheStore.get('./index.html').body, 'fresh-shell');
 });
 
 test('relative-age helper formats ages correctly', async () => {
@@ -128,16 +219,8 @@ test('share-text builder includes GST and spot lines without tola', async () => 
   const end = html.indexOf('    function announceRates()', start);
   assert.ok(start >= 0 && end > start);
   const source = html.slice(start, end);
-  const prices = {
-    gold999ExGst: 131000, gold999: 134930, gold995ExGst: 130869, gold995: 134795,
-    gold916ExGst: 120083, gold916: 123686, gold18ExGst: 98250, gold18: 101177,
-    gold999ExGstGram: 13100, gold999Gram: 13493,
-    silver999ExGst: 124000, silver999: 127720, silver925ExGst: 114700, silver925: 118141,
-    silver750ExGst: 93000, silver750: 95790, silverMCX: 108000, silverMCXGst: 111240,
-    spotGold: 4100, spotSilver: 48, usdInr: 85
-  };
   const context = {
-    state: { prices, live: { lastSync: new Date('2026-11-25T03:30:00Z') } },
+    state: { prices: samplePrices, live: { lastSync: new Date('2026-11-25T03:30:00Z') } },
     getCurrentCity: () => ({ name: 'Cuttack', state: 'Odisha' }),
     fmtINR: (n) => '₹' + Math.round(n).toLocaleString('en-IN'),
     fmtUSD: (n) => '$' + Number(n).toFixed(2)
@@ -165,4 +248,153 @@ test('admin tools and two-factor authentication are removed', async () => {
     assert.ok(html.includes(`data-tool-tab="${tab}"`));
     assert.ok(html.includes(`id="panel-${tab}"`));
   }
+});
+
+test('price calculator handles percentage, per-gram, and flat making charges without double percent sign', async () => {
+  const html = await loadHtml();
+  assert.ok(html.includes('<span id="quote-making-pct">8%</span>'), 'markup does not hardcode trailing %');
+  const start = html.indexOf('    function getPerGramPrice(');
+  const end = html.indexOf('    function switchToolTab(', start);
+  assert.ok(start >= 0 && end > start);
+  const source = html.slice(start, end);
+  const fmtINR = (n, d = 0) => '₹' + Number(n).toLocaleString('en-IN', { minimumFractionDigits: d, maximumFractionDigits: d });
+
+  // Percentage mode (10g 22K, 8% making, 3% GST)
+  const domPct = makeFakeDom({
+    'calc-metal': '22K', 'calc-weight': '10', 'calc-unit': 'g',
+    'calc-making': '8', 'calc-making-type': 'pct', 'calc-gst-toggle': { checked: true }
+  });
+  const qPct = vm.runInNewContext(`${source}\ncomputeQuote()`, {
+    state: { prices: samplePrices }, TROY_OZ_TO_GRAMS: 31.1034768, fmtINR, document: domPct.document
+  });
+  assert.equal(qPct.baseValue, 120083);
+  assert.equal(qPct.makingCharges, 9607);
+  assert.equal(qPct.gstAmount, 3891);
+  assert.equal(qPct.grandTotal, 133581);
+  assert.equal(domPct.getNode('quote-making-pct').textContent, '8%');
+
+  // Per-gram mode (10g 22K, ₹500/g, GST off)
+  const domPerG = makeFakeDom({
+    'calc-metal': '22K', 'calc-weight': '10', 'calc-unit': 'g',
+    'calc-making': '500', 'calc-making-type': 'per_g', 'calc-gst-toggle': { checked: false }
+  });
+  const qPerG = vm.runInNewContext(`${source}\ncomputeQuote()`, {
+    state: { prices: samplePrices }, TROY_OZ_TO_GRAMS: 31.1034768, fmtINR, document: domPerG.document
+  });
+  assert.equal(qPerG.makingCharges, 5000);
+  assert.equal(qPerG.gstAmount, 0);
+  assert.equal(domPerG.getNode('quote-making-pct').textContent, '₹500/g');
+
+  // Flat mode
+  const domFlat = makeFakeDom({
+    'calc-metal': '24K', 'calc-weight': '1', 'calc-unit': '10g',
+    'calc-making': '2500', 'calc-making-type': 'flat', 'calc-gst-toggle': { checked: true }
+  });
+  const qFlat = vm.runInNewContext(`${source}\ncomputeQuote()`, {
+    state: { prices: samplePrices }, TROY_OZ_TO_GRAMS: 31.1034768, fmtINR, document: domFlat.document
+  });
+  assert.equal(qFlat.baseValue, 131000);
+  assert.equal(qFlat.makingCharges, 2500);
+  assert.equal(domFlat.getNode('quote-making-pct').textContent, '₹2,500 flat');
+});
+
+test('old gold exchange applies stone deduction and hallmark vs non-hallmark policy', async () => {
+  const html = await loadHtml();
+  const unitStart = html.indexOf('    function unitToGrams(');
+  const unitEnd = html.indexOf('    function computeQuote(', unitStart);
+  const ogStart = html.indexOf('    function computeOldGoldExchange()');
+  const ogEnd = html.indexOf('    function computeOldSilverExchange()', ogStart);
+  assert.ok(ogStart >= 0 && ogEnd > ogStart);
+  const source = html.slice(unitStart, unitEnd) + '\n' + html.slice(ogStart, ogEnd);
+  const fmtINR = (n, d = 0) => '₹' + Number(n).toLocaleString('en-IN', { minimumFractionDigits: d, maximumFractionDigits: d });
+
+  const domHm = makeFakeDom({ 'og-purity': '91.6', 'og-weight': '10', 'og-unit': 'g', 'og-stone': '1', 'og-new-bill': '' });
+  const resHm = vm.runInNewContext(`${source}\ncomputeOldGoldExchange()`, {
+    state: { prices: samplePrices, ogHallmark: true }, TROY_OZ_TO_GRAMS: 31.1034768, fmtINR, document: domHm.document
+  });
+  assert.equal(resHm.netGrams, 9);
+  assert.equal(resHm.deductPct, 0);
+  assert.equal(Math.round(resHm.netValue), Math.round(9 * samplePrices.gold916ExGstGram));
+
+  const domNonHm = makeFakeDom({ 'og-purity': '91.6', 'og-weight': '10', 'og-unit': 'g', 'og-stone': '1', 'og-new-bill': '' });
+  const resNonHm = vm.runInNewContext(`${source}\ncomputeOldGoldExchange()`, {
+    state: { prices: samplePrices, ogHallmark: false }, TROY_OZ_TO_GRAMS: 31.1034768, fmtINR, document: domNonHm.document
+  });
+  assert.equal(resNonHm.deductPct, 30);
+  assert.equal(Math.round(resNonHm.netValue), Math.round(9 * samplePrices.gold916ExGstGram * 0.7));
+});
+
+test('market schedule accurately distinguishes weekday open, daily break, and weekend close', async () => {
+  const html = await loadHtml();
+  const start = html.indexOf('    const DAY_MAP =');
+  const end = html.indexOf('    const HEADER_DT_FORMATTER =', start);
+  assert.ok(start >= 0 && end > start);
+  const getMarketSchedule = vm.runInNewContext(`${html.slice(start, end)}\ngetMarketSchedule`, {
+    state: { marketMode: 'INR' }
+  });
+
+  // Wed 2026-11-25 06:00 UTC = 11:30 AM IST (MCX open) and 1:00 AM EST (Global Spot open)
+  const wed = getMarketSchedule(new Date('2026-11-25T06:00:00Z'));
+  assert.equal(wed.globalSpot.isOpen, true);
+  assert.equal(wed.indiaMcx.isOpen, true);
+
+  // Wed 2026-11-25 22:30 UTC = 5:30 PM EST (Global Spot daily 1h break)
+  const rollover = getMarketSchedule(new Date('2026-11-25T22:30:00Z'));
+  assert.equal(rollover.globalSpot.isOpen, false);
+  assert.equal(rollover.globalSpot.pillText, 'DAILY BREAK');
+
+  // Sat 2026-11-28 10:00 UTC (Weekend closed for both)
+  const sat = getMarketSchedule(new Date('2026-11-28T10:00:00Z'));
+  assert.equal(sat.globalSpot.isOpen, false);
+  assert.equal(sat.globalSpot.isWeekend, true);
+  assert.equal(sat.indiaMcx.isOpen, false);
+  assert.equal(sat.indiaMcx.isWeekend, true);
+});
+
+test('markdown renderer and avatar sanitizer defend against XSS and placeholder injection', async () => {
+  const html = await loadHtml();
+  const escStart = html.indexOf('    function escapeHtml(');
+  const escEnd = html.indexOf('\n    }', escStart) + 6;
+  const mdStart = html.indexOf('    function renderMarkdown(');
+  const mdEnd = html.indexOf('    // =========================================================================\n    // MINTU AVATAR', mdStart);
+  assert.ok(escStart >= 0 && mdStart >= 0 && mdEnd > mdStart);
+
+  const renderMarkdown = vm.runInNewContext(`${html.slice(escStart, escEnd)}\n${html.slice(mdStart, mdEnd)}\nrenderMarkdown`, {});
+  const xssHtml = renderMarkdown('<script>alert(1)</script>\n@@CODEBLOCK_99@@');
+  assert.ok(!xssHtml.includes('<script>'));
+  assert.ok(xssHtml.includes('&lt;script&gt;'));
+  assert.ok(!xssHtml.includes('undefined'));
+  assert.ok(xssHtml.includes('@@CODEBLOCK_99@@'));
+
+  const avStart = html.indexOf('    function safeAvatarSrc(');
+  const avEnd = html.indexOf('    function applyMintuAvatar(', avStart);
+  assert.ok(avStart >= 0 && avEnd > avStart);
+  const safeAvatarSrc = vm.runInNewContext(`const MINTU_DEFAULT_AVATAR = 'data:image/jpeg;base64,DEFAULT';\n${html.slice(avStart, avEnd)}\nsafeAvatarSrc`, {});
+  assert.equal(safeAvatarSrc('data:image/png;base64,iVBORw0KGgo='), 'data:image/png;base64,iVBORw0KGgo=');
+  assert.equal(safeAvatarSrc('" onerror="alert(1)'), 'data:image/jpeg;base64,DEFAULT');
+  assert.equal(safeAvatarSrc('javascript:alert(1)'), 'data:image/jpeg;base64,DEFAULT');
+  assert.equal(safeAvatarSrc('data:image/svg+xml;base64,PHN2Zz4='), 'data:image/jpeg;base64,DEFAULT');
+});
+
+test('security, performance, CSS utility, and cleanup regressions stay fixed', async () => {
+  const html = await loadHtml();
+  // Chart.js pinned to valid UMD bundle with SRI + CORS
+  assert.ok(html.includes("const CHART_JS_SRC = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js'"));
+  assert.match(html, /const CHART_JS_INTEGRITY = 'sha384-[A-Za-z0-9+/=]+'/);
+  assert.ok(html.includes("s.crossOrigin = 'anonymous'"));
+  // Gemini API key sent in header, never query string
+  assert.ok(html.includes("'x-goog-api-key': apiKey"));
+  assert.ok(!html.includes(':generateContent?key='));
+  // REST fallback uses sane 5s cadence with backoff
+  assert.ok(html.includes('const REST_FALLBACK_MS = 5000'));
+  // No missing CSS utility classes, mobile nav hidden in print, no dead elements/probes
+  assert.ok(html.includes('.bg-slate-950\\/50{'));
+  assert.ok(html.includes('.hover\\:bg-emerald-500\\/25:hover{'));
+  const printIdx = html.indexOf('@media print{');
+  assert.ok(printIdx >= 0);
+  assert.ok(html.slice(printIdx, printIdx + 350).includes('#mobile-nav-bar'));
+  assert.ok(!html.includes('mintu-agent.gif'));
+  assert.ok(!html.includes('id="os-balance-box"'));
+  assert.ok(html.includes('alt="Satyanarayan Jewellers Logo"'));
+  assert.ok(!html.includes('alt="DK Logo"'));
 });

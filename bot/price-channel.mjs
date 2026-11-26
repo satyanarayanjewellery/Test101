@@ -3,6 +3,8 @@ import { pathToFileURL } from 'node:url';
 
 const OZ = 31.1034768;
 const DAY = 24 * 60 * 60 * 1000;
+const MAX_QUOTE_AGE = 4 * DAY; // Covers standard weekends and 3-day market holidays.
+const MAX_OFFSET_PERCENT = 25;
 const fetchOptions = () => ({ signal: AbortSignal.timeout(15000), cache: 'no-store' });
 
 function positive(value, name) {
@@ -19,32 +21,96 @@ async function getJson(url, fetchImpl) {
   if (!response.ok) throw new Error(`Price provider request failed (${response.status})`);
   return response.json();
 }
+function parseSwissquote(json) {
+  if (!Array.isArray(json)) return null;
+  for (const item of json) {
+    const list = item?.spreadProfilePrices;
+    if (!Array.isArray(list)) continue;
+    for (const row of list) {
+      const bid = Number(row?.bid);
+      const ask = Number(row?.ask);
+      if (Number.isFinite(bid) && Number.isFinite(ask) && bid > 0 && ask > 0) {
+        const ts = Number(item?.ts);
+        return {
+          price: (bid + ask) / 2,
+          updatedAt: Number.isFinite(ts) && ts > 0 ? new Date(ts).toISOString() : ''
+        };
+      }
+    }
+  }
+  return null;
+}
+
+async function fetchMetalQuote(symbol, name, fetchImpl, now) {
+  try {
+    const data = await getJson(`https://api.gold-api.com/price/${symbol}`, fetchImpl);
+    if (data.symbol !== symbol || data.currency !== 'USD') throw new Error('Unexpected price provider response');
+    return {
+      price: positive(data.price, `${name} price`),
+      time: checkedTime(data.updatedAt, name, now, MAX_QUOTE_AGE)
+    };
+  } catch (primaryError) {
+    // Only fall back to Swissquote on network/HTTP errors; propagate explicit validation errors.
+    if (!/Price provider request failed|fetch|timeout|abort/i.test(primaryError.message || '')) throw primaryError;
+    try {
+      const sq = parseSwissquote(await getJson(`https://forex-data-feed.swissquote.com/public-quotes/bboquotes/instrument/${symbol}/USD`, fetchImpl));
+      if (!sq) throw new Error('Unexpected Swissquote response');
+      return {
+        price: positive(sq.price, `${name} price`),
+        time: checkedTime(sq.updatedAt, name, now, MAX_QUOTE_AGE)
+      };
+    } catch {
+      throw primaryError;
+    }
+  }
+}
+
+async function fetchFxQuote(fetchImpl, now) {
+  try {
+    const fx = await getJson('https://open.er-api.com/v6/latest/USD', fetchImpl);
+    if (fx.result !== 'success' || fx.base_code !== 'USD') throw new Error('Unexpected price provider response');
+    return {
+      fx: positive(fx.rates?.INR, 'USD/INR rate'),
+      fxTime: checkedTime(Number.isFinite(fx.time_last_update_unix) ? new Date(fx.time_last_update_unix * 1000).toISOString() : '', 'FX', now, MAX_QUOTE_AGE)
+    };
+  } catch (primaryError) {
+    if (!/Price provider request failed|fetch|timeout|abort/i.test(primaryError.message || '')) throw primaryError;
+    try {
+      const fb = await getJson('https://api.frankfurter.dev/v1/latest?base=USD&symbols=INR', fetchImpl);
+      if (fb.base !== 'USD') throw new Error('Unexpected Frankfurter response');
+      return {
+        fx: positive(fb.rates?.INR, 'USD/INR rate'),
+        fxTime: checkedTime(typeof fb.date === 'string' ? `${fb.date}T00:00:00Z` : '', 'FX', now, MAX_QUOTE_AGE)
+      };
+    } catch {
+      throw primaryError;
+    }
+  }
+}
 
 export async function getQuotes(fetchImpl = fetch, now = Date.now()) {
   const [gold, silver, fx] = await Promise.all([
-    getJson('https://api.gold-api.com/price/XAU', fetchImpl),
-    getJson('https://api.gold-api.com/price/XAG', fetchImpl),
-    getJson('https://open.er-api.com/v6/latest/USD', fetchImpl)
+    fetchMetalQuote('XAU', 'gold', fetchImpl, now),
+    fetchMetalQuote('XAG', 'silver', fetchImpl, now),
+    fetchFxQuote(fetchImpl, now)
   ]);
-  if (gold.symbol !== 'XAU' || silver.symbol !== 'XAG' || gold.currency !== 'USD' || silver.currency !== 'USD' || fx.result !== 'success' || fx.base_code !== 'USD') throw new Error('Unexpected price provider response');
   return {
-    gold: positive(gold.price, 'gold price'), silver: positive(silver.price, 'silver price'),
-    fx: positive(fx.rates?.INR, 'USD/INR rate'),
-    goldTime: checkedTime(gold.updatedAt, 'gold', now, 3 * DAY),
-    silverTime: checkedTime(silver.updatedAt, 'silver', now, 3 * DAY),
-    fxTime: checkedTime(Number.isFinite(fx.time_last_update_unix) ? new Date(fx.time_last_update_unix * 1000).toISOString() : '', 'FX', now, 3 * DAY)
+    gold: gold.price, silver: silver.price, fx: fx.fx,
+    goldTime: gold.time, silverTime: silver.time, fxTime: fx.fxTime
   };
 }
 
 // Mirrors index.html's Cuttack, computeCityPrices calculation.
 export function calculate(q, offset = 0) {
-  if (!Number.isFinite(offset) || offset < -100 || offset > 100) throw new Error('PRICE_OFFSET_PERCENT must be between -100 and 100');
+  if (!Number.isFinite(offset) || offset < -MAX_OFFSET_PERCENT || offset > MAX_OFFSET_PERCENT) {
+    throw new Error(`PRICE_OFFSET_PERCENT must be between -${MAX_OFFSET_PERCENT} and ${MAX_OFFSET_PERCENT}`);
+  }
   const adjustment = 1 + offset / 100;
   const goldSpot = positive(q.gold, 'gold') * positive(q.fx, 'FX') / OZ;
   const silverSpot = positive(q.silver, 'silver') * q.fx / OZ;
-  const goldBase = goldSpot * 1.15 * 10 * 1.0317 * adjustment;
-  const mcxBase = silverSpot * 1.15 * 1000 * 1.0802;
-  const silverBase = mcxBase * 1.1462 * adjustment;
+  const goldBase = positive(goldSpot * 1.15 * 10 * 1.0317 * adjustment, 'gold base');
+  const mcxBase = positive(silverSpot * 1.15 * 1000 * 1.0802, 'MCX silver base');
+  const silverBase = positive(mcxBase * 1.1462 * adjustment, 'silver base');
   return { goldSpot, silverSpot, goldBase, mcxBase, silverBase };
 }
 const inr = n => '₹' + Math.round(n).toLocaleString('en-IN');
@@ -82,16 +148,19 @@ export async function sendMessage(message, token, channel, fetchImpl = fetch) {
   return data.message?.id || data.sent_message.id;
 }
 
-export async function main(env = process.env) {
+export async function main(env = process.env, deps = {}) {
+  const fetchQuotes = deps.getQuotes || getQuotes;
+  const postMessage = deps.sendMessage || sendMessage;
+  const log = deps.log || console.log;
   const dryRun = env.DRY_RUN === 'true';
   if (!dryRun && (!env.WHAPI_TOKEN || !/^\d+@newsletter$/.test(env.WHAPI_CHANNEL_ID || ''))) throw new Error('Set WHAPI_TOKEN and a valid WHAPI_CHANNEL_ID ending in @newsletter');
   const offset = env.PRICE_OFFSET_PERCENT == null || env.PRICE_OFFSET_PERCENT.trim() === '' ? 0 : Number(env.PRICE_OFFSET_PERCENT);
-  const quotes = await getQuotes();
+  const quotes = await fetchQuotes();
   const message = formatMessage(quotes, new Date(), offset);
-  if (dryRun) console.log(message);
+  if (dryRun) log(message);
   else {
-    await sendMessage(message, env.WHAPI_TOKEN, env.WHAPI_CHANNEL_ID);
-    console.log('Whapi accepted the post. Verify delivery in your Channel.');
+    await postMessage(message, env.WHAPI_TOKEN, env.WHAPI_CHANNEL_ID);
+    log('Whapi accepted the post. Verify delivery in your Channel.');
   }
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

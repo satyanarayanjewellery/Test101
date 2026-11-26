@@ -7,6 +7,7 @@ const rows = (base, factors, gst = false) => factors.map(([label, factor]) => `$
 const gold = [['999', 1], ['995', 995 / 999], ['916', 22 / 24], ['750', 18 / 24]];
 const silver = [['999', 1], ['925', .925], ['750', .75]];
 const silverSpot = [['999', 1], ['995', 995 / 999], ['916', .916], ['750', .75]];
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // These seven positional parameters must match the approved body in docs/individual-messages.md.
 export function templateParameters(q, now = new Date(), offset = 0) {
@@ -20,7 +21,7 @@ export function templateParameters(q, now = new Date(), offset = 0) {
     rows(p.silverSpot * 1000, silverSpot),
     `Gold ${q.goldTime}; silver ${q.silverTime}; FX ${q.fxTime}; retail offset ${offset}%`
   ];
-  if (values.some(v => !v || v.length > 1024 || /[\r\n\t]/.test(v))) throw new Error('Template parameter is invalid');
+  if (values.some(v => !v || v.length > 1024 || /[\r\n\t]/.test(v) || /\s{5,}/.test(v))) throw new Error('Template parameter is invalid');
   return values;
 }
 
@@ -55,13 +56,21 @@ export async function sendIndividual({ token, phoneNumberId, version, templateNa
       signal: AbortSignal.timeout(30000)
     });
   } catch { throw new Error('Request failed or timed out; delivery is unknown'); }
-  if (!response.ok) throw new Error(`Meta returned HTTP ${response.status}`);
+  if (!response.ok) {
+    const err = new Error(`Meta returned HTTP ${response.status}`);
+    err.status = response.status;
+    throw err;
+  }
   let result;
   try { result = await response.json(); } catch { throw new Error('Meta response was unreadable; delivery is unknown'); }
   if (result.error || !result.messages?.[0]?.id) throw new Error('Meta did not confirm acceptance; delivery is unknown');
 }
 
-export async function main(env = process.env) {
+export async function main(env = process.env, deps = {}) {
+  const fetchQuotes = deps.getQuotes || getQuotes;
+  const sendOne = deps.sendIndividual || sendIndividual;
+  const log = deps.log || console.log;
+  const delayMs = deps.delayMs ?? 150;
   const dryRun = env.DRY_RUN === 'true';
   let recipients = [];
   if (!dryRun) {
@@ -69,24 +78,34 @@ export async function main(env = process.env) {
     recipients = parseRecipients(env.META_RECIPIENTS_JSON);
   }
   const offset = !env.PRICE_OFFSET_PERCENT?.trim() ? 0 : Number(env.PRICE_OFFSET_PERCENT);
-  const q = await getQuotes();
+  const q = await fetchQuotes();
   const params = templateParameters(q, new Date(), offset);
   if (dryRun) {
-    console.log('Template parameter preview (see docs/individual-messages.md for the full body):');
-    params.forEach((value, index) => console.log(`${index + 1}: ${value}`));
+    log('Template parameter preview (see docs/individual-messages.md for the full body):');
+    params.forEach((value, index) => log(`${index + 1}: ${value}`));
     return;
   }
   let accepted = 0;
-  for (const recipient of recipients) {
+  const rejectedEntries = [];
+  for (let i = 0; i < recipients.length; i++) {
+    const recipient = recipients[i];
+    if (i > 0 && delayMs > 0) await sleep(delayMs);
     try {
-      await sendIndividual({ token: env.META_ACCESS_TOKEN, phoneNumberId: env.META_PHONE_NUMBER_ID, version: env.META_GRAPH_VERSION, templateName: env.META_TEMPLATE_NAME, language: env.META_TEMPLATE_LANGUAGE, recipient, parameters: params });
+      await sendOne({ token: env.META_ACCESS_TOKEN, phoneNumberId: env.META_PHONE_NUMBER_ID, version: env.META_GRAPH_VERSION, templateName: env.META_TEMPLATE_NAME, language: env.META_TEMPLATE_LANGUAGE, recipient, parameters: params });
       accepted++;
     } catch (error) {
       // Never log a phone number, API token, or provider response body.
-      throw new Error(`Stopped at recipient entry ${accepted + 1} after ${accepted} accepted: ${error.message}. Check message statuses before any retry; earlier recipients may have received the update.`);
+      if (error.status === 400) {
+        rejectedEntries.push(i + 1);
+        continue;
+      }
+      throw new Error(`Stopped at recipient entry ${i + 1} after ${accepted} accepted: ${error.message}. Check message statuses before any retry; earlier recipients may have received the update.`);
     }
   }
-  console.log(`Meta accepted ${accepted} requests. Acceptance does not guarantee delivery.`);
+  if (rejectedEntries.length > 0) {
+    throw new Error(`Meta accepted ${accepted} requests, but rejected recipient entries [${rejectedEntries.join(', ')}] with HTTP 400. Verify or remove those entries before the next run.`);
+  }
+  log(`Meta accepted ${accepted} requests. Acceptance does not guarantee delivery.`);
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   main().catch(error => { console.error(`Individual update failed: ${error.message}`); process.exitCode = 1; });

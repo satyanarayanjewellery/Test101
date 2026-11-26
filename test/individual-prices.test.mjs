@@ -1,10 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseRecipients, sendIndividual, templateParameters, validateConfig } from '../bot/individual-prices.mjs';
+import { main, parseRecipients, sendIndividual, templateParameters, validateConfig } from '../bot/individual-prices.mjs';
 
 const now = Date.parse('2026-11-25T03:30:00Z');
 const quote = { gold: 4100, silver: 48, fx: 85, goldTime: '2026-11-25T03:29:00.000Z', silverTime: '2026-11-25T03:29:00.000Z', fxTime: '2026-11-25T00:00:00.000Z' };
 const valid = { phone: '919876543210', opted_in: true, opted_in_at: '2026-11-01T00:00:00Z', consent_source: 'signed form' };
+const valid2 = { phone: '919876543211', opted_in: true, opted_in_at: '2026-11-02T00:00:00Z', consent_source: 'signed form' };
 const config = { META_ACCESS_TOKEN: 'secret', META_PHONE_NUMBER_ID: '12345', META_TEMPLATE_NAME: 'daily_prices', META_TEMPLATE_LANGUAGE: 'en_US', META_GRAPH_VERSION: 'v26.0' };
 
 test('parameters cover all requested prices and remain valid template variables', () => {
@@ -17,7 +18,10 @@ test('parameters cover all requested prices and remain valid template variables'
   assert.match(p[4], /995: ₹/);
   assert.match(p[5], /916: ₹/);
   assert.match(p[6], /2026-11-25T03:29:00.000Z/);
-  assert.ok(p.every(v => v.length <= 1024 && !/[\n\r\t]/.test(v)));
+  assert.ok(p.every(v => v.length <= 1024 && !/[\n\r\t]/.test(v) && !/\s{5,}/.test(v)));
+
+  // Meta rejects >4 consecutive spaces in template text parameters
+  assert.throws(() => templateParameters({ ...quote, goldTime: '2026-11-25     03:29' }, new Date(now)), /Template parameter is invalid/);
 });
 
 test('only unique, explicitly opted-in recipients with consent evidence are accepted', () => {
@@ -49,7 +53,52 @@ test('uses official Meta template payload and reports failures without leaking d
     return { ok: true, json: async () => ({ messages: [{ id: 'wamid.123' }] }) };
   });
   assert.equal(calls, 1);
-  await assert.rejects(sendIndividual(args, async () => ({ ok: false, status: 401 })), /HTTP 401/);
+  await assert.rejects(sendIndividual(args, async () => ({ ok: false, status: 401 })), e => e.status === 401 && /HTTP 401/.test(e.message));
   await assert.rejects(sendIndividual(args, async () => ({ ok: true, json: async () => ({}) })), /did not confirm/);
   await assert.rejects(sendIndividual(args, async () => { throw new Error('secret'); }), e => !e.message.includes('secret') && /unknown/.test(e.message));
+});
+
+test('main() handles DRY_RUN, continues past per-recipient HTTP 400, and stops immediately on 401', async () => {
+  const baseEnv = { ...config, META_RECIPIENTS_JSON: JSON.stringify([valid, valid2]) };
+  const deps = {
+    getQuotes: async () => quote,
+    delayMs: 0,
+    log: () => {}
+  };
+
+  // DRY_RUN prints parameters without calling Meta or leaking phone numbers
+  const dryLogs = [];
+  await main({ ...baseEnv, DRY_RUN: 'true' }, { ...deps, log: line => dryLogs.push(line) });
+  assert.equal(dryLogs.length, 8);
+  assert.ok(dryLogs.every(line => !line.includes(valid.phone)), 'DRY_RUN log does not leak phone numbers');
+
+  // HTTP 400 on first recipient still delivers to second recipient, then throws summary without PII
+  const delivered = [];
+  await assert.rejects(
+    main(baseEnv, {
+      ...deps,
+      sendIndividual: async (args) => sendIndividual(args, async (_url, options) => {
+        const to = JSON.parse(options.body).to;
+        if (to === valid.phone) return { ok: false, status: 400 };
+        delivered.push(to);
+        return { ok: true, json: async () => ({ messages: [{ id: 'wamid.ok' }] }) };
+      })
+    }),
+    err => /accepted 1 requests.*\[1\]/.test(err.message) && !err.message.includes(valid.phone) && !err.message.includes(valid2.phone)
+  );
+  assert.deepEqual(delivered, [valid2.phone]);
+
+  // Systemic HTTP 401 stops immediately without attempting second recipient
+  let callsOn401 = 0;
+  await assert.rejects(
+    main(baseEnv, {
+      ...deps,
+      sendIndividual: async (args) => sendIndividual(args, async () => {
+        callsOn401++;
+        return { ok: false, status: 401 };
+      })
+    }),
+    /HTTP 401/
+  );
+  assert.equal(callsOn401, 1);
 });
