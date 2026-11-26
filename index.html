@@ -116,6 +116,7 @@
     @media (min-width:640px){.shop-hero-sub{font-size:12.5px}}
     .shop-owner-btn{display:inline-flex;align-items:center;gap:0.35rem;padding:0.35rem 0.6rem;border-radius:0.55rem;background:rgba(7,5,6,0.55);border:1px solid rgba(173,153,158,0.28);color:#C9BFC1;font-size:10.5px;font-weight:600}
     .shop-owner-btn:hover{color:#F9EBB8;border-color:rgba(212,175,55,0.5)}
+    .shop-owner-btn.hidden{display:none}
     .shop-trust{display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.9rem}
     .shop-trust-item{display:inline-flex;align-items:center;gap:0.3rem;padding:0.24rem 0.55rem;border-radius:9999px;font-size:10px;font-weight:600;color:#F2DC88;background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.25)}
     .shop-trust-item svg{width:11px;height:11px;flex-shrink:0}
@@ -915,7 +916,7 @@
               <span id="owner-mode-pill" class="hidden inline-flex items-center gap-1.5 text-[10px] font-semibold rounded-full px-2.5 py-1 bg-emerald-500/15 border border-emerald-500/30 text-emerald-300">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Owner Mode
               </span>
-              <button id="btn-owner-access" type="button" class="shop-owner-btn" title="Shop owner upload access">
+              <button id="btn-owner-access" type="button" class="shop-owner-btn hidden" title="Shop owner upload access">
                 <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                 <span id="btn-owner-access-label">Owner</span>
               </button>
@@ -5386,6 +5387,8 @@
     const CATALOG_MEDIA_PREFIX = 'catalog/media/';
     const PRODUCT_STORAGE_KEY = 'satyanarayan-jewellers-products-v1';
     const OWNER_GH_TOKEN_KEY = 'sj_product_owner_gh_token_v1';
+    const OWNER_ACCESS_REVEAL_KEY = 'sj_owner_access_revealed_v1';
+    const OWNER_ACCESS_SECRET = 'owner';
     const MAX_MEDIA_PER_ITEM = 6;
     const MAX_IMAGE_BYTES = 12 * 1024 * 1024;
     const MAX_VIDEO_PUBLISH_BYTES = 20 * 1024 * 1024;
@@ -5399,6 +5402,7 @@
 
     const productOwner = {
       unlocked: false,
+      accessRevealed: false,
       ghConnected: false,
       ghLogin: '',
       ghToken: '',
@@ -5417,6 +5421,11 @@
       bag: [],
       lastRenderedIds: []
     };
+
+    // Restore the per-tab hidden owner-entry reveal (set by the #owner hash / "owner" key sequence)
+    try {
+      productOwner.accessRevealed = sessionStorage.getItem(OWNER_ACCESS_REVEAL_KEY) === '1';
+    } catch { /* storage may be blocked */ }
 
     // --- Storefront bag & wishlist (persisted per device) ---
     function readShopStorage(key, fallback) {
@@ -6186,6 +6195,7 @@
     function updateOwnerStudioUI() {
       const studio = document.getElementById('owner-studio');
       const pill = document.getElementById('owner-mode-pill');
+      const accessBtn = document.getElementById('btn-owner-access');
       const btnLabel = document.getElementById('btn-owner-access-label');
       const syncStatus = document.getElementById('owner-sync-status');
       const pubBtn = document.getElementById('btn-publish-product');
@@ -6196,6 +6206,8 @@
       const isOwnerActive = Boolean(productOwner.unlocked && productOwner.ghConnected);
       if (studio) studio.classList.toggle('hidden', !isOwnerActive);
       if (pill) pill.classList.toggle('hidden', !isOwnerActive);
+      // Owner entry button stays hidden for customers until Owner Mode is live or the secret reveal fired
+      if (accessBtn) accessBtn.classList.toggle('hidden', !(isOwnerActive || productOwner.accessRevealed));
       if (btnLabel) btnLabel.textContent = isOwnerActive ? 'Token Settings' : 'Owner';
       if (pubCount) pubCount.textContent = String(productOwner.publishedItems.length);
       if (draftCount) draftCount.textContent = String(productOwner.localItems.length);
@@ -6206,6 +6218,21 @@
           ? `Connected to live website as @${productOwner.ghLogin} · Uploads publish to all customers.`
           : 'Owner login requires a verified GitHub token.';
       }
+    }
+
+    // --- Hidden owner entry: the Owner button is invisible to customers until revealed ---
+    function revealOwnerAccess() {
+      const firstReveal = !productOwner.accessRevealed;
+      productOwner.accessRevealed = true;
+      try { sessionStorage.setItem(OWNER_ACCESS_REVEAL_KEY, '1'); } catch { /* storage may be blocked */ }
+      updateOwnerStudioUI();
+      if (firstReveal) document.getElementById('btn-owner-access')?.focus();
+    }
+
+    function concealOwnerAccess() {
+      productOwner.accessRevealed = false;
+      try { sessionStorage.removeItem(OWNER_ACCESS_REVEAL_KEY); } catch { /* storage may be blocked */ }
+      updateOwnerStudioUI();
     }
 
     function renderPendingMediaPreviews() {
@@ -6700,6 +6727,31 @@
         if (e.target.id === 'owner-auth-modal') closeOwnerAuthModal();
       });
 
+      // --- Hidden owner entry: reveal only via the #owner URL hash or typing "owner" ---
+      const checkOwnerAccessHash = () => {
+        if ((location.hash || '').toLowerCase() !== '#owner') return;
+        revealOwnerAccess();
+        try { history.replaceState(null, '', `${location.pathname}${location.search}`); } catch { /* ignore */ }
+      };
+      checkOwnerAccessHash();
+      window.addEventListener('hashchange', checkOwnerAccessHash);
+
+      let ownerSecretBuf = '';
+      let ownerSecretAt = 0;
+      document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
+        const el = e.target;
+        if (el && ((typeof el.closest === 'function' && el.closest('input, textarea, select, [contenteditable="true"]')) || el.isContentEditable)) return;
+        if (typeof e.key !== 'string' || e.key.length !== 1) return;
+        const now = Date.now();
+        if (now - ownerSecretAt > 1500) ownerSecretBuf = '';
+        ownerSecretAt = now;
+        ownerSecretBuf = (ownerSecretBuf + e.key.toLowerCase()).slice(-OWNER_ACCESS_SECRET.length);
+        if (ownerSecretBuf !== OWNER_ACCESS_SECRET) return;
+        ownerSecretBuf = '';
+        revealOwnerAccess();
+      });
+
       document.getElementById('btn-toggle-gh-token')?.addEventListener('click', () => {
         const input = document.getElementById('owner-gh-token');
         const btn = document.getElementById('btn-toggle-gh-token');
@@ -6744,6 +6796,7 @@
         productOwner.ghLogin = '';
         productOwner.ghConnected = false;
         productOwner.unlocked = false;
+        concealOwnerAccess();
         closeOwnerAuthModal();
         renderProducts();
         showToast('GitHub token removed and Owner Mode locked.', 'info');
@@ -6751,6 +6804,7 @@
 
       document.getElementById('btn-owner-lock')?.addEventListener('click', () => {
         productOwner.unlocked = false;
+        concealOwnerAccess();
         clearPendingMedia();
         renderProducts();
         showToast('Owner Mode locked. Showing customer gallery view.', 'info');
