@@ -1707,9 +1707,9 @@
     const TROY_OZ_TO_GRAMS = 31.1034768;
     const INDIA_IMPORT_DUTY_MULTIPLIER = 1.15; // 10% BCD + 5% AIDC
     const INDIA_GST_MULTIPLIER = 1.03; // 3% India Bullion GST
-    const GOLD_RETAIL_PREMIUM = 1.0317; // India/Cuttack retail gold board spread over landed parity (matches Groww ex-GST base)
-    const SILVER_MCX_PREMIUM = 1.0802; // India MCX domestic physical premium over landed parity
-    const SILVER_RETAIL_PREMIUM = 1.1462; // Cuttack/India retail bullion spread over MCX spot
+    const GOLD_RETAIL_PREMIUM = 1.0308; // India/Cuttack retail gold board spread over landed parity (calibrated to Nov 2026 Cuttack ex-GST)
+    const SILVER_MCX_PREMIUM = 1.0420; // India MCX domestic physical premium over landed parity (calibrated to Nov 2026 MCX)
+    const SILVER_RETAIL_PREMIUM = 1.1120; // Cuttack/India retail bullion spread over MCX spot (calibrated to Nov 2026 retail ex-GST)
     const FX_REFRESH_MS = 15 * 60 * 1000; // Refresh USD/INR every 15 minutes (daily FX APIs don't tick per second)
     const WS_PROVIDERS = [
       {
