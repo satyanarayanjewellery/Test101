@@ -1,0 +1,14 @@
+{
+  "name": "satyanarayan-jewellers-price-desk",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Zero-build live gold & silver bullion price desk PWA and automated WhatsApp rate bots for Satyanarayan Jewellers, Cuttack.",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "test": "node --test",
+    "bot:channel:dry": "DRY_RUN=true node bot/price-channel.mjs",
+    "bot:individual:dry": "DRY_RUN=true node bot/individual-prices.mjs"
+  }
+}

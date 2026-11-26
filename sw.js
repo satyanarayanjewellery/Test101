@@ -2,8 +2,12 @@
    Caches only the static shell (page, manifest, icons). Live price APIs,
    WebSockets and news feeds always go to the network; the page itself
    keeps its own last-rates cache in localStorage for offline display. */
-const CACHE = 'sj-price-desk-v2';
+const CACHE = 'sj-price-desk-v3';
 const SHELL = ['./index.html', './manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
+
+function isCacheable(res) {
+  return Boolean(res && res.ok && res.type === 'basic');
+}
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -27,14 +31,26 @@ self.addEventListener('fetch', (event) => {
   if (req.mode === 'navigate') {
     event.respondWith(
       fetch(req).then((res) => {
-        const copy = res.clone();
-        caches.open(CACHE).then((cache) => cache.put('./index.html', copy));
-        return res;
+        if (isCacheable(res)) {
+          const copy = res.clone();
+          caches.open(CACHE).then((cache) => cache.put('./index.html', copy));
+          return res;
+        }
+        return caches.match('./index.html').then((cached) => cached || res);
       }).catch(() => caches.match('./index.html'))
     );
     return;
   }
   event.respondWith(
-    caches.match(req).then((hit) => hit || fetch(req))
+    caches.match(req).then((hit) => {
+      const networkFetch = fetch(req).then((res) => {
+        if (isCacheable(res)) {
+          const copy = res.clone();
+          caches.open(CACHE).then((cache) => cache.put(req, copy));
+        }
+        return res;
+      }).catch(() => hit);
+      return hit || networkFetch;
+    })
   );
 });

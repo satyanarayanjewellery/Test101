@@ -1,0 +1,30 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run test suite
+        run: node --test
+      - name: Validate HTML inline scripts syntax
+        run: |
+          node -e "
+            const fs = require('node:fs');
+            const vm = require('node:vm');
+            const html = fs.readFileSync('index.html', 'utf8');
+            const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)];
+            for (const [i, m] of scripts.entries()) {
+              if (/ld\+json/i.test(m[1])) JSON.parse(m[2]);
+              else new vm.Script(m[2], { filename: 'index.html:script-' + i });
+            }
+          "

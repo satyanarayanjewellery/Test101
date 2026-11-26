@@ -22,7 +22,7 @@ Source times (UTC): {{7}}.
 Estimates only, not firm quotes; markets may be closed and prices may be last available. Making charges excluded. Reply STOP to opt out of these updates.
 ```
 
-The seven placeholders receive, in order: India time, gold retail breakdown, silver retail/estimated MCX breakdown, USD/oz plus FX, gold spot INR breakdown, silver spot INR breakdown, and provider timestamps plus retail offset. Each is one line. The bot uses the same estimated Cuttack formulas and price providers described in the [main README](../README.md); a local browser's admin offset is not shared with the bot. Optional `PRICE_OFFSET_PERCENT` must be kept in sync manually.
+The seven placeholders receive, in order: India time, gold retail breakdown, silver retail/estimated MCX breakdown, USD/oz plus FX, gold spot INR breakdown, silver spot INR breakdown, and provider timestamps plus retail offset. Each is one line. The bot uses the same estimated Cuttack formulas and price providers described in the [main README](../README.md). Optional `PRICE_OFFSET_PERCENT` (bounded between `-25` and `25`) can be configured as an Actions variable if you want to apply a retail offset in bot messages.
 
 ## Configure GitHub Actions
 
@@ -43,6 +43,6 @@ The seven placeholders receive, in order: India time, gold retail breakdown, sil
 
 ## Delivery and failures
 
-Meta accepting a request does not mean delivery; monitor message statuses through Meta's tools. The bot stops at the first failure and makes **no automatic retries**. On timeout the result is unknown; earlier recipients may already have received their message. The log reports the failing list position and number accepted without logging phone numbers. Check delivery status before any retry, and if needed run again with only the recipients who still need a message. Rerunning the whole list can create duplicates. No status callback or automatic delivery tracking is included.
+Meta accepting a request does not mean delivery; monitor message statuses through Meta's tools. The bot paces requests slightly between recipients and makes **no automatic retries**. If Meta rejects an individual recipient with HTTP `400` (for example an invalid or non-WhatsApp number), the bot records that entry index, continues sending to the remaining recipients, and exits with a summary error at the end so you can clean up the list. On systemic or ambiguous errors (`401`, `403`, `429`, `5xx`, or timeouts), the bot stops immediately because delivery may be unknown or account-wide. The log reports failing list positions and accepted counts without logging phone numbers. Check delivery status before any retry, and if needed run again with only the recipients who still need a message. Rerunning the whole list can create duplicates. No status callback or automatic delivery tracking is included.
 
 `node --test` runs offline tests. `DRY_RUN=true node bot/individual-prices.mjs` previews using live provider requests (requires network access). Missing, invalid or stale quotes stop a run; timestamps may still represent the last available market price on closed-market days.
