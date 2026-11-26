@@ -1705,11 +1705,11 @@
     // =========================================================================
     const SHOP_GSTIN = '21AFNPP7926E1ZC';
     const TROY_OZ_TO_GRAMS = 31.1034768;
-    const INDIA_IMPORT_DUTY_MULTIPLIER = 1.15; // 10% BCD + 5% AIDC
-    const INDIA_GST_MULTIPLIER = 1.03; // 3% India Bullion GST
-    const GOLD_RETAIL_PREMIUM = 1.0308; // India/Cuttack retail gold board spread over landed parity (calibrated to Nov 2026 Cuttack ex-GST)
-    const SILVER_MCX_PREMIUM = 1.0420; // India MCX domestic physical premium over landed parity (calibrated to Nov 2026 MCX)
-    const SILVER_RETAIL_PREMIUM = 1.1120; // Cuttack/India retail bullion spread over MCX spot (calibrated to Nov 2026 retail ex-GST)
+    const INDIA_IMPORT_DUTY_MULTIPLIER = 1.15; // Official 15% India import duty (10% BCD + 5% AIDC)
+    const INDIA_GST_MULTIPLIER = 1.03; // Official 3% India Bullion GST
+    const GOLD_RETAIL_PREMIUM = 1.0000; // Official landed parity (no arbitrary retail markup)
+    const SILVER_MCX_PREMIUM = 1.0000; // Official landed parity (no arbitrary MCX markup)
+    const SILVER_RETAIL_PREMIUM = 1.0000; // Official landed parity (no arbitrary retail markup)
     const FX_REFRESH_MS = 15 * 60 * 1000; // Refresh USD/INR every 15 minutes (daily FX APIs don't tick per second)
     const WS_PROVIDERS = [
       {
@@ -2038,14 +2038,14 @@
 
       const gold999ExGst = Math.round(gold24ExGstRaw);
       const gold995ExGst = Math.round(gold24ExGstRaw * (995 / 999));
-      const gold916ExGst = Math.round(gold24ExGstRaw * (22 / 24));
-      const gold18ExGst = Math.round(gold24ExGstRaw * (18 / 24));
+      const gold916ExGst = Math.round(gold24ExGstRaw * (916 / 999));
+      const gold18ExGst = Math.round(gold24ExGstRaw * (750 / 999));
 
       const gold24 = Math.round(gold24GstRaw);
       const gold999 = gold24;
       const gold995 = Math.round(gold24GstRaw * (995 / 999));
-      const gold916 = Math.round(gold24GstRaw * (22 / 24));
-      const gold18 = Math.round(gold24GstRaw * (18 / 24));
+      const gold916 = Math.round(gold24GstRaw * (916 / 999));
+      const gold18 = Math.round(gold24GstRaw * (750 / 999));
 
       const silverMCXRaw = silverPerGramLanded * 1000 * SILVER_MCX_PREMIUM;
       const silverMCXGstRaw = silverMCXRaw * INDIA_GST_MULTIPLIER;
@@ -2055,12 +2055,12 @@
       const silver999ExGstRaw = silverMCXRaw * SILVER_RETAIL_PREMIUM * city.factor;
       const silver999GstRaw = silver999ExGstRaw * INDIA_GST_MULTIPLIER;
       const silver999ExGst = Math.round(silver999ExGstRaw);
-      const silver925ExGst = Math.round(silver999ExGstRaw * 0.925);
-      const silver750ExGst = Math.round(silver999ExGstRaw * 0.75);
+      const silver925ExGst = Math.round(silver999ExGstRaw * (925 / 999));
+      const silver750ExGst = Math.round(silver999ExGstRaw * (750 / 999));
 
       const silver999 = Math.round(silver999GstRaw);
-      const silver925 = Math.round(silver999GstRaw * 0.925);
-      const silver750 = Math.round(silver999GstRaw * 0.75);
+      const silver925 = Math.round(silver999GstRaw * (925 / 999));
+      const silver750 = Math.round(silver999GstRaw * (750 / 999));
 
       return {
         spotGold, spotSilver, usdInr,
@@ -2068,22 +2068,22 @@
         gold999ExGst, gold995ExGst, gold916ExGst, gold18ExGst,
         gold999Gram: gold24GstRaw / 10,
         gold995Gram: (gold24GstRaw * (995 / 999)) / 10,
-        gold916Gram: (gold24GstRaw * (22 / 24)) / 10,
-        gold18Gram: (gold24GstRaw * (18 / 24)) / 10,
+        gold916Gram: (gold24GstRaw * (916 / 999)) / 10,
+        gold18Gram: (gold24GstRaw * (750 / 999)) / 10,
         gold999ExGstGram: gold24ExGstRaw / 10,
         gold995ExGstGram: (gold24ExGstRaw * (995 / 999)) / 10,
-        gold916ExGstGram: (gold24ExGstRaw * (22 / 24)) / 10,
-        gold18ExGstGram: (gold24ExGstRaw * (18 / 24)) / 10,
+        gold916ExGstGram: (gold24ExGstRaw * (916 / 999)) / 10,
+        gold18ExGstGram: (gold24ExGstRaw * (750 / 999)) / 10,
         silver999, silver925, silver750, silverMCX, silverMCXGst,
         silver999ExGst, silver925ExGst, silver750ExGst,
         silver999Gram: silver999GstRaw / 1000,
-        silver925Gram: (silver999GstRaw * 0.925) / 1000,
-        silver750Gram: (silver999GstRaw * 0.75) / 1000,
+        silver925Gram: (silver999GstRaw * (925 / 999)) / 1000,
+        silver750Gram: (silver999GstRaw * (750 / 999)) / 1000,
         silverMCXGram: silverMCXRaw / 1000,
         silverMCXGstGram: silverMCXGstRaw / 1000,
         silver999ExGstGram: silver999ExGstRaw / 1000,
-        silver925ExGstGram: (silver999ExGstRaw * 0.925) / 1000,
-        silver750ExGstGram: (silver999ExGstRaw * 0.75) / 1000
+        silver925ExGstGram: (silver999ExGstRaw * (925 / 999)) / 1000,
+        silver750ExGstGram: (silver999ExGstRaw * (750 / 999)) / 1000
       };
     }
 
