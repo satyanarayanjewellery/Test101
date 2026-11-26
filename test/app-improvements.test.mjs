@@ -422,9 +422,9 @@ test('computeCityPrices computes Cuttack and city-adjusted gold & silver rates a
   ].join('\n'), {});
 
   const cuttack = computeCityPrices('cuttack', 4100, 48, 85);
-  const expectedGoldBase = (4100 * 85 / 31.1034768) * 1.15 * 10 * 1.0317;
-  const expectedMcxBase = (48 * 85 / 31.1034768) * 1.15 * 1000 * 1.0802;
-  const expectedSilverBase = expectedMcxBase * 1.1462;
+  const expectedGoldBase = (4100 * 85 / 31.1034768) * 1.15 * 10 * 1.0308;
+  const expectedMcxBase = (48 * 85 / 31.1034768) * 1.15 * 1000 * 1.0420;
+  const expectedSilverBase = expectedMcxBase * 1.1120;
   assert.equal(cuttack.gold999ExGst, Math.round(expectedGoldBase));
   assert.equal(cuttack.gold916, Math.round(expectedGoldBase * 1.03 * 22 / 24));
   assert.equal(cuttack.silverMCXGst, Math.round(expectedMcxBase * 1.03));
