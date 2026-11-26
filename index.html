@@ -104,6 +104,169 @@
     .jewel-badge-overlay{position:absolute;top:0.5rem;left:0.5rem;z-index:2;display:inline-flex;align-items:center;gap:0.25rem;padding:0.15rem 0.5rem;border-radius:9999px;font-size:10px;font-weight:600;background:rgba(7,5,6,0.78);border:1px solid rgba(212,175,55,0.35);color:#F9EBB8}
     .jewel-expand-btn{position:absolute;top:0.5rem;right:0.5rem;z-index:2;padding:0.3rem 0.55rem;border-radius:0.5rem;font-size:10px;font-weight:600;background:rgba(7,5,6,0.78);border:1px solid rgba(255,255,255,0.18);color:#F7F3F4}
     .jewel-expand-btn:hover{border-color:#E5C55B;color:#F9EBB8}
+
+    /* --- Storefront / e-commerce product section --- */
+    .shop-hero{position:relative;overflow:hidden;border-radius:1.15rem;padding:1.15rem;background:linear-gradient(152deg,rgba(58,32,16,0.85) 0%,rgba(40,15,22,0.92) 46%,rgba(11,7,9,0.99) 100%);border:1px solid rgba(212,175,55,0.32);box-shadow:0 18px 44px -26px rgba(0,0,0,0.95),inset 0 1px 0 rgba(255,255,255,0.05)}
+    @media (min-width:640px){.shop-hero{padding:1.6rem}}
+    .shop-hero-glow{position:absolute;top:-42%;right:-18%;width:22rem;height:22rem;border-radius:9999px;background:radial-gradient(circle,rgba(229,197,91,0.24) 0%,rgba(229,197,91,0) 68%);pointer-events:none}
+    .shop-eyebrow{margin:0 0 0.35rem;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;font-weight:700;color:#E5C55B}
+    .shop-hero-title{margin:0;font-family:Georgia,'Times New Roman',serif;font-size:1.6rem;line-height:1.15;font-weight:700;color:#FFF8E6;letter-spacing:-0.01em}
+    @media (min-width:640px){.shop-hero-title{font-size:2.05rem}}
+    .shop-hero-sub{margin:0.45rem 0 0;max-width:38rem;font-size:11.5px;line-height:1.65;color:rgba(236,229,231,0.72)}
+    @media (min-width:640px){.shop-hero-sub{font-size:12.5px}}
+    .shop-owner-btn{display:inline-flex;align-items:center;gap:0.35rem;padding:0.35rem 0.6rem;border-radius:0.55rem;background:rgba(7,5,6,0.55);border:1px solid rgba(173,153,158,0.28);color:#C9BFC1;font-size:10.5px;font-weight:600}
+    .shop-owner-btn:hover{color:#F9EBB8;border-color:rgba(212,175,55,0.5)}
+    .shop-trust{display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.9rem}
+    .shop-trust-item{display:inline-flex;align-items:center;gap:0.3rem;padding:0.24rem 0.55rem;border-radius:9999px;font-size:10px;font-weight:600;color:#F2DC88;background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.25)}
+    .shop-trust-item svg{width:11px;height:11px;flex-shrink:0}
+    .shop-hero-ctas{display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:1rem}
+    .shop-btn-primary,.shop-btn-ghost{display:inline-flex;align-items:center;justify-content:center;gap:0.4rem;padding:0.6rem 0.95rem;border-radius:0.65rem;font-size:11.5px;font-weight:700;border:1px solid transparent}
+    .shop-btn-primary svg,.shop-btn-ghost svg{width:14px;height:14px}
+    .shop-btn-primary{background:linear-gradient(135deg,#F2DC88,#D4AF37);color:#1A1005;box-shadow:0 8px 20px -10px rgba(212,175,55,0.8)}
+    .shop-btn-primary:hover{background:linear-gradient(135deg,#F9EBB8,#E5C55B)}
+    .shop-btn-ghost{background:rgba(7,5,6,0.6);border-color:rgba(212,175,55,0.35);color:#F2DC88}
+    .shop-btn-ghost:hover{border-color:#E5C55B;background:rgba(212,175,55,0.12)}
+    .shop-cart-pill{display:inline-flex;align-items:center;justify-content:center;min-width:1.05rem;height:1.05rem;padding:0 0.25rem;border-radius:9999px;background:#F2DC88;color:#1A1005;font-size:9.5px;font-weight:800;line-height:1}
+
+    .shop-toolbar{padding:0.85rem 0.9rem;border-radius:1rem;display:flex;flex-direction:column;gap:0.7rem}
+    .shop-cats{display:flex;gap:0.35rem;overflow-x:auto;padding-bottom:0.15rem;scrollbar-width:none}
+    .shop-cats::-webkit-scrollbar{display:none}
+    .shop-cats .prod-cat-btn{flex-shrink:0;display:inline-flex;align-items:center;gap:0.28rem;padding:0.32rem 0.65rem;border-radius:0.5rem;font-size:11px;font-weight:600;white-space:nowrap;background:rgba(7,5,6,0.7);border:1px solid rgba(58,35,42,0.9);color:#C9BFC1}
+    .shop-cats .prod-cat-btn:hover{color:#FFF8E6;border-color:rgba(212,175,55,0.45)}
+    .shop-cats .prod-cat-btn.is-active{background:linear-gradient(135deg,#F2DC88,#D4AF37);border-color:#E5C55B;color:#1A1005;font-weight:800}
+    .prod-cat-btn svg{width:12px;height:12px}
+    .shop-pill-count{display:inline-flex;align-items:center;justify-content:center;min-width:0.95rem;height:0.95rem;padding:0 0.22rem;border-radius:9999px;font-size:9px;font-weight:800;background:rgba(255,255,255,0.14)}
+    .prod-cat-btn.is-active .shop-pill-count{background:rgba(26,16,5,0.22)}
+    .shop-toolbar-row{display:flex;align-items:center;gap:0.45rem}
+    .shop-search{position:relative;flex:1;min-width:0;display:flex;align-items:center;gap:0.4rem;padding:0 0.6rem;border-radius:0.6rem;background:rgba(7,5,6,0.85);border:1px solid rgba(58,35,42,0.95)}
+    .shop-search:focus-within{border-color:#D4AF37}
+    .shop-search svg{width:13px;height:13px;color:#8A7B7E;flex-shrink:0}
+    .shop-search input{flex:1;min-width:0;background:transparent;border:0;outline:none;padding:0.55rem 0;font-size:12px;color:#F7F3F4}
+    .shop-search input::placeholder{color:#7E6F72}
+    .shop-search-clear{flex-shrink:0;width:1.1rem;height:1.1rem;border-radius:9999px;background:rgba(212,175,55,0.16);color:#F2DC88;font-size:9px;display:flex;align-items:center;justify-content:center}
+    .shop-sort{flex-shrink:0;max-width:8.2rem;padding:0.55rem 0.45rem;border-radius:0.6rem;background:rgba(7,5,6,0.85);border:1px solid rgba(58,35,42,0.95);color:#E6DEE0;font-size:11px;font-weight:600;outline:none}
+    .shop-sort:focus{border-color:#D4AF37}
+    .shop-bag-btn{position:relative;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;width:2.1rem;height:2.1rem;border-radius:0.6rem;background:rgba(212,175,55,0.12);border:1px solid rgba(212,175,55,0.32);color:#F2DC88}
+    .shop-bag-btn svg{width:15px;height:15px}
+    .shop-bag-count{position:absolute;top:-0.3rem;right:-0.3rem;min-width:1.02rem;height:1.02rem;padding:0 0.2rem;border-radius:9999px;background:#F2DC88;color:#1A1005;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;border:1px solid #090607}
+    .shop-results-row{display:flex;align-items:center;justify-content:space-between;gap:0.5rem}
+    .shop-results-count{font-size:10.5px;color:#9A8B8E;margin:0}
+    .shop-results-count strong{color:#F2DC88}
+    .shop-clear-btn{font-size:10.5px;font-weight:700;color:#F2DC88;text-decoration:underline;text-underline-offset:2px}
+
+    .shop-gallery{display:flex;flex-direction:column;gap:0.7rem}
+    .shop-gallery-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:0.35rem;padding:0 0.15rem}
+    .shop-gallery-title{margin:0;font-family:Georgia,'Times New Roman',serif;font-size:1.05rem;font-weight:700;color:#FFF8E6}
+    .shop-gallery-sub{font-size:10px;color:#9A8B8E;font-weight:600;letter-spacing:0.02em}
+    .shop-gallery-foot{margin:0.15rem 0 0;font-size:10px;line-height:1.6;color:#8A7B7E;text-align:center;padding:0 0.5rem}
+    .shop-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0.65rem}
+    @media (min-width:640px){.shop-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:0.9rem}}
+    @media (min-width:900px){.shop-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    .shop-card{position:relative;display:flex;flex-direction:column;overflow:hidden;border-radius:0.9rem;background:linear-gradient(172deg,rgba(26,15,19,0.97) 0%,rgba(11,7,9,0.99) 100%);border:1px solid rgba(212,175,55,0.16);transition:border-color 190ms ease,transform 190ms ease,box-shadow 190ms ease}
+    .shop-card:hover{border-color:rgba(212,175,55,0.45);box-shadow:0 16px 34px -22px rgba(0,0,0,0.95)}
+    .shop-card-media{position:relative;aspect-ratio:1/1;background:#070506;overflow:hidden}
+    .shop-card-media img,.shop-card-media video{width:100%;height:100%;object-fit:cover;display:block;transition:transform 420ms cubic-bezier(0.22,1,0.36,1)}
+    .shop-card:hover .shop-card-media img{transform:scale(1.045)}
+    .shop-badge{position:absolute;top:0.4rem;left:0.4rem;z-index:2;display:inline-flex;align-items:center;gap:0.2rem;padding:0.13rem 0.42rem;border-radius:9999px;font-size:8.5px;font-weight:800;letter-spacing:0.04em;text-transform:uppercase;background:rgba(7,5,6,0.8);border:1px solid rgba(212,175,55,0.38);color:#F9EBB8;backdrop-filter:blur(4px)}
+    .shop-badge-video{background:rgba(212,175,55,0.9);color:#1A1005;border-color:#F2DC88}
+    .shop-wish{position:absolute;top:0.35rem;right:0.35rem;z-index:3;width:1.7rem;height:1.7rem;border-radius:9999px;display:flex;align-items:center;justify-content:center;background:rgba(7,5,6,0.72);border:1px solid rgba(255,255,255,0.2);color:#E6DEE0;backdrop-filter:blur(4px)}
+    .shop-wish svg{width:13px;height:13px}
+    .shop-wish:hover{border-color:#E5C55B;color:#F9EBB8}
+    .shop-wish.is-saved{color:#FB7185;border-color:rgba(251,113,133,0.6);background:rgba(251,113,133,0.16)}
+    .shop-wish.is-saved svg{fill:currentColor}
+    .shop-zoom{position:absolute;bottom:0.4rem;right:0.4rem;z-index:2;padding:0.18rem 0.42rem;border-radius:0.4rem;font-size:9px;font-weight:700;background:rgba(7,5,6,0.76);border:1px solid rgba(255,255,255,0.18);color:#F7F3F4;opacity:0;transition:opacity 180ms ease}
+    .shop-card:hover .shop-zoom,.shop-zoom:focus-visible{opacity:1}
+    @media (hover:none){.shop-zoom{opacity:1;font-size:8.5px;padding:0.16rem 0.38rem}}
+    .shop-dots{position:absolute;bottom:0.42rem;left:50%;transform:translateX(-50%);z-index:2;display:flex;gap:0.18rem}
+    .shop-dot{width:0.55rem;height:0.18rem;border-radius:9999px;background:rgba(255,255,255,0.42);border:0;padding:0}
+    .shop-dot.is-active{background:#F2DC88;width:0.9rem}
+    .shop-card-body{display:flex;flex-direction:column;flex:1;padding:0.55rem 0.6rem 0.6rem;gap:0.28rem}
+    .shop-cat-tag{font-size:8.5px;font-weight:800;letter-spacing:0.09em;text-transform:uppercase;color:#C9A94E}
+    .shop-name{font-size:11.5px;font-weight:700;color:#FFF8E6;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.1em}
+    @media (min-width:640px){.shop-name{font-size:12.5px}}
+    .shop-specs{display:flex;flex-wrap:wrap;gap:0.22rem;margin-top:0.05rem}
+    .shop-spec{font-size:8.5px;font-weight:600;padding:0.1rem 0.32rem;border-radius:0.28rem;background:rgba(58,35,42,0.55);color:#C4B8BA;white-space:nowrap}
+    .shop-price{margin-top:auto;display:flex;flex-direction:column;gap:0.02rem;padding-top:0.3rem}
+    .shop-price-now{font-size:13px;font-weight:800;color:#F2DC88;font-variant-numeric:tabular-nums;line-height:1.2}
+    .shop-price-now .shop-price-unit{font-size:8.5px;font-weight:600;color:#9A8B8E;margin-left:0.15rem}
+    .shop-price-note{font-size:9px;color:#8A7B7E;font-weight:600}
+    .shop-price-request{font-size:11px;font-weight:700;color:#F9EBB8;background:rgba(212,175,55,0.14);border:1px dashed rgba(212,175,55,0.4);border-radius:0.4rem;padding:0.24rem 0.4rem;display:inline-flex;align-items:center;gap:0.25rem;width:100%;justify-content:center}
+    .shop-price-request svg{width:11px;height:11px;flex-shrink:0}
+    .shop-card-actions{display:flex;align-items:center;gap:0.3rem;margin-top:0.4rem}
+    .shop-add-btn{flex:1;min-width:0;display:inline-flex;align-items:center;justify-content:center;gap:0.25rem;padding:0.42rem 0.4rem;border-radius:0.5rem;background:linear-gradient(135deg,#F2DC88,#D4AF37);color:#1A1005;font-size:10px;font-weight:800;letter-spacing:0.01em}
+    .shop-add-btn:hover{background:linear-gradient(135deg,#F9EBB8,#E5C55B)}
+    .shop-add-btn svg{width:11px;height:11px;flex-shrink:0}
+    .shop-add-btn.is-added{background:rgba(16,185,129,0.22);border:1px solid rgba(16,185,129,0.5);color:#A7F3D0}
+    .shop-quick-btn{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;width:1.85rem;height:1.85rem;border-radius:0.5rem;background:rgba(16,185,129,0.14);border:1px solid rgba(16,185,129,0.35);color:#6EE7B7}
+    .shop-quick-btn svg{width:13px;height:13px}
+    .shop-quick-btn:hover{background:rgba(16,185,129,0.24)}
+    .shop-admin-row{display:flex;align-items:center;justify-content:space-between;gap:0.35rem;margin-top:0.4rem;padding-top:0.4rem;border-top:1px solid rgba(58,35,42,0.85)}
+    .shop-admin-row span{font-size:8.5px;font-weight:700;padding:0.1rem 0.35rem;border-radius:9999px}
+    .shop-admin-live{background:rgba(16,185,129,0.15);color:#6EE7B7;border:1px solid rgba(16,185,129,0.3)}
+    .shop-admin-draft{background:rgba(212,175,55,0.15);color:#F2DC88;border:1px solid rgba(212,175,55,0.3)}
+    .shop-admin-row .shop-admin-btns{display:flex;gap:0.25rem}
+    .shop-admin-row button{font-size:8.5px;font-weight:700;padding:0.16rem 0.36rem;border-radius:0.32rem}
+    .shop-empty{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;gap:0.5rem;text-align:center;padding:2.2rem 1rem}
+    .shop-empty svg{width:2.2rem;height:2.2rem;color:rgba(212,175,55,0.45)}
+    .shop-empty h4{margin:0;font-size:12.5px;font-weight:700;color:#FFF8E6}
+    .shop-empty p{margin:0;font-size:11px;line-height:1.6;color:#9A8B8E;max-width:24rem}
+    .shop-skeleton-card{pointer-events:none}
+    .shop-skeleton-media{aspect-ratio:1/1;background:linear-gradient(100deg,rgba(38,24,29,0.9) 0%,rgba(58,35,42,0.72) 50%,rgba(38,24,29,0.9) 100%);background-size:200% 100%;animation:shopShimmer 1.4s infinite linear}
+    .shop-skeleton-body{padding:0.55rem 0.6rem 0.6rem;display:flex;flex-direction:column;gap:0.35rem}
+    .shop-skeleton-line{height:0.5rem;border-radius:0.3rem;background:rgba(58,35,42,0.7)}
+    .shop-skeleton-line.short{width:65%}
+    .shop-skeleton-line.tiny{width:42%;height:0.42rem;margin-top:0.15rem}
+    @keyframes shopShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+    /* Shopping bag drawer */
+    .shop-cart-shell{position:fixed;inset:0;z-index:85;display:flex;justify-content:flex-end}
+    .shop-cart-shell.hidden{display:none}
+    .shop-cart-backdrop{position:absolute;inset:0;background:rgba(4,2,3,0.75);backdrop-filter:blur(3px)}
+    .shop-cart-panel{position:relative;width:100%;max-width:23rem;height:100%;display:flex;flex-direction:column;background:linear-gradient(180deg,#140D10 0%,#080506 100%);border-left:1px solid rgba(212,175,55,0.28);box-shadow:-22px 0 60px rgba(0,0,0,0.8);animation:shopSlideIn 240ms cubic-bezier(0.22,1,0.36,1)}
+    @keyframes shopSlideIn{from{transform:translateX(14px);opacity:0.4}to{transform:translateX(0);opacity:1}}
+    .shop-cart-head{display:flex;align-items:flex-start;justify-content:space-between;gap:0.6rem;padding:0.9rem 0.95rem 0.7rem;border-bottom:1px solid rgba(58,35,42,0.9)}
+    .shop-cart-head h3{margin:0;font-family:Georgia,'Times New Roman',serif;font-size:1rem;font-weight:700;color:#FFF8E6}
+    .shop-cart-head p{margin:0.15rem 0 0;font-size:10px;line-height:1.5;color:#9A8B8E}
+    .shop-cart-close{flex-shrink:0;width:1.6rem;height:1.6rem;border-radius:0.45rem;background:rgba(58,35,42,0.7);border:1px solid rgba(173,153,158,0.25);color:#E6DEE0;font-size:11px;display:flex;align-items:center;justify-content:center}
+    .shop-cart-items{flex:1;overflow-y:auto;padding:0.7rem 0.8rem;display:flex;flex-direction:column;gap:0.5rem}
+    .shop-cart-item{display:flex;gap:0.55rem;padding:0.5rem;border-radius:0.65rem;background:rgba(26,15,19,0.9);border:1px solid rgba(58,35,42,0.9)}
+    .shop-cart-thumb{width:3.1rem;height:3.1rem;flex-shrink:0;border-radius:0.5rem;overflow:hidden;background:#070506;border:1px solid rgba(58,35,42,0.9)}
+    .shop-cart-thumb img{width:100%;height:100%;object-fit:cover}
+    .shop-cart-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:0.1rem}
+    .shop-cart-info h4{margin:0;font-size:11px;font-weight:700;color:#FFF8E6;line-height:1.3}
+    .shop-cart-info p{margin:0;font-size:9.5px;color:#9A8B8E}
+    .shop-cart-price{font-size:11px;font-weight:800;color:#F2DC88;font-variant-numeric:tabular-nums;margin-top:0.1rem}
+    .shop-cart-controls{display:flex;align-items:center;gap:0.3rem;margin-top:0.25rem}
+    .shop-qty{display:inline-flex;align-items:center;border-radius:0.4rem;border:1px solid rgba(173,153,158,0.3);overflow:hidden}
+    .shop-qty button{width:1.25rem;height:1.25rem;font-size:11px;font-weight:800;color:#F2DC88;background:rgba(7,5,6,0.6)}
+    .shop-qty span{min-width:1.15rem;text-align:center;font-size:10px;font-weight:700;color:#F7F3F4;font-variant-numeric:tabular-nums}
+    .shop-remove{font-size:9.5px;font-weight:700;color:#FB7185;margin-left:auto}
+    .shop-cart-empty{display:flex;flex-direction:column;align-items:center;gap:0.4rem;text-align:center;padding:2.4rem 1rem;color:#9A8B8E}
+    .shop-cart-empty svg{width:2rem;height:2rem;color:rgba(212,175,55,0.4)}
+    .shop-cart-empty p{margin:0;font-size:11px;line-height:1.6}
+    .shop-cart-foot{padding:0.7rem 0.85rem 0.9rem;border-top:1px solid rgba(58,35,42,0.9);display:flex;flex-direction:column;gap:0.45rem;background:rgba(7,5,6,0.55)}
+    .shop-cart-total-row{display:flex;align-items:baseline;justify-content:space-between;font-size:11px;font-weight:600;color:#C4B8BA}
+    .shop-cart-total-row strong{font-size:15px;font-weight:800;color:#F2DC88;font-variant-numeric:tabular-nums}
+    .shop-cart-note{margin:0;font-size:9.5px;line-height:1.5;color:#8A7B7E}
+    .shop-btn-whatsapp{display:inline-flex;align-items:center;justify-content:center;gap:0.35rem;padding:0.6rem;border-radius:0.6rem;background:rgba(16,185,129,0.18);border:1px solid rgba(16,185,129,0.45);color:#A7F3D0;font-size:11.5px;font-weight:800}
+    .shop-btn-whatsapp svg{width:14px;height:14px}
+    .shop-btn-whatsapp:hover{background:rgba(16,185,129,0.28)}
+    .shop-btn-whatsapp:disabled{opacity:0.45;cursor:not-allowed}
+    .shop-cart-clear{font-size:10px;font-weight:700;color:#9A8B8E;text-align:center;text-decoration:underline;text-underline-offset:2px}
+    .shop-toast-note{font-size:10px}
+    @keyframes shopBump{0%{transform:scale(1)}45%{transform:scale(1.14)}100%{transform:scale(1)}}
+    .shop-bump{animation:shopBump 320ms cubic-bezier(0.22,1,0.36,1)}
+    .shop-lightbox-actions{display:flex;flex-wrap:wrap;align-items:center;gap:0.5rem;padding:0.55rem 0.15rem 0.1rem;border-top:1px solid rgba(58,35,42,0.9)}
+    .shop-lightbox-price{flex:1;min-width:7rem;display:flex;flex-direction:column;gap:0.05rem}
+    .shop-lightbox-price strong{font-size:15px;font-weight:800;color:#F2DC88;font-variant-numeric:tabular-nums}
+    .shop-lightbox-price span{font-size:9.5px;color:#9A8B8E}
+    .shop-lightbox-actions .shop-add-btn{flex:0 1 auto;padding:0.5rem 0.85rem;font-size:11px}
+    .shop-lightbox-actions .shop-wish{position:static;width:2.1rem;height:2.1rem}
+    @media (max-width:420px){
+      .shop-hero-title{font-size:1.4rem}
+      .shop-name{font-size:11px}
+      .shop-add-btn{font-size:9.5px;padding:0.4rem 0.3rem}
+    }
     .space-y-3 > :not([hidden]) ~ :not([hidden]){margin-top:0.75rem}.w-7{width:1.75rem}.ml-auto{margin-left:auto}.hover\:bg-rose-500\/10:hover{background-color:rgba(244,63,94,0.1)}@media (min-width:640px){.sm\:col-span-5{grid-column:span 5/span 5}}
     textarea{font-family:inherit;font-size:100%;color:inherit}
   
@@ -209,7 +372,7 @@
           <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg> Rates
         </button>
         <button data-app-view="products" type="button" class="app-nav-desktop flex-1 inline-flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-medium transition-colors duration-150 text-slate-400 hover:text-white border border-transparent hover:bg-slate-900/70">
-          <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m4.3 7.5 7.7 4.4 7.7-4.4M12 21v-9.1"/></svg> Products
+          <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m4.3 7.5 7.7 4.4 7.7-4.4M12 21v-9.1"/></svg> Shop
         </button>
         <button data-app-view="tools" type="button" class="app-nav-desktop relative flex-1 inline-flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-medium transition-colors duration-150 text-slate-400 hover:text-white border border-transparent hover:bg-slate-900/70">
           <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg> Tools
@@ -738,34 +901,86 @@
 
     <!-- VIEW: JEWELLERY COLLECTION SHOWCASE (OWNER-ONLY UPLOAD STUDIO) -->
     <div id="view-products" class="app-view hidden flex flex-col gap-4">
-      <section class="glass-card rounded-2xl p-4 sm:p-5">
-        <div class="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h2 class="text-base sm:text-lg font-semibold text-white">Jewellery Collection</h2>
-            <p class="text-xs text-slate-400 mt-1">Explore handcrafted gold, silver &amp; diamond pieces with photos and videos.</p>
+      <!-- STOREFRONT HERO -->
+      <section class="shop-hero" aria-label="Shop introduction">
+        <div class="shop-hero-glow" aria-hidden="true"></div>
+        <div class="relative">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div class="min-w-0">
+              <p class="shop-eyebrow">Satyanarayan Jewellers &middot; Cuttack</p>
+              <h2 class="shop-hero-title">The Jewellery Shop</h2>
+              <p class="shop-hero-sub">Handcrafted gold, silver, diamond &amp; gemstone pieces, hallmarked and weighed in front of you. Transparent pricing, GST invoice, showroom pickup or insured delivery across India.</p>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <span id="owner-mode-pill" class="hidden inline-flex items-center gap-1.5 text-[10px] font-semibold rounded-full px-2.5 py-1 bg-emerald-500/15 border border-emerald-500/30 text-emerald-300">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Owner Mode
+              </span>
+              <button id="btn-owner-access" type="button" class="shop-owner-btn" title="Shop owner upload access">
+                <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <span id="btn-owner-access-label">Owner</span>
+              </button>
+            </div>
           </div>
-          <div class="flex items-center gap-2">
-            <span id="owner-mode-pill" class="hidden inline-flex items-center gap-1.5 text-[10px] font-semibold rounded-full px-2.5 py-1 bg-emerald-500/15 border border-emerald-500/30 text-emerald-300">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Owner Mode
-            </span>
-            <button id="btn-owner-access" type="button" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-900/80 hover:bg-slate-800 border border-slate-700 text-[11px] font-medium text-slate-300 hover:text-amber-200 transition-colors duration-150" title="Shop owner upload access">
-              <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-              <span id="btn-owner-access-label">Owner</span>
+
+          <div class="shop-trust" aria-label="Shop assurances">
+            <span class="shop-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 12 2 2 4-4"/><path d="M12 3 4.5 6.5v5c0 4.2 3 8.1 7.5 9.5 4.5-1.4 7.5-5.3 7.5-9.5v-5L12 3Z"/></svg> BIS Hallmarked</span>
+            <span class="shop-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg> HUID Certified</span>
+            <span class="shop-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 2v20l3-2 3 2 3-2 3 2 3-2V2l-3 2-3-2-3 2-3-2-3 2Z"/><path d="M8 8h8M8 12h8M8 16h4"/></svg> GST Invoice</span>
+            <span class="shop-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg> Cuttack Showroom</span>
+          </div>
+
+          <div class="shop-hero-ctas">
+            <button type="button" id="btn-shop-now" class="shop-btn-primary">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+              Shop the collection
+            </button>
+            <button type="button" id="btn-open-cart" class="shop-btn-ghost" aria-haspopup="dialog" aria-controls="shop-cart">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+              My Bag <span id="cart-count-pill" class="shop-cart-pill hidden">0</span>
             </button>
           </div>
         </div>
+      </section>
 
-        <div class="flex flex-wrap items-center justify-between gap-2.5 mt-4">
-          <div id="product-category-pills" class="flex flex-wrap gap-1.5" role="group" aria-label="Filter jewellery by category">
-            <button type="button" data-prod-cat="all" class="prod-cat-btn px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-amber-500 text-slate-950">All</button>
-            <button type="button" data-prod-cat="Gold" class="prod-cat-btn px-2.5 py-1 rounded-lg text-[11px] font-medium bg-slate-900/90 border border-slate-800 text-slate-300 hover:text-white">Gold</button>
-            <button type="button" data-prod-cat="Silver" class="prod-cat-btn px-2.5 py-1 rounded-lg text-[11px] font-medium bg-slate-900/90 border border-slate-800 text-slate-300 hover:text-white">Silver</button>
-            <button type="button" data-prod-cat="Diamond" class="prod-cat-btn px-2.5 py-1 rounded-lg text-[11px] font-medium bg-slate-900/90 border border-slate-800 text-slate-300 hover:text-white">Diamond</button>
-            <button type="button" data-prod-cat="Platinum" class="prod-cat-btn px-2.5 py-1 rounded-lg text-[11px] font-medium bg-slate-900/90 border border-slate-800 text-slate-300 hover:text-white">Platinum</button>
-            <button type="button" data-prod-cat="Gemstone" class="prod-cat-btn px-2.5 py-1 rounded-lg text-[11px] font-medium bg-slate-900/90 border border-slate-800 text-slate-300 hover:text-white">Gemstone</button>
-            <button type="button" data-prod-cat="Other" class="prod-cat-btn px-2.5 py-1 rounded-lg text-[11px] font-medium bg-slate-900/90 border border-slate-800 text-slate-300 hover:text-white">Other</button>
+      <!-- FILTER / SORT TOOLBAR -->
+      <section class="glass-card shop-toolbar" aria-label="Filter and sort jewellery">
+        <div id="product-category-pills" class="shop-cats" role="group" aria-label="Filter jewellery by category">
+          <button type="button" data-prod-cat="all" class="prod-cat-btn is-active" aria-pressed="true">All</button>
+          <button type="button" data-prod-cat="Gold" class="prod-cat-btn">Gold</button>
+          <button type="button" data-prod-cat="Silver" class="prod-cat-btn">Silver</button>
+          <button type="button" data-prod-cat="Diamond" class="prod-cat-btn">Diamond</button>
+          <button type="button" data-prod-cat="Platinum" class="prod-cat-btn">Platinum</button>
+          <button type="button" data-prod-cat="Gemstone" class="prod-cat-btn">Gemstone</button>
+          <button type="button" data-prod-cat="Other" class="prod-cat-btn">Other</button>
+          <button type="button" data-prod-cat="saved" class="prod-cat-btn prod-cat-saved">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+            Saved <span id="saved-count-pill" class="shop-pill-count">0</span>
+          </button>
+        </div>
+
+        <div class="shop-toolbar-row">
+          <div class="shop-search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <label for="product-search" class="sr-only">Search jewellery</label>
+            <input id="product-search" type="search" placeholder="Search name, purity, code…" autocomplete="off" />
+            <button type="button" id="btn-clear-search" class="shop-search-clear hidden" aria-label="Clear search">✕</button>
           </div>
-          <input id="product-search" type="search" placeholder="Search jewellery, purity or code..." class="w-full sm:w-64 rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" />
+          <label for="product-sort" class="sr-only">Sort jewellery</label>
+          <select id="product-sort" class="shop-sort">
+            <option value="new">Newest first</option>
+            <option value="price-asc">Price: low to high</option>
+            <option value="price-desc">Price: high to low</option>
+            <option value="name">Name A–Z</option>
+          </select>
+          <button type="button" id="btn-open-cart-inline" class="shop-bag-btn" aria-label="Open shopping bag" aria-haspopup="dialog" aria-controls="shop-cart">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            <span id="cart-count-inline" class="shop-bag-count">0</span>
+          </button>
+        </div>
+
+        <div class="shop-results-row">
+          <p id="product-results-count" class="shop-results-count">Loading collection…</p>
+          <button type="button" id="btn-clear-filters" class="shop-clear-btn hidden">Clear filters</button>
         </div>
       </section>
 
@@ -836,11 +1051,21 @@
         </form>
       </section>
 
-      <!-- CUSTOMER SHOWCASE GALLERY -->
-      <section class="glass-card rounded-2xl p-4 sm:p-5">
-        <div id="product-list" class="jewel-grid">
-          <div class="text-center text-xs text-slate-400 py-8" style="grid-column:1/-1">Loading jewellery collection...</div>
+      <!-- CUSTOMER STOREFRONT GRID -->
+      <section class="shop-gallery" aria-label="Jewellery collection">
+        <div class="shop-gallery-head">
+          <h3 class="shop-gallery-title">Our Collection</h3>
+          <span class="shop-gallery-sub">Every piece is BIS hallmarked &amp; HUID certified</span>
         </div>
+        <div id="product-list" class="shop-grid">
+          <div class="shop-card shop-skeleton-card" aria-hidden="true"><div class="shop-skeleton-media"></div><div class="shop-skeleton-body"><span class="shop-skeleton-line"></span><span class="shop-skeleton-line short"></span><span class="shop-skeleton-line tiny"></span></div></div>
+          <div class="shop-card shop-skeleton-card" aria-hidden="true"><div class="shop-skeleton-media"></div><div class="shop-skeleton-body"><span class="shop-skeleton-line"></span><span class="shop-skeleton-line short"></span><span class="shop-skeleton-line tiny"></span></div></div>
+          <div class="shop-card shop-skeleton-card" aria-hidden="true"><div class="shop-skeleton-media"></div><div class="shop-skeleton-body"><span class="shop-skeleton-line"></span><span class="shop-skeleton-line short"></span><span class="shop-skeleton-line tiny"></span></div></div>
+          <div class="shop-card shop-skeleton-card" aria-hidden="true"><div class="shop-skeleton-media"></div><div class="shop-skeleton-body"><span class="shop-skeleton-line"></span><span class="shop-skeleton-line short"></span><span class="shop-skeleton-line tiny"></span></div></div>
+          <div class="shop-card shop-skeleton-card" aria-hidden="true"><div class="shop-skeleton-media"></div><div class="shop-skeleton-body"><span class="shop-skeleton-line"></span><span class="shop-skeleton-line short"></span><span class="shop-skeleton-line tiny"></span></div></div>
+          <div class="shop-card shop-skeleton-card" aria-hidden="true"><div class="shop-skeleton-media"></div><div class="shop-skeleton-body"><span class="shop-skeleton-line"></span><span class="shop-skeleton-line short"></span><span class="shop-skeleton-line tiny"></span></div></div>
+        </div>
+        <p class="shop-gallery-foot">Prices shown are indicative and include 3% GST. Making charges &amp; stone value are confirmed at the Cuttack showroom.</p>
       </section>
     </div>
 
@@ -1422,7 +1647,7 @@
       <button data-app-view="products" type="button" class="app-nav-mobile relative flex flex-col items-center justify-center gap-1 text-slate-400 hover:text-slate-200 transition-colors duration-150">
         <span class="nav-indicator hidden absolute top-0 w-8 h-0.5 rounded-full bg-amber-400"></span>
         <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m4.3 7.5 7.7 4.4 7.7-4.4M12 21v-9.1"/></svg>
-        <span class="nav-label text-[10px] font-medium">Products</span>
+        <span class="nav-label text-[10px] font-medium">Shop</span>
       </button>
       <button data-app-view="tools" type="button" class="app-nav-mobile relative flex flex-col items-center justify-center gap-1 text-slate-400 hover:text-slate-200 transition-colors duration-150">
         <span class="nav-indicator hidden absolute top-0 w-8 h-0.5 rounded-full bg-amber-400"></span>
@@ -1431,6 +1656,32 @@
       </button>
     </div>
   </nav>
+
+  <!-- SHOPPING BAG DRAWER (Top-level under body so fixed positioning is never trapped) -->
+  <div id="shop-cart" class="shop-cart-shell hidden" role="dialog" aria-modal="true" aria-labelledby="shop-cart-title">
+    <div id="shop-cart-backdrop" class="shop-cart-backdrop"></div>
+    <aside class="shop-cart-panel" aria-label="Shopping bag">
+      <header class="shop-cart-head">
+        <div>
+          <h3 id="shop-cart-title">My Bag</h3>
+          <p id="shop-cart-sub">Reserve the pieces you love — we confirm on WhatsApp.</p>
+        </div>
+        <button id="btn-close-cart" type="button" class="shop-cart-close" aria-label="Close shopping bag">✕</button>
+      </header>
+
+      <div id="shop-cart-items" class="shop-cart-items"></div>
+
+      <footer class="shop-cart-foot">
+        <div class="shop-cart-total-row"><span>Estimated total</span><strong id="shop-cart-total">₹0</strong></div>
+        <p class="shop-cart-note">Indicative, incl. 3% GST. Making charges &amp; stone value are confirmed by our Cuttack team before payment.</p>
+        <button id="btn-cart-whatsapp" type="button" class="shop-btn-whatsapp">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91C21.95 6.45 17.5 2 12.04 2zm5.82 14.01c-.24.68-1.41 1.3-1.95 1.38-.5.08-1.13.11-1.82-.11-.42-.13-.96-.31-1.65-.61-2.9-1.25-4.79-4.17-4.93-4.36-.14-.19-1.18-1.57-1.18-3 0-1.43.75-2.13 1.01-2.42.27-.29.58-.36.78-.36.19 0 .39 0 .56.01.18.01.42-.07.66.5.24.58.82 2.01.89 2.15.07.15.12.32.02.51-.1.19-.15.32-.29.49-.15.17-.31.38-.44.51-.15.15-.3.31-.13.6.17.29.76 1.25 1.63 2.03 1.12 1 2.06 1.31 2.35 1.46.29.15.46.12.63-.07.17-.19.73-.85.92-1.14.19-.29.39-.24.66-.15.27.1 1.7.8 1.99.95.29.14.49.22.56.34.07.12.07.7-.17 1.38z"/></svg>
+          Enquire on WhatsApp
+        </button>
+        <button id="btn-cart-clear" type="button" class="shop-cart-clear">Clear bag</button>
+      </footer>
+    </aside>
+  </div>
 
   <!-- OWNER ACCESS MODAL (GitHub Token Only · Top-level under body so fixed positioning is never trapped) -->
   <div id="owner-auth-modal" class="jewel-modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="owner-auth-title">
@@ -1480,6 +1731,7 @@
         <button id="btn-close-lightbox" type="button" class="shrink-0 px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs text-slate-200" aria-label="Close preview">✕</button>
       </div>
       <div id="lightbox-stage" class="jewel-lightbox-stage"></div>
+      <div id="lightbox-actions" class="shop-lightbox-actions"></div>
       <div id="lightbox-nav" class="hidden flex items-center justify-between gap-2">
         <button id="btn-lightbox-prev" type="button" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs text-slate-200">← Previous</button>
         <span id="lightbox-counter" class="text-xs text-slate-400 tabular-nums">1 / 1</span>
@@ -5141,6 +5393,10 @@
     const ALLOWED_IMAGE_MIME = /^image\/(jpeg|png|webp|gif)$/i;
     const ALLOWED_VIDEO_MIME = /^video\/(mp4|webm|quicktime)$/i;
 
+    const SHOP_WISHLIST_KEY = 'satyanarayan-shop-wishlist-v1';
+    const SHOP_BAG_KEY = 'satyanarayan-shop-bag-v1';
+    const SHOP_WHATSAPP_NUMBER = ''; // Optional: set a 10-digit showroom number to pre-address bag enquiries
+
     const productOwner = {
       unlocked: false,
       ghConnected: false,
@@ -5148,6 +5404,7 @@
       ghToken: '',
       busy: false,
       activeCategory: 'all',
+      sortMode: 'new',
       catalogLoaded: false,
       publishedItems: [],
       localItems: [],
@@ -5155,8 +5412,323 @@
       activeMediaIndex: new Map(),
       objectUrls: [],
       lightboxItem: null,
-      lightboxIdx: 0
+      lightboxIdx: 0,
+      savedIds: new Set(),
+      bag: [],
+      lastRenderedIds: []
     };
+
+    // --- Storefront bag & wishlist (persisted per device) ---
+    function readShopStorage(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return fallback;
+        const parsed = JSON.parse(raw);
+        return parsed == null ? fallback : parsed;
+      } catch {
+        return fallback;
+      }
+    }
+
+    function writeShopStorage(key, value) {
+      try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* storage may be blocked */ }
+    }
+
+    function loadShopState() {
+      const saved = readShopStorage(SHOP_WISHLIST_KEY, []);
+      productOwner.savedIds = new Set(Array.isArray(saved) ? saved.filter((x) => typeof x === 'string') : []);
+      const bag = readShopStorage(SHOP_BAG_KEY, []);
+      productOwner.bag = Array.isArray(bag)
+        ? bag.filter((x) => x && typeof x.id === 'string').map((x) => ({
+            id: x.id,
+            source: x.source === 'local' ? 'local' : 'published',
+            qty: Math.max(1, Math.min(20, Number(x.qty) || 1))
+          }))
+        : [];
+    }
+
+    function saveShopState() {
+      writeShopStorage(SHOP_WISHLIST_KEY, Array.from(productOwner.savedIds));
+      writeShopStorage(SHOP_BAG_KEY, productOwner.bag);
+    }
+
+    function findCatalogItem(id, source) {
+      const pool = source === 'local' ? productOwner.localItems : productOwner.publishedItems;
+      return pool.find((x) => x.id === id) || null;
+    }
+
+    function toggleProductSaved(id) {
+      if (!id) return;
+      if (productOwner.savedIds.has(id)) {
+        productOwner.savedIds.delete(id);
+        showToast('Removed from saved pieces.', 'info');
+      } else {
+        productOwner.savedIds.add(id);
+        showToast('Saved to your wishlist.', 'success');
+      }
+      saveShopState();
+      renderProducts();
+    }
+
+    function addProductToBag(id, source, qty = 1) {
+      const item = findCatalogItem(id, source);
+      if (!item) return;
+      const existing = productOwner.bag.find((x) => x.id === id);
+      if (existing) {
+        existing.qty = Math.min(20, existing.qty + qty);
+        showToast(`Updated quantity for “${item.name}”.`, 'success');
+      } else {
+        productOwner.bag.push({ id, source, qty: Math.max(1, Math.min(20, qty)) });
+        showToast(`“${item.name}” added to your bag.`, 'success');
+      }
+      saveShopState();
+      renderProducts();
+      renderShopBag();
+      pulseCartButtons();
+    }
+
+    function setBagQty(id, nextQty) {
+      const entry = productOwner.bag.find((x) => x.id === id);
+      if (!entry) return;
+      if (nextQty <= 0) {
+        productOwner.bag = productOwner.bag.filter((x) => x.id !== id);
+      } else {
+        entry.qty = Math.min(20, nextQty);
+      }
+      saveShopState();
+      renderProducts();
+      renderShopBag();
+    }
+
+    function removeBagItem(id) {
+      productOwner.bag = productOwner.bag.filter((x) => x.id !== id);
+      saveShopState();
+      renderProducts();
+      renderShopBag();
+    }
+
+    function clearShopBag() {
+      if (!productOwner.bag.length) return;
+      productOwner.bag = [];
+      saveShopState();
+      renderProducts();
+      renderShopBag();
+      showToast('Shopping bag cleared.', 'info');
+    }
+
+    function getBagDetail() {
+      const lines = [];
+      let total = 0;
+      let count = 0;
+      let onRequest = 0;
+      for (const entry of productOwner.bag) {
+        const item = findCatalogItem(entry.id, entry.source);
+        if (!item) continue;
+        const price = Number(item.price) || 0;
+        if (price > 0) total += price * entry.qty; else onRequest += entry.qty;
+        count += entry.qty;
+        lines.push({ item, qty: entry.qty, price });
+      }
+      return { lines, total, count, onRequest };
+    }
+
+    function pulseCartButtons() {
+      ['btn-open-cart', 'btn-open-cart-inline'].forEach((id) => {
+        const btn = document.getElementById(id);
+        if (!btn) return;
+        btn.classList.remove('shop-bump');
+        void btn.offsetWidth;
+        btn.classList.add('shop-bump');
+      });
+    }
+
+    function formatShopPrice(value) {
+      const n = Number(value) || 0;
+      return `₹${n.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
+    }
+
+    function buildBagEnquiryText() {
+      const { lines, total, count, onRequest } = getBagDetail();
+      if (!lines.length) return '';
+      const rows = lines.map(({ item, qty, price }) => `• ${item.name}${item.purity ? ` (${item.purity})` : ''} × ${qty} — ${price > 0 ? formatShopPrice(price * qty) : 'Price on request'}`);
+      const lines2 = [
+        'Hello Satyanarayan Jewellers, I would like to reserve these pieces:',
+        '',
+        ...rows,
+        '',
+        `Estimated total: ${formatShopPrice(total)}${onRequest ? ` + ${onRequest} piece(s) on request` : ''}`,
+        `Total pieces: ${count}`,
+        '',
+        'Please confirm availability, making charges and pickup/delivery.'
+      ];
+      return lines2.join('\n');
+    }
+
+    function enquireBagOnWhatsApp() {
+      const text = buildBagEnquiryText();
+      if (!text) { showToast('Your bag is empty — add a piece first.', 'alert'); return; }
+      const base = SHOP_WHATSAPP_NUMBER ? `https://wa.me/91${SHOP_WHATSAPP_NUMBER.replace(/\D/g, '').slice(-10)}` : 'https://wa.me/';
+      window.open(`${base}?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
+    }
+
+    function enquireSingleProduct(id, source) {
+      const item = findCatalogItem(id, source);
+      if (!item) return;
+      const price = Number(item.price) || 0;
+      const text = [
+        `Hello Satyanarayan Jewellers, I am interested in this piece:`,
+        `• ${item.name}${item.purity ? ` (${item.purity})` : ''}`,
+        item.sku ? `Code: ${item.sku}` : '',
+        price > 0 ? `Listed price: ${formatShopPrice(price)}` : 'Price on request',
+        'Please share availability and making charges.'
+      ].filter(Boolean).join('\n');
+      const base = SHOP_WHATSAPP_NUMBER ? `https://wa.me/91${SHOP_WHATSAPP_NUMBER.replace(/\D/g, '').slice(-10)}` : 'https://wa.me/';
+      window.open(`${base}?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
+    }
+
+    function openShopCart() {
+      const shell = document.getElementById('shop-cart');
+      if (!shell) return;
+      renderShopBag();
+      shell.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      setTimeout(() => document.getElementById('btn-close-cart')?.focus(), 40);
+    }
+
+    function closeShopCart() {
+      const shell = document.getElementById('shop-cart');
+      if (!shell) return;
+      shell.classList.add('hidden');
+      if (document.getElementById('product-lightbox')?.classList.contains('hidden')
+        && document.getElementById('owner-auth-modal')?.classList.contains('hidden')) {
+        document.body.style.overflow = '';
+      }
+    }
+
+    function renderShopBag() {
+      const wrap = document.getElementById('shop-cart-items');
+      const totalEl = document.getElementById('shop-cart-total');
+      const subEl = document.getElementById('shop-cart-sub');
+      const waBtn = document.getElementById('btn-cart-whatsapp');
+      const clearBtn = document.getElementById('btn-cart-clear');
+      const { lines, total, count, onRequest } = getBagDetail();
+
+      document.querySelectorAll('#cart-count-pill').forEach((el) => {
+        el.textContent = String(count);
+        el.classList.toggle('hidden', count === 0);
+      });
+      const inlineCount = document.getElementById('cart-count-inline');
+      if (inlineCount) inlineCount.textContent = String(count);
+      if (totalEl) totalEl.textContent = formatShopPrice(total);
+      if (subEl) {
+        subEl.textContent = count
+          ? `${count} piece${count > 1 ? 's' : ''} in your bag · we confirm on WhatsApp.`
+          : 'Reserve the pieces you love — we confirm on WhatsApp.';
+      }
+      if (waBtn) waBtn.disabled = !lines.length;
+      if (clearBtn) clearBtn.classList.toggle('hidden', !lines.length);
+
+      if (!wrap) return;
+      if (!lines.length) {
+        wrap.innerHTML = `
+          <div class="shop-cart-empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            <p>Your bag is empty.<br />Tap “Add to bag” on any piece you like.</p>
+          </div>`;
+        return;
+      }
+
+      wrap.innerHTML = lines.map(({ item, qty, price }) => {
+        const media = resolveItemMediaList(item);
+        const thumb = media.find((m) => m.type === 'image') || media[0] || null;
+        const thumbHtml = thumb
+          ? (thumb.type === 'video'
+            ? `<video src="${escapeHtml(thumb.src)}" muted playsinline preload="metadata"></video>`
+            : `<img loading="lazy" decoding="async" src="${escapeHtml(thumb.src)}" alt="${escapeHtml(item.name)}" />`)
+          : '';
+        return `
+          <div class="shop-cart-item">
+            <div class="shop-cart-thumb">${thumbHtml}</div>
+            <div class="shop-cart-info">
+              <h4>${escapeHtml(item.name)}</h4>
+              <p>${escapeHtml(item.category || 'Gold')}${item.purity ? ` · ${escapeHtml(item.purity)}` : ''}${Number(item.weight) > 0 ? ` · ${Number(item.weight).toLocaleString('en-IN')} g` : ''}</p>
+              <span class="shop-cart-price">${price > 0 ? formatShopPrice(price * qty) : 'Price on request'}</span>
+              <div class="shop-cart-controls">
+                <span class="shop-qty">
+                  <button type="button" data-bag-dec="${escapeHtml(item.id)}" aria-label="Decrease quantity">−</button>
+                  <span aria-label="Quantity">${qty}</span>
+                  <button type="button" data-bag-inc="${escapeHtml(item.id)}" aria-label="Increase quantity">+</button>
+                </span>
+                <button type="button" class="shop-remove" data-bag-remove="${escapeHtml(item.id)}">Remove</button>
+              </div>
+            </div>
+          </div>`;
+      }).join('') + (onRequest ? `<p class="shop-toast-note" style="color:#9A8B8E;margin:0.2rem 0 0">${onRequest} piece${onRequest > 1 ? 's' : ''} priced on request — our team will quote on WhatsApp.</p>` : '');
+    }
+
+    function bindShopEvents() {
+      document.getElementById('product-sort')?.addEventListener('change', (e) => {
+        productOwner.sortMode = e.target.value || 'new';
+        renderProducts();
+      });
+      document.getElementById('product-search')?.addEventListener('input', () => {
+        document.getElementById('btn-clear-search')?.classList.toggle('hidden', !(document.getElementById('product-search')?.value || '').trim());
+        renderProducts();
+      });
+      document.getElementById('btn-clear-search')?.addEventListener('click', () => {
+        const input = document.getElementById('product-search');
+        if (input) input.value = '';
+        document.getElementById('btn-clear-search')?.classList.add('hidden');
+        renderProducts();
+      });
+      document.getElementById('btn-clear-filters')?.addEventListener('click', () => {
+        productOwner.activeCategory = 'all';
+        productOwner.sortMode = 'new';
+        const input = document.getElementById('product-search');
+        if (input) input.value = '';
+        const sort = document.getElementById('product-sort');
+        if (sort) sort.value = 'new';
+        document.getElementById('btn-clear-search')?.classList.add('hidden');
+        syncCategoryPillStyles();
+        renderProducts();
+      });
+      document.getElementById('btn-shop-now')?.addEventListener('click', () => {
+        document.getElementById('product-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+      document.getElementById('btn-open-cart')?.addEventListener('click', openShopCart);
+      document.getElementById('btn-open-cart-inline')?.addEventListener('click', openShopCart);
+      document.getElementById('btn-close-cart')?.addEventListener('click', closeShopCart);
+      document.getElementById('shop-cart-backdrop')?.addEventListener('click', closeShopCart);
+      document.getElementById('btn-cart-whatsapp')?.addEventListener('click', enquireBagOnWhatsApp);
+      document.getElementById('btn-cart-clear')?.addEventListener('click', clearShopBag);
+      document.getElementById('shop-cart-items')?.addEventListener('click', (e) => {
+        const inc = e.target.closest('[data-bag-inc]');
+        if (inc) {
+          const entry = productOwner.bag.find((x) => x.id === inc.dataset.bagInc);
+          if (entry) setBagQty(entry.id, entry.qty + 1);
+          return;
+        }
+        const dec = e.target.closest('[data-bag-dec]');
+        if (dec) {
+          const entry = productOwner.bag.find((x) => x.id === dec.dataset.bagDec);
+          if (entry) setBagQty(entry.id, entry.qty - 1);
+          return;
+        }
+        const rm = e.target.closest('[data-bag-remove]');
+        if (rm) removeBagItem(rm.dataset.bagRemove);
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeShopCart();
+      });
+    }
+
+    function syncCategoryPillStyles() {
+      document.querySelectorAll('.prod-cat-btn').forEach((btn) => {
+        const on = (btn.dataset.prodCat || 'all') === productOwner.activeCategory;
+        btn.classList.toggle('is-active', on);
+        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+    }
 
     function sanitizeCatalogMediaUrl(src) {
       if (typeof src !== 'string') return '';
@@ -5706,103 +6278,206 @@
       return [...drafts, ...published];
     }
 
+    function getFilteredCatalogItems() {
+      const allItems = getVisibleCatalogItems();
+      const query = (document.getElementById('product-search')?.value || '').trim().toLowerCase();
+      const cat = productOwner.activeCategory;
+      const filtered = allItems.filter((p) => {
+        if (cat === 'saved') {
+          if (!productOwner.savedIds.has(p.id)) return false;
+        } else if (cat !== 'all' && String(p.category || 'Other') !== cat) {
+          return false;
+        }
+        if (!query) return true;
+        return [p.name, p.category, p.purity, p.sku, p.note].some((v) => String(v || '').toLowerCase().includes(query));
+      });
+      return { allItems, filtered };
+    }
+
+    function sortCatalogItems(items) {
+      const mode = productOwner.sortMode || 'new';
+      const priceOf = (p) => Number(p.price) || 0;
+      const out = items.slice();
+      const byPrice = (a, b, dir) => {
+        const pa = priceOf(a);
+        const pb = priceOf(b);
+        if (!pa && !pb) return 0;
+        if (!pa) return 1; // "price on request" always sorts last
+        if (!pb) return -1;
+        return dir === 'asc' ? pa - pb : pb - pa;
+      };
+      if (mode === 'price-asc') {
+        out.sort((a, b) => byPrice(a, b, 'asc'));
+      } else if (mode === 'price-desc') {
+        out.sort((a, b) => byPrice(a, b, 'desc'));
+      } else if (mode === 'name') {
+        out.sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'en'));
+      } else {
+        out.sort((a, b) => {
+          const ta = Date.parse(a.createdAt || '') || 0;
+          const tb = Date.parse(b.createdAt || '') || 0;
+          return tb - ta;
+        });
+      }
+      return out;
+    }
+
+    function renderEmptyCollection(allItems) {
+      const emptyText = allItems.length
+        ? 'No jewellery matches these filters. Try another category or clear the search.'
+        : (productOwner.unlocked
+            ? 'No jewellery uploaded yet. Add photos or videos in the Owner Upload Studio above.'
+            : 'New jewellery designs are arriving shortly. Visit our showroom in Cuttack or check back soon.');
+      const title = allItems.length
+        ? (productOwner.activeCategory === 'saved' ? 'No saved pieces yet' : 'Nothing matched')
+        : 'Collection coming soon';
+      return `
+        <div class="shop-empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m4.3 7.5 7.7 4.4 7.7-4.4M12 21v-9.1"/></svg>
+          <h4>${escapeHtml(title)}</h4>
+          <p>${escapeHtml(emptyText)}</p>
+          ${allItems.length ? '<button type="button" class="shop-btn-ghost" data-shop-reset>Show all jewellery</button>' : ''}
+        </div>`;
+    }
+
     function renderProducts() {
       updateOwnerStudioUI();
       const list = document.getElementById('product-list');
       if (!list) return;
       revokeGalleryObjectUrls();
 
-      const allItems = getVisibleCatalogItems();
-      const query = (document.getElementById('product-search')?.value || '').trim().toLowerCase();
-      const cat = productOwner.activeCategory;
-      const filtered = allItems.filter((p) => {
-        if (cat !== 'all' && String(p.category || 'Other') !== cat) return false;
-        if (!query) return true;
-        return [p.name, p.category, p.purity, p.sku, p.note].some((v) => String(v || '').toLowerCase().includes(query));
-      });
+      const { allItems, filtered } = getFilteredCatalogItems();
+      const sorted = sortCatalogItems(filtered);
+      productOwner.lastRenderedIds = sorted.map((p) => p.id);
 
-      if (!filtered.length) {
-        const emptyText = allItems.length
-          ? 'No jewellery matches your filter.'
-          : (productOwner.unlocked
-              ? 'No jewellery uploaded yet. Add photos or videos in the Owner Upload Studio above.'
-              : 'New jewellery designs coming soon. Visit our showroom in Cuttack or check back shortly.');
-        list.innerHTML = `<div class="text-center text-xs text-slate-400 py-8" style="grid-column:1/-1">${emptyText}</div>`;
+      // Filter/sort chrome state
+      syncCategoryPillStyles();
+      const sortSelect = document.getElementById('product-sort');
+      if (sortSelect && sortSelect.value !== productOwner.sortMode) sortSelect.value = productOwner.sortMode;
+      const savedPill = document.getElementById('saved-count-pill');
+      if (savedPill) savedPill.textContent = String(productOwner.savedIds.size);
+      const searchInput = document.getElementById('product-search');
+      document.getElementById('btn-clear-search')?.classList.toggle('hidden', !(searchInput?.value || '').trim());
+      const resultsEl = document.getElementById('product-results-count');
+      const hasFilters = productOwner.activeCategory !== 'all' || Boolean((searchInput?.value || '').trim());
+      document.getElementById('btn-clear-filters')?.classList.toggle('hidden', !hasFilters);
+      const bagDetail = getBagDetail();
+      document.querySelectorAll('#cart-count-pill').forEach((el) => {
+        el.textContent = String(bagDetail.count);
+        el.classList.toggle('hidden', bagDetail.count === 0);
+      });
+      const inlineCount = document.getElementById('cart-count-inline');
+      if (inlineCount) inlineCount.textContent = String(bagDetail.count);
+      if (resultsEl) {
+        if (!allItems.length) {
+          resultsEl.textContent = 'Collection loading…';
+        } else if (!sorted.length) {
+          resultsEl.innerHTML = `Showing <strong>0</strong> of ${allItems.length} pieces`;
+        } else {
+          resultsEl.innerHTML = `${hasFilters ? 'Showing' : 'All'} <strong>${sorted.length}</strong>${hasFilters ? ` of ${allItems.length}` : ''} piece${sorted.length > 1 ? 's' : ''} · BIS hallmarked`;
+        }
+      }
+
+      if (!sorted.length) {
+        if (!allItems.length && !productOwner.catalogLoaded) {
+          list.innerHTML = Array.from({ length: 4 }, () => `<div class="shop-card shop-skeleton-card" aria-hidden="true"><div class="shop-skeleton-media"></div><div class="shop-skeleton-body"><span class="shop-skeleton-line"></span><span class="shop-skeleton-line short"></span><span class="shop-skeleton-line tiny"></span></div></div>`).join('');
+        } else {
+          list.innerHTML = renderEmptyCollection(allItems);
+        }
+        attachShopResetHandler();
+        renderShopBag();
         return;
       }
 
-      list.innerHTML = filtered.map((p) => {
+      list.innerHTML = sorted.map((p) => {
         const mediaList = resolveItemMediaList(p);
         const activeIdx = Math.min(productOwner.activeMediaIndex.get(p.id) || 0, Math.max(0, mediaList.length - 1));
         const activeMedia = mediaList[activeIdx] || null;
+        const isSaved = productOwner.savedIds.has(p.id);
+        const inBag = productOwner.bag.find((x) => x.id === p.id);
+        const priceNum = Number(p.price) || 0;
 
         let mediaHtml = `<div class="flex flex-col items-center justify-center gap-1.5 text-slate-500 p-4 text-center">
           <svg viewBox="0 0 24 24" class="w-8 h-8 text-amber-500/40" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/></svg>
-          <span class="text-[10px]">No media uploaded</span>
+          <span class="text-[10px]">Photo coming soon</span>
         </div>`;
         if (activeMedia) {
-          if (activeMedia.type === 'video') {
-            mediaHtml = `
-              <span class="jewel-badge-overlay">▶ VIDEO</span>
-              <button type="button" class="jewel-expand-btn product-open-lightbox" data-product-id="${escapeHtml(p.id)}" data-source="${p._source}" data-media-idx="${activeIdx}" aria-label="Expand video">⛶ Fullscreen</button>
-              <video src="${escapeHtml(activeMedia.src)}" controls playsinline preload="metadata"></video>
-            `;
-          } else {
-            mediaHtml = `
-              ${mediaList.length > 1 ? `<span class="jewel-badge-overlay">${activeIdx + 1} / ${mediaList.length}</span>` : ''}
-              <button type="button" class="jewel-expand-btn product-open-lightbox" data-product-id="${escapeHtml(p.id)}" data-source="${p._source}" data-media-idx="${activeIdx}" aria-label="Zoom image">⛶ View</button>
-              <img loading="lazy" decoding="async" src="${escapeHtml(activeMedia.src)}" alt="${escapeHtml(p.name)}" class="product-open-lightbox cursor-pointer" data-product-id="${escapeHtml(p.id)}" data-source="${p._source}" data-media-idx="${activeIdx}" />
-            `;
-          }
+          mediaHtml = (activeMedia.type === 'video'
+            ? `<video src="${escapeHtml(activeMedia.src)}" controls playsinline preload="metadata"></video><span class="shop-badge shop-badge-video">▶ Video</span>`
+            : `<img loading="lazy" decoding="async" src="${escapeHtml(activeMedia.src)}" alt="${escapeHtml(p.name)}" class="product-open-lightbox cursor-pointer" data-product-id="${escapeHtml(p.id)}" data-source="${p._source}" data-media-idx="${activeIdx}" /><span class="shop-badge">${escapeHtml(p.purity || p.category || 'Gold')}</span>`)
+            + (mediaList.length > 1
+              ? `<div class="shop-dots">${mediaList.map((m, idx) => `<button type="button" class="shop-dot product-thumb-btn ${idx === activeIdx ? 'is-active' : ''}" data-product-id="${escapeHtml(p.id)}" data-media-idx="${idx}" aria-label="Show media ${idx + 1}"></button>`).join('')}</div>`
+              : '')
+            + `<button type="button" class="shop-zoom product-open-lightbox" data-product-id="${escapeHtml(p.id)}" data-source="${p._source}" data-media-idx="${activeIdx}" aria-label="View ${escapeHtml(p.name)} full size">⛶ View</button>`;
         }
 
-        const thumbsHtml = mediaList.length > 1
-          ? `<div class="jewel-thumbs">${mediaList.map((m, idx) => `
-              <button type="button" class="jewel-thumb product-thumb-btn ${idx === activeIdx ? 'is-active' : ''}" data-product-id="${escapeHtml(p.id)}" data-media-idx="${idx}" aria-label="View media ${idx + 1}">
-                ${m.type === 'video'
-                  ? `<video src="${escapeHtml(m.src)}" muted playsinline preload="metadata"></video><span class="absolute inset-0 flex items-center justify-center bg-black/45 text-[10px] text-amber-200 font-bold">▶</span>`
-                  : `<img loading="lazy" decoding="async" src="${escapeHtml(m.src)}" alt="" />`}
-              </button>`).join('')}</div>`
-          : '';
+        const specParts = [];
+        if (p.purity) specParts.push(p.purity);
+        if (Number(p.weight) > 0) specParts.push(`${Number(p.weight).toLocaleString('en-IN')} g`);
+        if (p.sku) specParts.push(`#${p.sku}`);
 
-        const metaParts = [];
-        if (p.purity) metaParts.push(escapeHtml(p.purity));
-        if (Number(p.weight) > 0) metaParts.push(`${Number(p.weight).toLocaleString('en-IN')} g`);
-        if (p.sku) metaParts.push(`Code: ${escapeHtml(p.sku)}`);
-
-        const priceNum = Number(p.price) || 0;
         const priceHtml = priceNum > 0
-          ? `<p class="text-sm font-bold text-amber-300 tabular-nums">₹${priceNum.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>`
-          : `<p class="text-[11px] font-medium text-amber-200/80">Price on request</p>`;
+          ? `<span class="shop-price-now">${formatShopPrice(priceNum)}<span class="shop-price-unit">incl. GST</span></span>
+             ${Number(p.weight) > 0 ? `<span class="shop-price-note">≈ ${formatShopPrice(priceNum / Number(p.weight))}/g · making charges extra</span>` : '<span class="shop-price-note">making charges extra</span>'}`
+          : `<span class="shop-price-request"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-8.5 8.5 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7A8.4 8.4 0 0 1 4 11.5 8.5 8.5 0 0 1 12.5 3 8.4 8.4 0 0 1 21 11.5Z"/></svg> Price on request</span>`;
 
         const ownerBar = productOwner.unlocked
-          ? `<div class="flex flex-wrap items-center justify-between gap-2 pt-2.5 mt-2.5 border-t border-slate-800/90">
-              <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full ${p._source === 'published' ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'}">${p._source === 'published' ? 'Live on Website' : 'Local Draft'}</span>
-              <div class="flex items-center gap-1.5">
-                ${p._source === 'local' && productOwner.ghConnected ? `<button type="button" class="product-publish-draft px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-200 text-[10px] font-semibold" data-product-id="${escapeHtml(p.id)}">Publish</button>` : ''}
-                <button type="button" class="product-delete px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/15 text-rose-300 text-[10px] font-semibold" data-product-id="${escapeHtml(p.id)}" data-source="${p._source}" aria-label="Delete ${escapeHtml(p.name)}">Delete</button>
+          ? `<div class="shop-admin-row">
+              <span class="${p._source === 'published' ? 'shop-admin-live' : 'shop-admin-draft'}">${p._source === 'published' ? 'Live' : 'Draft'}</span>
+              <div class="shop-admin-btns">
+                ${p._source === 'local' && productOwner.ghConnected ? `<button type="button" class="product-publish-draft bg-emerald-500/20 border border-emerald-500/40 text-emerald-200" data-product-id="${escapeHtml(p.id)}">Publish</button>` : ''}
+                <button type="button" class="product-delete bg-rose-500/10 border border-rose-500/30 text-rose-300" data-product-id="${escapeHtml(p.id)}" data-source="${p._source}" aria-label="Delete ${escapeHtml(p.name)}">Delete</button>
               </div>
             </div>`
           : '';
 
         return `
-          <article class="jewel-card">
-            <div class="jewel-media-frame">${mediaHtml}</div>
-            ${thumbsHtml}
-            <div class="p-3.5 flex-1 flex flex-col justify-between">
-              <div>
-                <div class="flex items-start justify-between gap-2">
-                  <h4 class="text-sm font-semibold text-white leading-tight">${escapeHtml(p.name)}</h4>
-                  <span class="shrink-0 text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-200 border border-amber-500/25">${escapeHtml(p.category || 'Gold')}</span>
-                </div>
-                ${metaParts.length ? `<p class="text-[11px] text-slate-400 mt-1">${metaParts.join(' · ')}</p>` : ''}
-                ${p.note ? `<p class="text-[11px] text-slate-300/80 mt-1.5 leading-relaxed">${escapeHtml(p.note)}</p>` : ''}
+          <article class="shop-card" data-product-card="${escapeHtml(p.id)}">
+            <div class="shop-card-media">
+              ${mediaHtml}
+              <button type="button" class="shop-wish product-save-btn ${isSaved ? 'is-saved' : ''}" data-product-id="${escapeHtml(p.id)}" aria-pressed="${isSaved ? 'true' : 'false'}" aria-label="${isSaved ? 'Remove from' : 'Save'} ${escapeHtml(p.name)}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+              </button>
+            </div>
+            <div class="shop-card-body">
+              <span class="shop-cat-tag">${escapeHtml(p.category || 'Gold')}</span>
+              <h4 class="shop-name">${escapeHtml(p.name)}</h4>
+              ${specParts.length ? `<div class="shop-specs">${specParts.map((s) => `<span class="shop-spec">${escapeHtml(s)}</span>`).join('')}</div>` : ''}
+              <div class="shop-price">${priceHtml}</div>
+              <div class="shop-card-actions">
+                <button type="button" class="shop-add-btn product-add-bag ${inBag ? 'is-added' : ''}" data-product-id="${escapeHtml(p.id)}" data-source="${p._source}" aria-label="Add ${escapeHtml(p.name)} to bag">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                  ${inBag ? `In bag · ${inBag.qty}` : 'Add to bag'}
+                </button>
+                <button type="button" class="shop-quick-btn product-wa-enquire" data-product-id="${escapeHtml(p.id)}" data-source="${p._source}" aria-label="Enquire about ${escapeHtml(p.name)} on WhatsApp" title="Enquire on WhatsApp">
+                  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91C21.95 6.45 17.5 2 12.04 2zm5.82 14.01c-.24.68-1.41 1.3-1.95 1.38-.5.08-1.13.11-1.82-.11-.42-.13-.96-.31-1.65-.61-2.9-1.25-4.79-4.17-4.93-4.36-.14-.19-1.18-1.57-1.18-3 0-1.43.75-2.13 1.01-2.42.27-.29.58-.36.78-.36.19 0 .39 0 .56.01.18.01.42-.07.66.5.24.58.82 2.01.89 2.15.07.15.12.32.02.51-.1.19-.15.32-.29.49-.15.17-.31.38-.44.51-.15.15-.3.31-.13.6.17.29.76 1.25 1.63 2.03 1.12 1 2.06 1.31 2.35 1.46.29.15.46.12.63-.07.17-.19.73-.85.92-1.14.19-.29.39-.24.66-.15.27.1 1.7.8 1.99.95.29.14.49.22.56.34.07.12.07.7-.17 1.38z"/></svg>
+                </button>
               </div>
-              <div class="mt-2.5">${priceHtml}${ownerBar}</div>
+              ${p.note ? `<p class="shop-price-note" style="margin:0.3rem 0 0;line-height:1.5">${escapeHtml(p.note)}</p>` : ''}
+              ${ownerBar}
             </div>
           </article>
         `;
       }).join('');
+
+      renderShopBag();
+    }
+
+    function attachShopResetHandler() {
+      const list = document.getElementById('product-list');
+      if (!list || list.dataset.resetBound === '1') return;
+      list.dataset.resetBound = '1';
+      list.addEventListener('click', (e) => {
+        if (!e.target.closest('[data-shop-reset]')) return;
+        productOwner.activeCategory = 'all';
+        productOwner.sortMode = 'new';
+        const input = document.getElementById('product-search');
+        if (input) input.value = '';
+        const sort = document.getElementById('product-sort');
+        if (sort) sort.value = 'new';
+        syncCategoryPillStyles();
+        renderProducts();
+      });
     }
 
     function openProductLightbox(itemId, source, startIdx = 0) {
@@ -5838,6 +6513,31 @@
         : `<img src="${escapeHtml(m.src)}" alt="${escapeHtml(ctx.item.name)}" />`;
       if (nav) nav.classList.toggle('hidden', ctx.media.length <= 1);
       if (counter) counter.textContent = `${productOwner.lightboxIdx + 1} / ${ctx.media.length}`;
+
+      const actions = document.getElementById('lightbox-actions');
+      if (actions) {
+        const item = ctx.item;
+        const src = item._source || (productOwner.localItems.includes(item) ? 'local' : 'published');
+        const priceNum = Number(item.price) || 0;
+        const isSaved = productOwner.savedIds.has(item.id);
+        const inBag = productOwner.bag.find((x) => x.id === item.id);
+        const specs = [item.category, item.purity, Number(item.weight) > 0 ? `${Number(item.weight).toLocaleString('en-IN')} g` : '', item.sku ? `#${item.sku}` : ''].filter(Boolean);
+        actions.innerHTML = `
+          <div class="shop-lightbox-price">
+            <strong>${priceNum > 0 ? formatShopPrice(priceNum) : 'Price on request'}</strong>
+            <span>${priceNum > 0 ? 'Incl. 3% GST · making charges extra' : escapeHtml(specs.join(' · ') || 'Our team will quote on WhatsApp')}</span>
+          </div>
+          <button type="button" class="shop-add-btn product-add-bag ${inBag ? 'is-added' : ''}" data-product-id="${escapeHtml(item.id)}" data-source="${src}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            ${inBag ? `In bag · ${inBag.qty}` : 'Add to bag'}
+          </button>
+          <button type="button" class="shop-quick-btn product-wa-enquire" data-product-id="${escapeHtml(item.id)}" data-source="${src}" aria-label="Enquire on WhatsApp" title="Enquire on WhatsApp">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91C21.95 6.45 17.5 2 12.04 2zm5.82 14.01c-.24.68-1.41 1.3-1.95 1.38-.5.08-1.13.11-1.82-.11-.42-.13-.96-.31-1.65-.61-2.9-1.25-4.79-4.17-4.93-4.36-.14-.19-1.18-1.57-1.18-3 0-1.43.75-2.13 1.01-2.42.27-.29.58-.36.78-.36.19 0 .39 0 .56.01.18.01.42-.07.66.5.24.58.82 2.01.89 2.15.07.15.12.32.02.51-.1.19-.15.32-.29.49-.15.17-.31.38-.44.51-.15.15-.3.31-.13.6.17.29.76 1.25 1.63 2.03 1.12 1 2.06 1.31 2.35 1.46.29.15.46.12.63-.07.17-.19.73-.85.92-1.14.19-.29.39-.24.66-.15.27.1 1.7.8 1.99.95.29.14.49.22.56.34.07.12.07.7-.17 1.38z"/></svg>
+          </button>
+          <button type="button" class="shop-wish product-save-btn ${isSaved ? 'is-saved' : ''}" data-product-id="${escapeHtml(item.id)}" aria-pressed="${isSaved ? 'true' : 'false'}" aria-label="${isSaved ? 'Remove from saved' : 'Save this piece'}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+          </button>`;
+      }
     }
 
     function closeProductLightbox() {
@@ -6099,13 +6799,8 @@
         const btn = e.target.closest('.prod-cat-btn');
         if (!btn) return;
         productOwner.activeCategory = btn.dataset.prodCat || 'all';
-        document.querySelectorAll('.prod-cat-btn').forEach((b) => {
-          const on = (b.dataset.prodCat || 'all') === productOwner.activeCategory;
-          b.className = `prod-cat-btn px-2.5 py-1 rounded-lg text-[11px] ${on ? 'font-semibold bg-amber-500 text-slate-950' : 'font-medium bg-slate-900/90 border border-slate-800 text-slate-300 hover:text-white'}`;
-        });
         renderProducts();
       });
-      document.getElementById('product-search')?.addEventListener('input', renderProducts);
 
       document.getElementById('product-list')?.addEventListener('click', async (event) => {
         const thumbBtn = event.target.closest('.product-thumb-btn');
@@ -6117,6 +6812,21 @@
         const lightboxTrigger = event.target.closest('.product-open-lightbox');
         if (lightboxTrigger) {
           openProductLightbox(lightboxTrigger.dataset.productId, lightboxTrigger.dataset.source, Number(lightboxTrigger.dataset.mediaIdx) || 0);
+          return;
+        }
+        const saveBtn = event.target.closest('.product-save-btn');
+        if (saveBtn) {
+          toggleProductSaved(saveBtn.dataset.productId);
+          return;
+        }
+        const addBagBtn = event.target.closest('.product-add-bag');
+        if (addBagBtn) {
+          addProductToBag(addBagBtn.dataset.productId, addBagBtn.dataset.source || 'published');
+          return;
+        }
+        const waBtn = event.target.closest('.product-wa-enquire');
+        if (waBtn) {
+          enquireSingleProduct(waBtn.dataset.productId, waBtn.dataset.source || 'published');
           return;
         }
         const publishBtn = event.target.closest('.product-publish-draft');
@@ -6153,6 +6863,23 @@
         }
       });
 
+      document.getElementById('lightbox-actions')?.addEventListener('click', (e) => {
+        const saveBtn = e.target.closest('.product-save-btn');
+        if (saveBtn) {
+          toggleProductSaved(saveBtn.dataset.productId);
+          const ctx = productOwner.lightboxItem;
+          if (ctx) renderLightboxStage();
+          return;
+        }
+        const addBtn = e.target.closest('.product-add-bag');
+        if (addBtn) {
+          addProductToBag(addBtn.dataset.productId, addBtn.dataset.source || 'published');
+          renderLightboxStage();
+          return;
+        }
+        const waBtn = e.target.closest('.product-wa-enquire');
+        if (waBtn) enquireSingleProduct(waBtn.dataset.productId, waBtn.dataset.source || 'published');
+      });
       document.getElementById('btn-close-lightbox')?.addEventListener('click', closeProductLightbox);
       document.getElementById('product-lightbox')?.addEventListener('click', (e) => {
         if (e.target.id === 'product-lightbox') closeProductLightbox();
@@ -6175,6 +6902,9 @@
           closeOwnerAuthModal();
         }
       });
+      bindShopEvents();
+      loadShopState();
+      attachShopResetHandler();
       renderProducts();
       document.getElementById('btn-retry-connection').addEventListener('click', () => { syncLiveAPIs(true, true); connectLiveWebSocket(); });
       document.getElementById('location-select').addEventListener('change', (e) => setLocation(e.target.value));
