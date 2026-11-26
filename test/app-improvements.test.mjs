@@ -398,3 +398,35 @@ test('security, performance, CSS utility, and cleanup regressions stay fixed', a
   assert.ok(html.includes('alt="Satyanarayan Jewellers Logo"'));
   assert.ok(!html.includes('alt="DK Logo"'));
 });
+
+test('computeCityPrices computes Cuttack and city-adjusted gold & silver rates accurately', async () => {
+  const html = await loadHtml();
+  const constantsStart = html.indexOf('    const TROY_OZ_TO_GRAMS =');
+  const constantsEnd = html.indexOf('    const FX_REFRESH_MS =', constantsStart);
+  const citiesStart = html.indexOf('    const CITIES = {');
+  const citiesEnd = html.indexOf('    };', citiesStart) + '    };'.length;
+  const fnStart = html.indexOf('    function computeCityPrices(');
+  const fnEnd = html.indexOf('    function formatIndianInt(', fnStart);
+  assert.ok(constantsStart >= 0 && constantsEnd > constantsStart);
+  assert.ok(citiesStart >= 0 && citiesEnd > citiesStart);
+  assert.ok(fnStart >= 0 && fnEnd > fnStart);
+
+  const computeCityPrices = vm.runInNewContext([
+    html.slice(constantsStart, constantsEnd),
+    html.slice(citiesStart, citiesEnd),
+    html.slice(fnStart, fnEnd),
+    'computeCityPrices'
+  ].join('\n'), {});
+
+  const cuttack = computeCityPrices('cuttack', 4100, 48, 85);
+  const expectedGoldBase = (4100 * 85 / 31.1034768) * 1.15 * 10 * 1.0317;
+  const expectedMcxBase = (48 * 85 / 31.1034768) * 1.15 * 1000 * 1.0802;
+  const expectedSilverBase = expectedMcxBase * 1.1462;
+  assert.equal(cuttack.gold999ExGst, Math.round(expectedGoldBase));
+  assert.equal(cuttack.gold916, Math.round(expectedGoldBase * 1.03 * 22 / 24));
+  assert.equal(cuttack.silverMCXGst, Math.round(expectedMcxBase * 1.03));
+  assert.equal(cuttack.silver925ExGst, Math.round(expectedSilverBase * 0.925));
+
+  const delhi = computeCityPrices('delhi', 4100, 48, 85);
+  assert.ok(delhi.gold999ExGst > cuttack.gold999ExGst);
+});
