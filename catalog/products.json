@@ -1,1 +1,20 @@
-[]
+[
+  {
+    "id": "prod-1795678352289-ct8ei",
+    "name": "Necles",
+    "category": "Gold",
+    "purity": "",
+    "weight": 0,
+    "price": 0,
+    "sku": "",
+    "note": "",
+    "media": [
+      {
+        "type": "image",
+        "src": "catalog/media/prod-1795678352289-ct8ei-0.webp",
+        "mime": "image/webp"
+      }
+    ],
+    "createdAt": "2026-11-26T07:32:32.289Z"
+  }
+]
