@@ -127,7 +127,6 @@
     .shop-btn-primary:hover{background:linear-gradient(135deg,#F9EBB8,#E5C55B)}
     .shop-btn-ghost{background:rgba(7,5,6,0.6);border-color:rgba(212,175,55,0.35);color:#F2DC88}
     .shop-btn-ghost:hover{border-color:#E5C55B;background:rgba(212,175,55,0.12)}
-    .shop-cart-pill{display:inline-flex;align-items:center;justify-content:center;min-width:1.05rem;height:1.05rem;padding:0 0.25rem;border-radius:9999px;background:#F2DC88;color:#1A1005;font-size:9.5px;font-weight:800;line-height:1}
 
     .shop-toolbar{padding:0.85rem 0.9rem;border-radius:1rem;display:flex;flex-direction:column;gap:0.7rem}
     .shop-cats{display:flex;gap:0.35rem;overflow-x:auto;padding-bottom:0.15rem;scrollbar-width:none}
@@ -147,9 +146,6 @@
     .shop-search-clear{flex-shrink:0;width:1.1rem;height:1.1rem;border-radius:9999px;background:rgba(212,175,55,0.16);color:#F2DC88;font-size:9px;display:flex;align-items:center;justify-content:center}
     .shop-sort{flex-shrink:0;max-width:8.2rem;padding:0.55rem 0.45rem;border-radius:0.6rem;background:rgba(7,5,6,0.85);border:1px solid rgba(58,35,42,0.95);color:#E6DEE0;font-size:11px;font-weight:600;outline:none}
     .shop-sort:focus{border-color:#D4AF37}
-    .shop-bag-btn{position:relative;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;width:2.1rem;height:2.1rem;border-radius:0.6rem;background:rgba(212,175,55,0.12);border:1px solid rgba(212,175,55,0.32);color:#F2DC88}
-    .shop-bag-btn svg{width:15px;height:15px}
-    .shop-bag-count{position:absolute;top:-0.3rem;right:-0.3rem;min-width:1.02rem;height:1.02rem;padding:0 0.2rem;border-radius:9999px;background:#F2DC88;color:#1A1005;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;border:1px solid #090607}
     .shop-results-row{display:flex;align-items:center;justify-content:space-between;gap:0.5rem}
     .shop-results-count{font-size:10.5px;color:#9A8B8E;margin:0}
     .shop-results-count strong{color:#F2DC88}
@@ -194,11 +190,9 @@
     .shop-price-request{font-size:11px;font-weight:700;color:#F9EBB8;background:rgba(212,175,55,0.14);border:1px dashed rgba(212,175,55,0.4);border-radius:0.4rem;padding:0.24rem 0.4rem;display:inline-flex;align-items:center;gap:0.25rem;width:100%;justify-content:center}
     .shop-price-request svg{width:11px;height:11px;flex-shrink:0}
     .shop-card-actions{display:flex;align-items:center;gap:0.3rem;margin-top:0.4rem}
-    .shop-add-btn{flex:1;min-width:0;display:inline-flex;align-items:center;justify-content:center;gap:0.25rem;padding:0.42rem 0.4rem;border-radius:0.5rem;background:linear-gradient(135deg,#F2DC88,#D4AF37);color:#1A1005;font-size:10px;font-weight:800;letter-spacing:0.01em}
-    .shop-add-btn:hover{background:linear-gradient(135deg,#F9EBB8,#E5C55B)}
-    .shop-add-btn svg{width:11px;height:11px;flex-shrink:0}
-    .shop-add-btn.is-added{background:rgba(16,185,129,0.22);border:1px solid rgba(16,185,129,0.5);color:#A7F3D0}
     .shop-quick-btn{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;width:1.85rem;height:1.85rem;border-radius:0.5rem;background:rgba(16,185,129,0.14);border:1px solid rgba(16,185,129,0.35);color:#6EE7B7}
+    .shop-card-actions .shop-quick-btn{flex:1;min-width:0;width:auto;height:auto;gap:0.3rem;padding:0.45rem 0.5rem;font-size:10px;font-weight:800;letter-spacing:0.01em}
+    .shop-card-actions .shop-quick-btn svg{width:12px;height:12px;flex-shrink:0}
     .shop-quick-btn svg{width:13px;height:13px}
     .shop-quick-btn:hover{background:rgba(16,185,129,0.24)}
     .shop-admin-row{display:flex;align-items:center;justify-content:space-between;gap:0.35rem;margin-top:0.4rem;padding-top:0.4rem;border-top:1px solid rgba(58,35,42,0.85)}
@@ -219,54 +213,14 @@
     .shop-skeleton-line.tiny{width:42%;height:0.42rem;margin-top:0.15rem}
     @keyframes shopShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
-    /* Shopping bag drawer */
-    .shop-cart-shell{position:fixed;inset:0;z-index:85;display:flex;justify-content:flex-end}
-    .shop-cart-shell.hidden{display:none}
-    .shop-cart-backdrop{position:absolute;inset:0;background:rgba(4,2,3,0.75);backdrop-filter:blur(3px)}
-    .shop-cart-panel{position:relative;width:100%;max-width:23rem;height:100%;display:flex;flex-direction:column;background:linear-gradient(180deg,#140D10 0%,#080506 100%);border-left:1px solid rgba(212,175,55,0.28);box-shadow:-22px 0 60px rgba(0,0,0,0.8);animation:shopSlideIn 240ms cubic-bezier(0.22,1,0.36,1)}
-    @keyframes shopSlideIn{from{transform:translateX(14px);opacity:0.4}to{transform:translateX(0);opacity:1}}
-    .shop-cart-head{display:flex;align-items:flex-start;justify-content:space-between;gap:0.6rem;padding:0.9rem 0.95rem 0.7rem;border-bottom:1px solid rgba(58,35,42,0.9)}
-    .shop-cart-head h3{margin:0;font-family:Georgia,'Times New Roman',serif;font-size:1rem;font-weight:700;color:#FFF8E6}
-    .shop-cart-head p{margin:0.15rem 0 0;font-size:10px;line-height:1.5;color:#9A8B8E}
-    .shop-cart-close{flex-shrink:0;width:1.6rem;height:1.6rem;border-radius:0.45rem;background:rgba(58,35,42,0.7);border:1px solid rgba(173,153,158,0.25);color:#E6DEE0;font-size:11px;display:flex;align-items:center;justify-content:center}
-    .shop-cart-items{flex:1;overflow-y:auto;padding:0.7rem 0.8rem;display:flex;flex-direction:column;gap:0.5rem}
-    .shop-cart-item{display:flex;gap:0.55rem;padding:0.5rem;border-radius:0.65rem;background:rgba(26,15,19,0.9);border:1px solid rgba(58,35,42,0.9)}
-    .shop-cart-thumb{width:3.1rem;height:3.1rem;flex-shrink:0;border-radius:0.5rem;overflow:hidden;background:#070506;border:1px solid rgba(58,35,42,0.9)}
-    .shop-cart-thumb img{width:100%;height:100%;object-fit:cover}
-    .shop-cart-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:0.1rem}
-    .shop-cart-info h4{margin:0;font-size:11px;font-weight:700;color:#FFF8E6;line-height:1.3}
-    .shop-cart-info p{margin:0;font-size:9.5px;color:#9A8B8E}
-    .shop-cart-price{font-size:11px;font-weight:800;color:#F2DC88;font-variant-numeric:tabular-nums;margin-top:0.1rem}
-    .shop-cart-controls{display:flex;align-items:center;gap:0.3rem;margin-top:0.25rem}
-    .shop-qty{display:inline-flex;align-items:center;border-radius:0.4rem;border:1px solid rgba(173,153,158,0.3);overflow:hidden}
-    .shop-qty button{width:1.25rem;height:1.25rem;font-size:11px;font-weight:800;color:#F2DC88;background:rgba(7,5,6,0.6)}
-    .shop-qty span{min-width:1.15rem;text-align:center;font-size:10px;font-weight:700;color:#F7F3F4;font-variant-numeric:tabular-nums}
-    .shop-remove{font-size:9.5px;font-weight:700;color:#FB7185;margin-left:auto}
-    .shop-cart-empty{display:flex;flex-direction:column;align-items:center;gap:0.4rem;text-align:center;padding:2.4rem 1rem;color:#9A8B8E}
-    .shop-cart-empty svg{width:2rem;height:2rem;color:rgba(212,175,55,0.4)}
-    .shop-cart-empty p{margin:0;font-size:11px;line-height:1.6}
-    .shop-cart-foot{padding:0.7rem 0.85rem 0.9rem;border-top:1px solid rgba(58,35,42,0.9);display:flex;flex-direction:column;gap:0.45rem;background:rgba(7,5,6,0.55)}
-    .shop-cart-total-row{display:flex;align-items:baseline;justify-content:space-between;font-size:11px;font-weight:600;color:#C4B8BA}
-    .shop-cart-total-row strong{font-size:15px;font-weight:800;color:#F2DC88;font-variant-numeric:tabular-nums}
-    .shop-cart-note{margin:0;font-size:9.5px;line-height:1.5;color:#8A7B7E}
-    .shop-btn-whatsapp{display:inline-flex;align-items:center;justify-content:center;gap:0.35rem;padding:0.6rem;border-radius:0.6rem;background:rgba(16,185,129,0.18);border:1px solid rgba(16,185,129,0.45);color:#A7F3D0;font-size:11.5px;font-weight:800}
-    .shop-btn-whatsapp svg{width:14px;height:14px}
-    .shop-btn-whatsapp:hover{background:rgba(16,185,129,0.28)}
-    .shop-btn-whatsapp:disabled{opacity:0.45;cursor:not-allowed}
-    .shop-cart-clear{font-size:10px;font-weight:700;color:#9A8B8E;text-align:center;text-decoration:underline;text-underline-offset:2px}
-    .shop-toast-note{font-size:10px}
-    @keyframes shopBump{0%{transform:scale(1)}45%{transform:scale(1.14)}100%{transform:scale(1)}}
-    .shop-bump{animation:shopBump 320ms cubic-bezier(0.22,1,0.36,1)}
     .shop-lightbox-actions{display:flex;flex-wrap:wrap;align-items:center;gap:0.5rem;padding:0.55rem 0.15rem 0.1rem;border-top:1px solid rgba(58,35,42,0.9)}
     .shop-lightbox-price{flex:1;min-width:7rem;display:flex;flex-direction:column;gap:0.05rem}
     .shop-lightbox-price strong{font-size:15px;font-weight:800;color:#F2DC88;font-variant-numeric:tabular-nums}
     .shop-lightbox-price span{font-size:9.5px;color:#9A8B8E}
-    .shop-lightbox-actions .shop-add-btn{flex:0 1 auto;padding:0.5rem 0.85rem;font-size:11px}
     .shop-lightbox-actions .shop-wish{position:static;width:2.1rem;height:2.1rem}
     @media (max-width:420px){
       .shop-hero-title{font-size:1.4rem}
       .shop-name{font-size:11px}
-      .shop-add-btn{font-size:9.5px;padding:0.4rem 0.3rem}
     }
     .space-y-3 > :not([hidden]) ~ :not([hidden]){margin-top:0.75rem}.w-7{width:1.75rem}.ml-auto{margin-left:auto}.hover\:bg-rose-500\/10:hover{background-color:rgba(244,63,94,0.1)}@media (min-width:640px){.sm\:col-span-5{grid-column:span 5/span 5}}
     textarea{font-family:inherit;font-size:100%;color:inherit}
@@ -403,6 +357,47 @@
 
     <!-- VIEW 1: LIVE RATES (Default Home) -->
     <div id="view-rates" class="app-view flex flex-col gap-4">
+
+      <!-- RATE OF THE DAY (Retail ex-GST per gram, captured in the 12:00–12:59 PM window) -->
+      <section id="rate-of-day-section" class="glass-card rounded-2xl p-3.5 sm:p-5" aria-label="Rate of the day">
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <div class="min-w-0">
+            <h2 class="text-sm sm:text-base font-semibold text-amber-100 leading-tight">Rate of the Day</h2>
+            <p id="rate-of-day-caption" class="text-[11px] text-slate-400 mt-0.5">Retail ex-GST per gram · captured between 12:00–1:00 PM</p>
+          </div>
+          <span id="rate-of-day-date" class="shrink-0 text-[10px] px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 tabular-nums whitespace-nowrap">Awaiting 12 PM</span>
+        </div>
+        <div class="grid grid-cols-4 gap-1.5 sm:gap-2.5">
+          <div class="rate-tile rate-tile-gold-hi rounded-xl px-1 py-2 sm:p-2.5 flex flex-col justify-between text-center">
+            <div>
+              <p id="rod-999-price" class="price-num text-[11px] sm:text-base font-bold text-white tabular-nums tracking-tight whitespace-nowrap min-h-[1.25rem] flex items-center justify-center">--</p>
+              <p id="rod-999-10g" class="text-[9px] sm:text-[10px] text-amber-200/75 tabular-nums mt-0.5 truncate">-- / 10g</p>
+            </div>
+            <span class="mt-2 block py-1 rounded-lg bg-amber-500 text-slate-950 text-[10px] sm:text-[11px] font-bold">999</span>
+          </div>
+          <div class="rate-tile rate-tile-gold rounded-xl px-1 py-2 sm:p-2.5 flex flex-col justify-between text-center">
+            <div>
+              <p id="rod-995-price" class="price-num text-[11px] sm:text-base font-bold text-white tabular-nums tracking-tight whitespace-nowrap min-h-[1.25rem] flex items-center justify-center">--</p>
+              <p id="rod-995-10g" class="text-[9px] sm:text-[10px] text-slate-400 tabular-nums mt-0.5 truncate">-- / 10g</p>
+            </div>
+            <span class="mt-2 block py-1 rounded-lg bg-amber-500/20 text-amber-200 border border-amber-500/30 text-[10px] sm:text-[11px] font-semibold">995</span>
+          </div>
+          <div class="rate-tile rate-tile-gold rounded-xl px-1 py-2 sm:p-2.5 flex flex-col justify-between text-center">
+            <div>
+              <p id="rod-916-price" class="price-num text-[11px] sm:text-base font-bold text-white tabular-nums tracking-tight whitespace-nowrap min-h-[1.25rem] flex items-center justify-center">--</p>
+              <p id="rod-916-10g" class="text-[9px] sm:text-[10px] text-slate-400 tabular-nums mt-0.5 truncate">-- / 10g</p>
+            </div>
+            <span class="mt-2 block py-1 rounded-lg bg-amber-500/20 text-amber-200 border border-amber-500/30 text-[10px] sm:text-[11px] font-semibold">916</span>
+          </div>
+          <div class="rate-tile rate-tile-gold rounded-xl px-1 py-2 sm:p-2.5 flex flex-col justify-between text-center">
+            <div>
+              <p id="rod-750-price" class="price-num text-[11px] sm:text-base font-bold text-white tabular-nums tracking-tight whitespace-nowrap min-h-[1.25rem] flex items-center justify-center">--</p>
+              <p id="rod-750-10g" class="text-[9px] sm:text-[10px] text-slate-400 tabular-nums mt-0.5 truncate">-- / 10g</p>
+            </div>
+            <span class="mt-2 block py-1 rounded-lg bg-amber-500/20 text-amber-200 border border-amber-500/30 text-[10px] sm:text-[11px] font-semibold">750</span>
+          </div>
+        </div>
+      </section>
 
       <!-- INDIA (INR) 2-CARD LAYOUT: GOLD & SILVER (CLEAN & SMOOTH) -->
       <section id="inr-rates-section" class="flex flex-col gap-3.5" aria-label="India Live Bullion Prices Per 1 Gram">
@@ -935,10 +930,6 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
               Shop the collection
             </button>
-            <button type="button" id="btn-open-cart" class="shop-btn-ghost" aria-haspopup="dialog" aria-controls="shop-cart">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-              My Bag <span id="cart-count-pill" class="shop-cart-pill hidden">0</span>
-            </button>
           </div>
         </div>
       </section>
@@ -949,9 +940,6 @@
           <button type="button" data-prod-cat="all" class="prod-cat-btn is-active" aria-pressed="true">All</button>
           <button type="button" data-prod-cat="Gold" class="prod-cat-btn">Gold</button>
           <button type="button" data-prod-cat="Silver" class="prod-cat-btn">Silver</button>
-          <button type="button" data-prod-cat="Diamond" class="prod-cat-btn">Diamond</button>
-          <button type="button" data-prod-cat="Platinum" class="prod-cat-btn">Platinum</button>
-          <button type="button" data-prod-cat="Gemstone" class="prod-cat-btn">Gemstone</button>
           <button type="button" data-prod-cat="Other" class="prod-cat-btn">Other</button>
           <button type="button" data-prod-cat="saved" class="prod-cat-btn prod-cat-saved">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
@@ -973,10 +961,6 @@
             <option value="price-desc">Price: high to low</option>
             <option value="name">Name A–Z</option>
           </select>
-          <button type="button" id="btn-open-cart-inline" class="shop-bag-btn" aria-label="Open shopping bag" aria-haspopup="dialog" aria-controls="shop-cart">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-            <span id="cart-count-inline" class="shop-bag-count">0</span>
-          </button>
         </div>
 
         <div class="shop-results-row">
@@ -1018,7 +1002,7 @@
               <input id="product-name" required maxlength="80" placeholder="e.g. 22K Bridal Temple Necklace" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" />
             </label>
             <label class="col-span-1 sm:col-span-3 text-[11px] text-slate-400">Category
-              <select id="product-category" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-2 py-2.5 text-sm text-white"><option>Gold</option><option>Silver</option><option>Diamond</option><option>Platinum</option><option>Gemstone</option><option>Other</option></select>
+              <select id="product-category" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-2 py-2.5 text-sm text-white"><option>Gold</option><option>Silver</option><option>Other</option></select>
             </label>
             <label class="col-span-1 sm:col-span-2 text-[11px] text-slate-400">Purity
               <input id="product-purity" maxlength="20" placeholder="22K HUID" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" />
@@ -1658,32 +1642,6 @@
     </div>
   </nav>
 
-  <!-- SHOPPING BAG DRAWER (Top-level under body so fixed positioning is never trapped) -->
-  <div id="shop-cart" class="shop-cart-shell hidden" role="dialog" aria-modal="true" aria-labelledby="shop-cart-title">
-    <div id="shop-cart-backdrop" class="shop-cart-backdrop"></div>
-    <aside class="shop-cart-panel" aria-label="Shopping bag">
-      <header class="shop-cart-head">
-        <div>
-          <h3 id="shop-cart-title">My Bag</h3>
-          <p id="shop-cart-sub">Reserve the pieces you love — we confirm on WhatsApp.</p>
-        </div>
-        <button id="btn-close-cart" type="button" class="shop-cart-close" aria-label="Close shopping bag">✕</button>
-      </header>
-
-      <div id="shop-cart-items" class="shop-cart-items"></div>
-
-      <footer class="shop-cart-foot">
-        <div class="shop-cart-total-row"><span>Estimated total</span><strong id="shop-cart-total">₹0</strong></div>
-        <p class="shop-cart-note">Indicative, incl. 3% GST. Making charges &amp; stone value are confirmed by our Cuttack team before payment.</p>
-        <button id="btn-cart-whatsapp" type="button" class="shop-btn-whatsapp">
-          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91C21.95 6.45 17.5 2 12.04 2zm5.82 14.01c-.24.68-1.41 1.3-1.95 1.38-.5.08-1.13.11-1.82-.11-.42-.13-.96-.31-1.65-.61-2.9-1.25-4.79-4.17-4.93-4.36-.14-.19-1.18-1.57-1.18-3 0-1.43.75-2.13 1.01-2.42.27-.29.58-.36.78-.36.19 0 .39 0 .56.01.18.01.42-.07.66.5.24.58.82 2.01.89 2.15.07.15.12.32.02.51-.1.19-.15.32-.29.49-.15.17-.31.38-.44.51-.15.15-.3.31-.13.6.17.29.76 1.25 1.63 2.03 1.12 1 2.06 1.31 2.35 1.46.29.15.46.12.63-.07.17-.19.73-.85.92-1.14.19-.29.39-.24.66-.15.27.1 1.7.8 1.99.95.29.14.49.22.56.34.07.12.07.7-.17 1.38z"/></svg>
-          Enquire on WhatsApp
-        </button>
-        <button id="btn-cart-clear" type="button" class="shop-cart-clear">Clear bag</button>
-      </footer>
-    </aside>
-  </div>
-
   <!-- OWNER ACCESS MODAL (GitHub Token Only · Top-level under body so fixed positioning is never trapped) -->
   <div id="owner-auth-modal" class="jewel-modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="owner-auth-title">
     <div class="jewel-modal-card">
@@ -1849,7 +1807,8 @@
       geminiKey: 'aurumai_gemini_api_key',
       lastRates: 'satyanarayan_last_rates_v1',
       fastWs: 'satyanarayan_fast_ws_v1',
-      newsCache: 'satyanarayan_news_cache_v1'
+      newsCache: 'satyanarayan_news_cache_v1',
+      rateOfDay: 'satyanarayan_rate_of_day_v1'
     };
 
     function lsGet(key, fallback = '') {
@@ -2923,6 +2882,93 @@
       renderPriceCardsNow(fl, rev, wsStamp);
     }
 
+    // --- RATE OF THE DAY (Retail ex-GST per gram for 999/995/916/750, captured 12:00–12:59 PM) ---
+    function localDateKey(d = new Date()) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+
+    function readRateOfDay() {
+      const raw = lsGet(STORAGE_KEYS.rateOfDay, '');
+      if (!raw) return null;
+      try {
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed.date !== 'string' || !parsed.rates) return null;
+        return parsed;
+      } catch { return null; }
+    }
+
+    // Capture the day's Retail (ex-GST) rates once, only while the clock is between 12:00–12:59 PM.
+    // A capture already taken today is never overwritten; older days stay until a new in-window capture.
+    function captureRateOfDay(prices, now = new Date()) {
+      const stored = readRateOfDay();
+      const today = localDateKey(now);
+      if (stored && stored.date === today) return stored;
+      if (now.getHours() !== 12 || !prices) return null;
+      const rates = {
+        g999: Number(prices.gold999ExGstGram),
+        g995: Number(prices.gold995ExGstGram),
+        g916: Number(prices.gold916ExGstGram),
+        g750: Number(prices.gold18ExGstGram)
+      };
+      if (!Object.values(rates).every((v) => Number.isFinite(v) && v > 0)) return null;
+      const entry = {
+        date: today,
+        capturedAt: now.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true }),
+        rates
+      };
+      lsSet(STORAGE_KEYS.rateOfDay, JSON.stringify(entry));
+      return entry;
+    }
+
+    function renderRateOfDay(prices) {
+      const dateEl = document.getElementById('rate-of-day-date');
+      const captionEl = document.getElementById('rate-of-day-caption');
+      const entry = captureRateOfDay(prices) || readRateOfDay();
+      const tiles = [
+        ['rod-999-price', 'rod-999-10g', 'g999'],
+        ['rod-995-price', 'rod-995-10g', 'g995'],
+        ['rod-916-price', 'rod-916-10g', 'g916'],
+        ['rod-750-price', 'rod-750-10g', 'g750']
+      ];
+      if (!entry) {
+        for (const [priceId, tenGId] of tiles) {
+          const priceEl = document.getElementById(priceId);
+          const tenGEl = document.getElementById(tenGId);
+          if (priceEl) priceEl.textContent = '--';
+          if (tenGEl) tenGEl.textContent = '-- / 10g';
+        }
+        if (dateEl) dateEl.textContent = 'Awaiting 12 PM';
+        if (captionEl) captionEl.textContent = 'Retail ex-GST per gram · captured between 12:00–1:00 PM';
+        return;
+      }
+      const isToday = entry.date === localDateKey();
+      for (const [priceId, tenGId, key] of tiles) {
+        const value = Number(entry.rates[key]);
+        const priceEl = document.getElementById(priceId);
+        const tenGEl = document.getElementById(tenGId);
+        if (priceEl) priceEl.textContent = Number.isFinite(value) && value > 0 ? fmtINR(value, 2) : '--';
+        if (tenGEl) tenGEl.textContent = Number.isFinite(value) && value > 0 ? `${fmtINR(value * 10, 0)} / 10g` : '-- / 10g';
+      }
+      if (dateEl) {
+        if (isToday) {
+          dateEl.textContent = `Today · ${entry.capturedAt || '12 PM'}`;
+        } else {
+          const d = new Date(`${entry.date}T00:00:00`);
+          dateEl.textContent = Number.isNaN(d.getTime())
+            ? entry.date
+            : d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+      }
+      if (captionEl) {
+        captionEl.textContent = isToday
+          ? 'Retail ex-GST per gram · captured in the 12 PM window'
+          : 'Retail ex-GST per gram · last captured rate shown';
+      }
+    }
+
     function renderPriceCards(flashDirs = null, animateReveal = false, fromWs = false) {
       if (!state.prices || !state.sessionOpen) return;
       if (flashDirs) {
@@ -2958,6 +3004,7 @@
     function renderPriceCardsNow(flashDirs = null, animateReveal = false, fromWs = false) {
       const p = state.prices;
       if (!p || !state.sessionOpen) return;
+      renderRateOfDay(p);
 
       const openP = state.openPrices || (state.openPrices = computeCityPrices(state.cityId, state.sessionOpen.spotGold, state.sessionOpen.spotSilver, state.sessionOpen.usdInr));
       const modeChanged = lastPaintedMode !== state.marketMode;
@@ -5397,7 +5444,6 @@
     const ALLOWED_VIDEO_MIME = /^video\/(mp4|webm|quicktime)$/i;
 
     const SHOP_WISHLIST_KEY = 'satyanarayan-shop-wishlist-v1';
-    const SHOP_BAG_KEY = 'satyanarayan-shop-bag-v1';
     const SHOP_WHATSAPP_NUMBER = ''; // Optional: set a 10-digit showroom number to pre-address bag enquiries
 
     const productOwner = {
@@ -5418,7 +5464,6 @@
       lightboxItem: null,
       lightboxIdx: 0,
       savedIds: new Set(),
-      bag: [],
       lastRenderedIds: []
     };
 
@@ -5446,19 +5491,10 @@
     function loadShopState() {
       const saved = readShopStorage(SHOP_WISHLIST_KEY, []);
       productOwner.savedIds = new Set(Array.isArray(saved) ? saved.filter((x) => typeof x === 'string') : []);
-      const bag = readShopStorage(SHOP_BAG_KEY, []);
-      productOwner.bag = Array.isArray(bag)
-        ? bag.filter((x) => x && typeof x.id === 'string').map((x) => ({
-            id: x.id,
-            source: x.source === 'local' ? 'local' : 'published',
-            qty: Math.max(1, Math.min(20, Number(x.qty) || 1))
-          }))
-        : [];
     }
 
     function saveShopState() {
       writeShopStorage(SHOP_WISHLIST_KEY, Array.from(productOwner.savedIds));
-      writeShopStorage(SHOP_BAG_KEY, productOwner.bag);
     }
 
     function findCatalogItem(id, source) {
@@ -5479,105 +5515,9 @@
       renderProducts();
     }
 
-    function addProductToBag(id, source, qty = 1) {
-      const item = findCatalogItem(id, source);
-      if (!item) return;
-      const existing = productOwner.bag.find((x) => x.id === id);
-      if (existing) {
-        existing.qty = Math.min(20, existing.qty + qty);
-        showToast(`Updated quantity for “${item.name}”.`, 'success');
-      } else {
-        productOwner.bag.push({ id, source, qty: Math.max(1, Math.min(20, qty)) });
-        showToast(`“${item.name}” added to your bag.`, 'success');
-      }
-      saveShopState();
-      renderProducts();
-      renderShopBag();
-      pulseCartButtons();
-    }
-
-    function setBagQty(id, nextQty) {
-      const entry = productOwner.bag.find((x) => x.id === id);
-      if (!entry) return;
-      if (nextQty <= 0) {
-        productOwner.bag = productOwner.bag.filter((x) => x.id !== id);
-      } else {
-        entry.qty = Math.min(20, nextQty);
-      }
-      saveShopState();
-      renderProducts();
-      renderShopBag();
-    }
-
-    function removeBagItem(id) {
-      productOwner.bag = productOwner.bag.filter((x) => x.id !== id);
-      saveShopState();
-      renderProducts();
-      renderShopBag();
-    }
-
-    function clearShopBag() {
-      if (!productOwner.bag.length) return;
-      productOwner.bag = [];
-      saveShopState();
-      renderProducts();
-      renderShopBag();
-      showToast('Shopping bag cleared.', 'info');
-    }
-
-    function getBagDetail() {
-      const lines = [];
-      let total = 0;
-      let count = 0;
-      let onRequest = 0;
-      for (const entry of productOwner.bag) {
-        const item = findCatalogItem(entry.id, entry.source);
-        if (!item) continue;
-        const price = Number(item.price) || 0;
-        if (price > 0) total += price * entry.qty; else onRequest += entry.qty;
-        count += entry.qty;
-        lines.push({ item, qty: entry.qty, price });
-      }
-      return { lines, total, count, onRequest };
-    }
-
-    function pulseCartButtons() {
-      ['btn-open-cart', 'btn-open-cart-inline'].forEach((id) => {
-        const btn = document.getElementById(id);
-        if (!btn) return;
-        btn.classList.remove('shop-bump');
-        void btn.offsetWidth;
-        btn.classList.add('shop-bump');
-      });
-    }
-
     function formatShopPrice(value) {
       const n = Number(value) || 0;
       return `₹${n.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
-    }
-
-    function buildBagEnquiryText() {
-      const { lines, total, count, onRequest } = getBagDetail();
-      if (!lines.length) return '';
-      const rows = lines.map(({ item, qty, price }) => `• ${item.name}${item.purity ? ` (${item.purity})` : ''} × ${qty} — ${price > 0 ? formatShopPrice(price * qty) : 'Price on request'}`);
-      const lines2 = [
-        'Hello Satyanarayan Jewellers, I would like to reserve these pieces:',
-        '',
-        ...rows,
-        '',
-        `Estimated total: ${formatShopPrice(total)}${onRequest ? ` + ${onRequest} piece(s) on request` : ''}`,
-        `Total pieces: ${count}`,
-        '',
-        'Please confirm availability, making charges and pickup/delivery.'
-      ];
-      return lines2.join('\n');
-    }
-
-    function enquireBagOnWhatsApp() {
-      const text = buildBagEnquiryText();
-      if (!text) { showToast('Your bag is empty — add a piece first.', 'alert'); return; }
-      const base = SHOP_WHATSAPP_NUMBER ? `https://wa.me/91${SHOP_WHATSAPP_NUMBER.replace(/\D/g, '').slice(-10)}` : 'https://wa.me/';
-      window.open(`${base}?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
     }
 
     function enquireSingleProduct(id, source) {
@@ -5593,86 +5533,6 @@
       ].filter(Boolean).join('\n');
       const base = SHOP_WHATSAPP_NUMBER ? `https://wa.me/91${SHOP_WHATSAPP_NUMBER.replace(/\D/g, '').slice(-10)}` : 'https://wa.me/';
       window.open(`${base}?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
-    }
-
-    function openShopCart() {
-      const shell = document.getElementById('shop-cart');
-      if (!shell) return;
-      renderShopBag();
-      shell.classList.remove('hidden');
-      document.body.style.overflow = 'hidden';
-      setTimeout(() => document.getElementById('btn-close-cart')?.focus(), 40);
-    }
-
-    function closeShopCart() {
-      const shell = document.getElementById('shop-cart');
-      if (!shell) return;
-      shell.classList.add('hidden');
-      if (document.getElementById('product-lightbox')?.classList.contains('hidden')
-        && document.getElementById('owner-auth-modal')?.classList.contains('hidden')) {
-        document.body.style.overflow = '';
-      }
-    }
-
-    function renderShopBag() {
-      const wrap = document.getElementById('shop-cart-items');
-      const totalEl = document.getElementById('shop-cart-total');
-      const subEl = document.getElementById('shop-cart-sub');
-      const waBtn = document.getElementById('btn-cart-whatsapp');
-      const clearBtn = document.getElementById('btn-cart-clear');
-      const { lines, total, count, onRequest } = getBagDetail();
-
-      document.querySelectorAll('#cart-count-pill').forEach((el) => {
-        el.textContent = String(count);
-        el.classList.toggle('hidden', count === 0);
-      });
-      const inlineCount = document.getElementById('cart-count-inline');
-      if (inlineCount) inlineCount.textContent = String(count);
-      if (totalEl) totalEl.textContent = formatShopPrice(total);
-      if (subEl) {
-        subEl.textContent = count
-          ? `${count} piece${count > 1 ? 's' : ''} in your bag · we confirm on WhatsApp.`
-          : 'Reserve the pieces you love — we confirm on WhatsApp.';
-      }
-      if (waBtn) waBtn.disabled = !lines.length;
-      if (clearBtn) clearBtn.classList.toggle('hidden', !lines.length);
-
-      if (!wrap) return;
-      if (!lines.length) {
-        wrap.innerHTML = `
-          <div class="shop-cart-empty">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-            <p>Your bag is empty.<br />Tap “Add to bag” on any piece you like.</p>
-          </div>`;
-        return;
-      }
-
-      wrap.innerHTML = lines.map(({ item, qty, price }) => {
-        const media = resolveItemMediaList(item);
-        const thumb = media.find((m) => m.type === 'image') || media[0] || null;
-        const thumbHtml = thumb
-          ? (thumb.type === 'video'
-            ? `<video src="${escapeHtml(thumb.src)}" muted playsinline preload="metadata"></video>`
-            : `<img loading="lazy" decoding="async" src="${escapeHtml(thumb.src)}" alt="${escapeHtml(item.name)}" />`)
-          : '';
-        return `
-          <div class="shop-cart-item">
-            <div class="shop-cart-thumb">${thumbHtml}</div>
-            <div class="shop-cart-info">
-              <h4>${escapeHtml(item.name)}</h4>
-              <p>${escapeHtml(item.category || 'Gold')}${item.purity ? ` · ${escapeHtml(item.purity)}` : ''}${Number(item.weight) > 0 ? ` · ${Number(item.weight).toLocaleString('en-IN')} g` : ''}</p>
-              <span class="shop-cart-price">${price > 0 ? formatShopPrice(price * qty) : 'Price on request'}</span>
-              <div class="shop-cart-controls">
-                <span class="shop-qty">
-                  <button type="button" data-bag-dec="${escapeHtml(item.id)}" aria-label="Decrease quantity">−</button>
-                  <span aria-label="Quantity">${qty}</span>
-                  <button type="button" data-bag-inc="${escapeHtml(item.id)}" aria-label="Increase quantity">+</button>
-                </span>
-                <button type="button" class="shop-remove" data-bag-remove="${escapeHtml(item.id)}">Remove</button>
-              </div>
-            </div>
-          </div>`;
-      }).join('') + (onRequest ? `<p class="shop-toast-note" style="color:#9A8B8E;margin:0.2rem 0 0">${onRequest} piece${onRequest > 1 ? 's' : ''} priced on request — our team will quote on WhatsApp.</p>` : '');
     }
 
     function bindShopEvents() {
@@ -5703,31 +5563,6 @@
       });
       document.getElementById('btn-shop-now')?.addEventListener('click', () => {
         document.getElementById('product-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
-      document.getElementById('btn-open-cart')?.addEventListener('click', openShopCart);
-      document.getElementById('btn-open-cart-inline')?.addEventListener('click', openShopCart);
-      document.getElementById('btn-close-cart')?.addEventListener('click', closeShopCart);
-      document.getElementById('shop-cart-backdrop')?.addEventListener('click', closeShopCart);
-      document.getElementById('btn-cart-whatsapp')?.addEventListener('click', enquireBagOnWhatsApp);
-      document.getElementById('btn-cart-clear')?.addEventListener('click', clearShopBag);
-      document.getElementById('shop-cart-items')?.addEventListener('click', (e) => {
-        const inc = e.target.closest('[data-bag-inc]');
-        if (inc) {
-          const entry = productOwner.bag.find((x) => x.id === inc.dataset.bagInc);
-          if (entry) setBagQty(entry.id, entry.qty + 1);
-          return;
-        }
-        const dec = e.target.closest('[data-bag-dec]');
-        if (dec) {
-          const entry = productOwner.bag.find((x) => x.id === dec.dataset.bagDec);
-          if (entry) setBagQty(entry.id, entry.qty - 1);
-          return;
-        }
-        const rm = e.target.closest('[data-bag-remove]');
-        if (rm) removeBagItem(rm.dataset.bagRemove);
-      });
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeShopCart();
       });
     }
 
@@ -6388,13 +6223,6 @@
       const resultsEl = document.getElementById('product-results-count');
       const hasFilters = productOwner.activeCategory !== 'all' || Boolean((searchInput?.value || '').trim());
       document.getElementById('btn-clear-filters')?.classList.toggle('hidden', !hasFilters);
-      const bagDetail = getBagDetail();
-      document.querySelectorAll('#cart-count-pill').forEach((el) => {
-        el.textContent = String(bagDetail.count);
-        el.classList.toggle('hidden', bagDetail.count === 0);
-      });
-      const inlineCount = document.getElementById('cart-count-inline');
-      if (inlineCount) inlineCount.textContent = String(bagDetail.count);
       if (resultsEl) {
         if (!allItems.length) {
           resultsEl.textContent = 'Collection loading…';
@@ -6412,7 +6240,6 @@
           list.innerHTML = renderEmptyCollection(allItems);
         }
         attachShopResetHandler();
-        renderShopBag();
         return;
       }
 
@@ -6421,7 +6248,6 @@
         const activeIdx = Math.min(productOwner.activeMediaIndex.get(p.id) || 0, Math.max(0, mediaList.length - 1));
         const activeMedia = mediaList[activeIdx] || null;
         const isSaved = productOwner.savedIds.has(p.id);
-        const inBag = productOwner.bag.find((x) => x.id === p.id);
         const priceNum = Number(p.price) || 0;
 
         let mediaHtml = `<div class="flex flex-col items-center justify-center gap-1.5 text-slate-500 p-4 text-center">
@@ -6472,12 +6298,9 @@
               ${specParts.length ? `<div class="shop-specs">${specParts.map((s) => `<span class="shop-spec">${escapeHtml(s)}</span>`).join('')}</div>` : ''}
               <div class="shop-price">${priceHtml}</div>
               <div class="shop-card-actions">
-                <button type="button" class="shop-add-btn product-add-bag ${inBag ? 'is-added' : ''}" data-product-id="${escapeHtml(p.id)}" data-source="${p._source}" aria-label="Add ${escapeHtml(p.name)} to bag">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-                  ${inBag ? `In bag · ${inBag.qty}` : 'Add to bag'}
-                </button>
                 <button type="button" class="shop-quick-btn product-wa-enquire" data-product-id="${escapeHtml(p.id)}" data-source="${p._source}" aria-label="Enquire about ${escapeHtml(p.name)} on WhatsApp" title="Enquire on WhatsApp">
                   <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91C21.95 6.45 17.5 2 12.04 2zm5.82 14.01c-.24.68-1.41 1.3-1.95 1.38-.5.08-1.13.11-1.82-.11-.42-.13-.96-.31-1.65-.61-2.9-1.25-4.79-4.17-4.93-4.36-.14-.19-1.18-1.57-1.18-3 0-1.43.75-2.13 1.01-2.42.27-.29.58-.36.78-.36.19 0 .39 0 .56.01.18.01.42-.07.66.5.24.58.82 2.01.89 2.15.07.15.12.32.02.51-.1.19-.15.32-.29.49-.15.17-.31.38-.44.51-.15.15-.3.31-.13.6.17.29.76 1.25 1.63 2.03 1.12 1 2.06 1.31 2.35 1.46.29.15.46.12.63-.07.17-.19.73-.85.92-1.14.19-.29.39-.24.66-.15.27.1 1.7.8 1.99.95.29.14.49.22.56.34.07.12.07.7-.17 1.38z"/></svg>
+                  Enquire on WhatsApp
                 </button>
               </div>
               ${p.note ? `<p class="shop-price-note" style="margin:0.3rem 0 0;line-height:1.5">${escapeHtml(p.note)}</p>` : ''}
@@ -6486,8 +6309,6 @@
           </article>
         `;
       }).join('');
-
-      renderShopBag();
     }
 
     function attachShopResetHandler() {
@@ -6547,17 +6368,12 @@
         const src = item._source || (productOwner.localItems.includes(item) ? 'local' : 'published');
         const priceNum = Number(item.price) || 0;
         const isSaved = productOwner.savedIds.has(item.id);
-        const inBag = productOwner.bag.find((x) => x.id === item.id);
         const specs = [item.category, item.purity, Number(item.weight) > 0 ? `${Number(item.weight).toLocaleString('en-IN')} g` : '', item.sku ? `#${item.sku}` : ''].filter(Boolean);
         actions.innerHTML = `
           <div class="shop-lightbox-price">
             <strong>${priceNum > 0 ? formatShopPrice(priceNum) : 'Price on request'}</strong>
             <span>${priceNum > 0 ? 'Incl. 3% GST · making charges extra' : escapeHtml(specs.join(' · ') || 'Our team will quote on WhatsApp')}</span>
           </div>
-          <button type="button" class="shop-add-btn product-add-bag ${inBag ? 'is-added' : ''}" data-product-id="${escapeHtml(item.id)}" data-source="${src}">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-            ${inBag ? `In bag · ${inBag.qty}` : 'Add to bag'}
-          </button>
           <button type="button" class="shop-quick-btn product-wa-enquire" data-product-id="${escapeHtml(item.id)}" data-source="${src}" aria-label="Enquire on WhatsApp" title="Enquire on WhatsApp">
             <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91C21.95 6.45 17.5 2 12.04 2zm5.82 14.01c-.24.68-1.41 1.3-1.95 1.38-.5.08-1.13.11-1.82-.11-.42-.13-.96-.31-1.65-.61-2.9-1.25-4.79-4.17-4.93-4.36-.14-.19-1.18-1.57-1.18-3 0-1.43.75-2.13 1.01-2.42.27-.29.58-.36.78-.36.19 0 .39 0 .56.01.18.01.42-.07.66.5.24.58.82 2.01.89 2.15.07.15.12.32.02.51-.1.19-.15.32-.29.49-.15.17-.31.38-.44.51-.15.15-.3.31-.13.6.17.29.76 1.25 1.63 2.03 1.12 1 2.06 1.31 2.35 1.46.29.15.46.12.63-.07.17-.19.73-.85.92-1.14.19-.29.39-.24.66-.15.27.1 1.7.8 1.99.95.29.14.49.22.56.34.07.12.07.7-.17 1.38z"/></svg>
           </button>
@@ -6873,11 +6689,6 @@
           toggleProductSaved(saveBtn.dataset.productId);
           return;
         }
-        const addBagBtn = event.target.closest('.product-add-bag');
-        if (addBagBtn) {
-          addProductToBag(addBagBtn.dataset.productId, addBagBtn.dataset.source || 'published');
-          return;
-        }
         const waBtn = event.target.closest('.product-wa-enquire');
         if (waBtn) {
           enquireSingleProduct(waBtn.dataset.productId, waBtn.dataset.source || 'published');
@@ -6923,12 +6734,6 @@
           toggleProductSaved(saveBtn.dataset.productId);
           const ctx = productOwner.lightboxItem;
           if (ctx) renderLightboxStage();
-          return;
-        }
-        const addBtn = e.target.closest('.product-add-bag');
-        if (addBtn) {
-          addProductToBag(addBtn.dataset.productId, addBtn.dataset.source || 'published');
-          renderLightboxStage();
           return;
         }
         const waBtn = e.target.closest('.product-wa-enquire');
@@ -7326,6 +7131,7 @@
       // 1. Paint cached rates & start 3-exchange WebSocket race + parallel REST sync FIRST
       renderMarketHoursUI();
       hydrateCachedRates();
+      renderRateOfDay(state.prices);
       connectLiveWebSocket();
       syncLiveAPIs(false, true);
 

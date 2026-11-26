@@ -581,3 +581,84 @@ test('jewellery collection supports image/video uploads with owner-only access a
   assert.equal(recProductOwner.accessRevealed, false);
   assert.equal(recSessionStorage.getItem('sj_owner_access_revealed_v1'), null);
 });
+
+test('shop drops the shopping bag and Gemstone/Platinum/Diamond; rates gain a Rate of the Day', async () => {
+  const html = await loadHtml();
+
+  // Shopping bag/cart fully removed — Saved/wishlist stays
+  assert.ok(!html.includes('id="shop-cart"'), 'cart drawer must be removed');
+  assert.ok(!html.includes('btn-open-cart'), 'My Bag buttons must be removed');
+  assert.ok(!html.includes('product-add-bag'), 'Add-to-bag buttons must be removed');
+  assert.ok(!html.includes('SHOP_BAG_KEY'), 'bag storage must be removed');
+  assert.ok(!html.includes('Add to bag'), 'no "Add to bag" copy may remain');
+  assert.ok(!html.includes('shop-cart-shell'), 'cart drawer CSS must be removed');
+  assert.ok(!html.includes('renderShopBag'), 'bag renderer must be removed');
+  assert.ok(html.includes('product-save-btn'), 'Saved/wishlist must stay');
+  assert.ok(html.includes('saved-count-pill'), 'saved count pill must stay');
+  assert.ok(html.includes('product-wa-enquire'), 'per-product WhatsApp enquiry must stay');
+
+  // Gemstone / Platinum / Diamond removed from shop filters and owner upload form
+  for (const cat of ['Diamond', 'Platinum', 'Gemstone']) {
+    assert.ok(!html.includes(`data-prod-cat="${cat}"`), `${cat} filter pill must be removed`);
+    assert.ok(!html.includes(`<option>${cat}</option>`), `${cat} upload option must be removed`);
+  }
+  assert.ok(html.includes('data-prod-cat="Gold"') && html.includes('data-prod-cat="Silver"'),
+    'Gold and Silver pills must stay');
+
+  // Rate of the Day card + capture wiring
+  assert.ok(html.includes('id="rate-of-day-section"'), 'Rate of the Day card must exist');
+  assert.ok(html.includes('rateOfDay:'), 'rate-of-day storage key must exist');
+  assert.ok(html.includes('renderRateOfDay(p);'), 'rate-of-day must refresh with every rate paint');
+
+  // captureRateOfDay(): noon-window capture, once per day, older days kept for display
+  const capStart = html.indexOf('    function localDateKey(');
+  const capEnd = html.indexOf('    function renderRateOfDay(', capStart);
+  assert.ok(capStart >= 0 && capEnd > capStart);
+  const store = new Map();
+  const { localDateKey, readRateOfDay, captureRateOfDay } = vm.runInNewContext(
+    `${html.slice(capStart, capEnd)}\n({ localDateKey, readRateOfDay, captureRateOfDay })`,
+    {
+      STORAGE_KEYS: { rateOfDay: 'satyanarayan_rate_of_day_v1' },
+      lsGet: (k, fb = '') => (store.has(k) ? store.get(k) : fb),
+      lsSet: (k, v) => { store.set(k, String(v)); }
+    }
+  );
+  const prices = {
+    gold999ExGstGram: 9000.5,
+    gold995ExGstGram: 8965.2,
+    gold916ExGstGram: 8250.4,
+    gold18ExGstGram: 6750.3
+  };
+
+  // Inside the 12:00–12:59 PM window → captures today's ex-GST retail rates
+  const noon = new Date(2026, 10, 26, 12, 30);
+  const captured = captureRateOfDay(prices, noon);
+  assert.equal(localDateKey(noon), '2026-11-26');
+  assert.equal(captured.date, '2026-11-26');
+  assert.equal(captured.rates.g999, 9000.5);
+  assert.equal(captured.rates.g916, 8250.4);
+  assert.equal(readRateOfDay().rates.g750, 6750.3);
+
+  // Outside the window with nothing captured today → no capture
+  store.clear();
+  assert.equal(captureRateOfDay(prices, new Date(2026, 10, 26, 14, 0)), null,
+    'rates outside 12:00–12:59 must not be captured');
+  assert.equal(captureRateOfDay(prices, new Date(2026, 10, 26, 11, 59)), null);
+
+  // Today's capture is never overwritten later in the day
+  captureRateOfDay(prices, noon);
+  const later = captureRateOfDay({ ...prices, gold999ExGstGram: 9999 }, new Date(2026, 10, 26, 15, 0));
+  assert.equal(later.rates.g999, 9000.5, 'today\'s noon capture must not be overwritten');
+
+  // First in-window rate of a new day replaces the previous day's capture
+  const nextDay = captureRateOfDay({ ...prices, gold999ExGstGram: 9111 }, new Date(2026, 10, 27, 12, 5));
+  assert.equal(nextDay.date, '2026-11-27');
+  assert.equal(nextDay.rates.g999, 9111);
+
+  // A previous day's capture stays readable for display when today's window hasn't happened yet
+  store.set('satyanarayan_rate_of_day_v1',
+    JSON.stringify({ date: '2026-12-25', capturedAt: '12:04 PM', rates: { g999: 8888, g995: 1, g916: 1, g750: 1 } }));
+  assert.equal(captureRateOfDay(prices, new Date(2026, 11, 26, 9, 0)), null,
+    'no new capture outside the window');
+  assert.equal(readRateOfDay().date, '2026-12-25', 'older capture must remain for display');
+});
