@@ -25,7 +25,10 @@ function makeFakeDom(values = {}) {
           toggle(cls, force) { if (cls === 'hidden') this.hidden = Boolean(force); },
           add() {},
           remove() {}
-        }
+        },
+        focus() {},
+        removeAttribute() {},
+        setAttribute() {}
       };
       nodes.set(id, node);
     }
@@ -497,4 +500,84 @@ test('jewellery collection supports image/video uploads with owner-only access a
     productOwner: { unlocked: true, publishedItems: [{ id: 'pub-1' }], localItems: [{ id: 'loc-1' }] }
   });
   assert.deepEqual(Array.from(unlockedItems, (x) => x.id), ['loc-1', 'pub-1']);
+
+  // Owner entry button stays hidden for customers until a secret reveal
+  assert.match(html, /<button id="btn-owner-access" type="button" class="shop-owner-btn hidden"/);
+  assert.ok(html.includes('.shop-owner-btn.hidden{display:none}'),
+    'hidden rule must beat .shop-owner-btn display:inline-flex');
+  assert.ok(html.includes('OWNER_ACCESS_REVEAL_KEY'), 'reveal state must persist per tab');
+  assert.ok(html.includes("'#owner'"), 'secret #owner URL hash must reveal owner access');
+  assert.ok(html.includes('OWNER_ACCESS_SECRET'), 'secret "owner" key sequence must reveal owner access');
+  const lockIdx = html.indexOf("document.getElementById('btn-owner-lock')");
+  assert.ok(lockIdx > 0 && html.slice(lockIdx, lockIdx + 400).includes('concealOwnerAccess()'),
+    'Lock must re-hide owner access');
+
+  // updateOwnerStudioUI() drives the owner button visibility
+  const uiStart = html.indexOf('    function updateOwnerStudioUI()');
+  const uiEnd = html.indexOf('    function revealOwnerAccess()', uiStart);
+  assert.ok(uiStart >= 0 && uiEnd > uiStart);
+  const runOwnerUi = (ownerState) => {
+    const dom = makeFakeDom();
+    const run = vm.runInNewContext(`${html.slice(uiStart, uiEnd)}\nupdateOwnerStudioUI`, {
+      document: dom.document,
+      productOwner: ownerState
+    });
+    run();
+    return dom;
+  };
+  const baseOwnerState = () => ({
+    unlocked: false,
+    ghConnected: false,
+    ghLogin: '',
+    accessRevealed: false,
+    publishedItems: [],
+    localItems: []
+  });
+
+  const lockedDom = runOwnerUi(baseOwnerState());
+  assert.equal(lockedDom.getNode('btn-owner-access').classList.hidden, true,
+    'owner button must be hidden for regular visitors');
+  assert.equal(lockedDom.getNode('owner-studio').classList.hidden, true);
+  assert.equal(lockedDom.getNode('owner-mode-pill').classList.hidden, true);
+  assert.equal(lockedDom.getNode('btn-owner-access-label').textContent, 'Owner');
+
+  const revealedDom = runOwnerUi({ ...baseOwnerState(), accessRevealed: true });
+  assert.equal(revealedDom.getNode('btn-owner-access').classList.hidden, false,
+    'owner button must appear after the secret reveal');
+  assert.equal(revealedDom.getNode('owner-studio').classList.hidden, true,
+    'upload studio must stay hidden until owner mode is unlocked');
+
+  const activeDom = runOwnerUi({ ...baseOwnerState(), unlocked: true, ghConnected: true });
+  assert.equal(activeDom.getNode('btn-owner-access').classList.hidden, false,
+    'owner button must stay visible while owner mode is active');
+  assert.equal(activeDom.getNode('owner-mode-pill').classList.hidden, false);
+  assert.equal(activeDom.getNode('btn-owner-access-label').textContent, 'Token Settings');
+
+  // revealOwnerAccess()/concealOwnerAccess() flip the flag and persist it per tab
+  const recStart = html.indexOf('    function revealOwnerAccess()');
+  const recEnd = html.indexOf('    function renderPendingMediaPreviews(', recStart);
+  assert.ok(recStart >= 0 && recEnd > recStart);
+  const recStore = new Map();
+  const recProductOwner = { accessRevealed: false };
+  const recSessionStorage = {
+    getItem: (k) => (recStore.has(k) ? recStore.get(k) : null),
+    setItem: (k, v) => { recStore.set(k, String(v)); },
+    removeItem: (k) => { recStore.delete(k); }
+  };
+  const { revealOwnerAccess, concealOwnerAccess } = vm.runInNewContext(
+    `${html.slice(recStart, recEnd)}\n({ revealOwnerAccess, concealOwnerAccess })`,
+    {
+      productOwner: recProductOwner,
+      sessionStorage: recSessionStorage,
+      OWNER_ACCESS_REVEAL_KEY: 'sj_owner_access_revealed_v1',
+      document: makeFakeDom().document,
+      updateOwnerStudioUI: () => {}
+    }
+  );
+  revealOwnerAccess();
+  assert.equal(recProductOwner.accessRevealed, true);
+  assert.equal(recSessionStorage.getItem('sj_owner_access_revealed_v1'), '1');
+  concealOwnerAccess();
+  assert.equal(recProductOwner.accessRevealed, false);
+  assert.equal(recSessionStorage.getItem('sj_owner_access_revealed_v1'), null);
 });
