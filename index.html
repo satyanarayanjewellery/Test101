@@ -93,7 +93,7 @@
     .jewel-thumb img,.jewel-thumb video{width:100%;height:100%;object-fit:cover;pointer-events:none}
     .jewel-dropzone{border:1.5px dashed rgba(212,175,55,0.35);background:rgba(7,5,6,0.55);border-radius:0.875rem;padding:1.1rem;text-align:center;transition:border-color 160ms ease,background-color 160ms ease}
     .jewel-dropzone.is-dragover{border-color:#E5C55B;background:rgba(212,175,55,0.1)}
-    .jewel-modal-backdrop{position:fixed;inset:0;z-index:60;background:rgba(4,2,3,0.84);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:1rem}
+    .jewel-modal-backdrop{position:fixed;inset:0;z-index:80;background:rgba(4,2,3,0.86);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:1rem;overflow-y:auto}
     .jewel-modal-backdrop.hidden{display:none}
     .jewel-modal-card{width:100%;max-width:28rem;max-height:90dvh;overflow-y:auto;background:linear-gradient(165deg,#180D11 0%,#0B0709 100%);border:1px solid rgba(212,175,55,0.28);border-radius:1.125rem;padding:1.25rem;box-shadow:0 24px 60px rgba(0,0,0,0.85)}
     .jewel-lightbox-card{width:100%;max-width:56rem;max-height:92dvh;display:flex;flex-direction:column;gap:0.75rem;background:#090607;border:1px solid rgba(212,175,55,0.28);border-radius:1.125rem;padding:1rem;box-shadow:0 24px 60px rgba(0,0,0,0.9)}
@@ -774,12 +774,12 @@
         <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-4 border-b border-slate-800">
           <div>
             <h3 class="text-sm font-semibold text-amber-200">Owner Upload Studio</h3>
-            <p id="owner-sync-status" class="text-[11px] text-slate-400 mt-0.5">Local device mode · Save drafts on this device or connect GitHub to publish live.</p>
+            <p id="owner-sync-status" class="text-[11px] text-slate-400 mt-0.5">Verified GitHub token connected · Uploads publish live to all customers.</p>
           </div>
           <div class="flex flex-wrap items-center gap-2">
             <span class="text-[10px] px-2 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 tabular-nums">Live: <strong id="owner-published-count" class="text-emerald-300">0</strong> · Drafts: <strong id="owner-draft-count" class="text-amber-300">0</strong></span>
             <button id="btn-publish-all-drafts" type="button" class="hidden px-2.5 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-200 text-[11px] font-semibold">Publish All Drafts</button>
-            <button id="btn-owner-settings" type="button" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-[11px] font-medium">Website Sync / PIN</button>
+            <button id="btn-owner-settings" type="button" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-[11px] font-medium">Token Settings</button>
             <button id="btn-owner-lock" type="button" class="px-2.5 py-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-500/10 border border-rose-500/30 text-rose-200 text-[11px] font-semibold">Lock</button>
           </div>
         </div>
@@ -830,8 +830,8 @@
           </div>
 
           <div class="flex flex-wrap items-center justify-end gap-2 pt-1">
-            <button id="btn-save-local-product" type="submit" data-action="local" class="px-4 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-100 font-semibold text-xs sm:text-sm">Save to This Device</button>
-            <button id="btn-publish-product" type="button" class="hidden px-4 py-2.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs sm:text-sm">Upload &amp; Publish to Website</button>
+            <button id="btn-save-local-product" type="button" class="px-4 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-100 font-semibold text-xs sm:text-sm">Save Local Draft</button>
+            <button id="btn-publish-product" type="submit" class="px-4 py-2.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs sm:text-sm">Upload &amp; Publish to Website</button>
           </div>
         </form>
       </section>
@@ -842,80 +842,6 @@
           <div class="text-center text-xs text-slate-400 py-8" style="grid-column:1/-1">Loading jewellery collection...</div>
         </div>
       </section>
-
-      <!-- OWNER ACCESS MODAL -->
-      <div id="owner-auth-modal" class="jewel-modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="owner-auth-title">
-        <div class="jewel-modal-card">
-          <div class="flex items-center justify-between gap-2 mb-3">
-            <div>
-              <h3 id="owner-auth-title" class="text-sm sm:text-base font-semibold text-white">Shop Owner Access</h3>
-              <p class="text-[11px] text-slate-400 mt-0.5">Only the owner can upload or delete jewellery photos &amp; videos.</p>
-            </div>
-            <button id="btn-close-owner-modal" type="button" class="px-2 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs text-slate-300" aria-label="Close">✕</button>
-          </div>
-
-          <div class="grid grid-cols-2 gap-1.5 bg-slate-950 p-1 rounded-lg border border-slate-800 mb-4">
-            <button id="owner-tab-github" type="button" class="px-2.5 py-1.5 rounded-md text-xs font-semibold bg-amber-500 text-slate-950">Website Publish (GitHub)</button>
-            <button id="owner-tab-pin" type="button" class="px-2.5 py-1.5 rounded-md text-xs font-medium text-slate-300 hover:text-white">This Device (PIN)</button>
-          </div>
-
-          <!-- GitHub Token Panel -->
-          <div id="owner-panel-github" class="space-y-3">
-            <div class="rounded-xl bg-slate-950/60 border border-slate-800 p-3 text-[11px] text-slate-300 space-y-1">
-              <p class="font-semibold text-amber-200">Publish directly to all customers</p>
-              <p class="text-slate-400">Uses your GitHub Fine-Grained Personal Access Token scoped to <span class="font-mono text-amber-200">satyanarayanjewellery/shop</span> (<span class="text-slate-200">Contents: Read and write</span>). GitHub verifies write permission server-side so nobody else can upload.</p>
-            </div>
-            <label class="block text-[11px] text-slate-400">GitHub Personal Access Token
-              <input id="owner-gh-token" type="password" autocomplete="off" placeholder="github_pat_..." class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 font-mono" />
-            </label>
-            <label class="inline-flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
-              <input id="owner-gh-remember" type="checkbox" class="accent-amber-500" />
-              Remember token on this device (otherwise clears when tab closes)
-            </label>
-            <p id="owner-gh-error" class="hidden text-xs text-rose-300"></p>
-            <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
-              <button id="btn-owner-gh-disconnect" type="button" class="hidden px-3 py-2 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-200 text-xs font-semibold">Disconnect Token</button>
-              <button id="btn-owner-gh-verify" type="button" class="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs ml-auto">Verify &amp; Unlock</button>
-            </div>
-          </div>
-
-          <!-- Local Device PIN Panel -->
-          <div id="owner-panel-pin" class="hidden space-y-3">
-            <div class="rounded-xl bg-slate-950/60 border border-slate-800 p-3 text-[11px] text-slate-400">
-              <p id="owner-pin-hint">Set a private Owner PIN on this device to save local jewellery photo &amp; video drafts offline in IndexedDB.</p>
-            </div>
-            <label class="block text-[11px] text-slate-400"><span id="owner-pin-label">Owner PIN (4–12 characters)</span>
-              <input id="owner-pin-input" type="password" inputmode="text" minlength="4" maxlength="12" autocomplete="off" placeholder="Enter PIN" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" />
-            </label>
-            <label id="owner-pin-confirm-wrap" class="hidden block text-[11px] text-slate-400">Confirm Owner PIN
-              <input id="owner-pin-confirm" type="password" inputmode="text" minlength="4" maxlength="12" autocomplete="off" placeholder="Re-enter PIN" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" />
-            </label>
-            <p id="owner-pin-error" class="hidden text-xs text-rose-300"></p>
-            <div class="flex items-center justify-end gap-2 pt-1">
-              <button id="btn-owner-pin-submit" type="button" class="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs">Unlock Local Studio</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- FULLSCREEN JEWELLERY MEDIA LIGHTBOX -->
-      <div id="product-lightbox" class="jewel-modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="lightbox-title">
-        <div class="jewel-lightbox-card">
-          <div class="flex items-center justify-between gap-2">
-            <div class="min-w-0">
-              <h3 id="lightbox-title" class="text-sm sm:text-base font-semibold text-white truncate">Jewellery Preview</h3>
-              <p id="lightbox-meta" class="text-[11px] text-slate-400 truncate"></p>
-            </div>
-            <button id="btn-close-lightbox" type="button" class="shrink-0 px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs text-slate-200" aria-label="Close preview">✕</button>
-          </div>
-          <div id="lightbox-stage" class="jewel-lightbox-stage"></div>
-          <div id="lightbox-nav" class="hidden flex items-center justify-between gap-2">
-            <button id="btn-lightbox-prev" type="button" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs text-slate-200">← Previous</button>
-            <span id="lightbox-counter" class="text-xs text-slate-400 tabular-nums">1 / 1</span>
-            <button id="btn-lightbox-next" type="button" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs text-slate-200">Next →</button>
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- VIEW: LIVE GOLD, SILVER & RUPEE NEWS -->
@@ -1505,6 +1431,62 @@
       </button>
     </div>
   </nav>
+
+  <!-- OWNER ACCESS MODAL (GitHub Token Only · Top-level under body so fixed positioning is never trapped) -->
+  <div id="owner-auth-modal" class="jewel-modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="owner-auth-title">
+    <div class="jewel-modal-card">
+      <div class="flex items-center justify-between gap-2 mb-3">
+        <div>
+          <h3 id="owner-auth-title" class="text-sm sm:text-base font-semibold text-white">Shop Owner Login</h3>
+          <p class="text-[11px] text-slate-400 mt-0.5">GitHub Token required. Only the shop owner can upload or delete jewellery.</p>
+        </div>
+        <button id="btn-close-owner-modal" type="button" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs text-slate-300" aria-label="Close">✕</button>
+      </div>
+
+      <form id="owner-panel-github" class="space-y-3" novalidate>
+        <div class="rounded-xl bg-slate-950/60 border border-slate-800 p-3 text-[11px] text-slate-300 space-y-1">
+          <p class="font-semibold text-amber-200">GitHub Token Verification</p>
+          <p class="text-slate-400">Paste your GitHub Fine-Grained Token with <span class="text-slate-200">Contents: Read and write</span> on <span class="font-mono text-amber-200">satyanarayanjewellery/shop</span>.</p>
+          <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-amber-300 hover:text-amber-200 font-medium">Create token on GitHub ↗</a>
+        </div>
+        <div class="text-[11px] text-slate-400">
+          <label for="owner-gh-token" class="block">GitHub Personal Access Token</label>
+          <div class="flex items-center gap-1.5 mt-1">
+            <input id="owner-gh-token" type="password" autocomplete="off" spellcheck="false" autocapitalize="off" placeholder="github_pat_..." class="flex-1 min-w-0 rounded-lg bg-slate-950 border border-slate-700 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 font-mono" />
+            <button id="btn-toggle-gh-token" type="button" class="shrink-0 px-2.5 py-2.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs text-slate-300" aria-label="Show or hide token">Show</button>
+          </div>
+        </div>
+        <label class="inline-flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
+          <input id="owner-gh-remember" type="checkbox" checked class="accent-amber-500" />
+          Stay logged in on this device
+        </label>
+        <p id="owner-gh-error" class="hidden text-xs text-rose-300 leading-relaxed"></p>
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+          <button id="btn-owner-gh-disconnect" type="button" class="hidden px-3 py-2 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-200 text-xs font-semibold">Disconnect Token</button>
+          <button id="btn-owner-gh-verify" type="submit" class="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs ml-auto">Verify &amp; Unlock</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- FULLSCREEN JEWELLERY MEDIA LIGHTBOX (Top-level under body) -->
+  <div id="product-lightbox" class="jewel-modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="lightbox-title">
+    <div class="jewel-lightbox-card">
+      <div class="flex items-center justify-between gap-2">
+        <div class="min-w-0">
+          <h3 id="lightbox-title" class="text-sm sm:text-base font-semibold text-white truncate">Jewellery Preview</h3>
+          <p id="lightbox-meta" class="text-[11px] text-slate-400 truncate"></p>
+        </div>
+        <button id="btn-close-lightbox" type="button" class="shrink-0 px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs text-slate-200" aria-label="Close preview">✕</button>
+      </div>
+      <div id="lightbox-stage" class="jewel-lightbox-stage"></div>
+      <div id="lightbox-nav" class="hidden flex items-center justify-between gap-2">
+        <button id="btn-lightbox-prev" type="button" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs text-slate-200">← Previous</button>
+        <span id="lightbox-counter" class="text-xs text-slate-400 tabular-nums">1 / 1</span>
+        <button id="btn-lightbox-next" type="button" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs text-slate-200">Next →</button>
+      </div>
+    </div>
+  </div>
 
   <script>
     // =========================================================================
@@ -5277,7 +5259,6 @@
     const CATALOG_MANIFEST_PATH = 'catalog/products.json';
     const CATALOG_MEDIA_PREFIX = 'catalog/media/';
     const PRODUCT_STORAGE_KEY = 'satyanarayan-jewellers-products-v1';
-    const OWNER_PIN_STORAGE_KEY = 'sj_product_owner_pin_v1';
     const OWNER_GH_TOKEN_KEY = 'sj_product_owner_gh_token_v1';
     const MAX_MEDIA_PER_ITEM = 6;
     const MAX_IMAGE_BYTES = 12 * 1024 * 1024;
@@ -5329,43 +5310,6 @@
       if (bytes < 1024) return `${bytes} B`;
       if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
       return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-    }
-
-    async function sha256Hex(text) {
-      const data = new TextEncoder().encode(String(text));
-      if (window.crypto && window.crypto.subtle) {
-        const buf = await window.crypto.subtle.digest('SHA-256', data);
-        return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('');
-      }
-      // Fallback hash only if SubtleCrypto is unavailable in insecure file:// contexts
-      let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
-      for (let i = 0; i < data.length; i++) {
-        h1 = Math.imul(h1 ^ data[i], 2654435761);
-        h2 = Math.imul(h2 ^ data[i], 1597334677);
-      }
-      h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
-      h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
-      return (h2 >>> 0).toString(16).padStart(8, '0') + (h1 >>> 0).toString(16).padStart(8, '0');
-    }
-
-    function generateRandomSalt() {
-      const bytes = new Uint8Array(16);
-      if (window.crypto && window.crypto.getRandomValues) {
-        window.crypto.getRandomValues(bytes);
-      } else {
-        for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256);
-      }
-      return Array.from(bytes).map((b) => b.toString(16).padStart(2, '0')).join('');
-    }
-
-    function readStoredPinRecord() {
-      try {
-        const raw = localStorage.getItem(OWNER_PIN_STORAGE_KEY);
-        if (!raw) return null;
-        const parsed = JSON.parse(raw);
-        if (parsed && typeof parsed.salt === 'string' && typeof parsed.hash === 'string') return parsed;
-      } catch { /* ignore */ }
-      return null;
     }
 
     function openCatalogDB() {
@@ -5498,20 +5442,44 @@
     }
 
     async function verifyGitHubToken(token) {
-      const clean = String(token || '').trim();
+      const clean = String(token || '').trim().replace(/^Bearer\s+/i, '').replace(/^["']|["']$/g, '').trim();
       if (!clean) throw new Error('Enter your GitHub Personal Access Token.');
       const headers = {
         Authorization: `Bearer ${clean}`,
         Accept: 'application/vnd.github+json',
         'X-GitHub-Api-Version': '2022-11-28'
       };
-      const repoRes = await fetch(`https://api.github.com/repos/${CATALOG_REPO_OWNER}/${CATALOG_REPO_NAME}`, { headers, cache: 'no-store' });
-      if (repoRes.status === 401) throw new Error('Token is invalid or expired.');
-      if (repoRes.status === 403 || repoRes.status === 404) throw new Error('Token does not have access to satyanarayanjewellery/shop.');
+      let repoRes;
+      try {
+        repoRes = await fetch(`https://api.github.com/repos/${CATALOG_REPO_OWNER}/${CATALOG_REPO_NAME}`, { headers, cache: 'no-store' });
+      } catch {
+        throw new Error('Could not reach GitHub API. Check your internet connection and try again.');
+      }
+      if (repoRes.status === 401) {
+        const err = new Error('Token is invalid or expired. Generate a new Fine-Grained Token on GitHub.');
+        err.authError = true;
+        throw err;
+      }
+      if (repoRes.status === 403 || repoRes.status === 404) {
+        const err = new Error('Token does not have access to satyanarayanjewellery/shop. Select this repository when creating the token.');
+        err.authError = true;
+        throw err;
+      }
       if (!repoRes.ok) throw new Error(`GitHub verification failed (HTTP ${repoRes.status}).`);
       const repo = await repoRes.json();
-      if (!repo.permissions || repo.permissions.push !== true) {
-        throw new Error('This token is read-only. Grant "Contents: Read and write" on satyanarayanjewellery/shop.');
+      if (repo.permissions && repo.permissions.push === false) {
+        const err = new Error('This token is read-only. Enable "Contents: Read and write" on satyanarayanjewellery/shop.');
+        err.authError = true;
+        throw err;
+      }
+      if (!repo.permissions) {
+        // Fallback check if GitHub omits permissions on a scoped token: confirm token is authenticated
+        const userCheck = await fetch('https://api.github.com/user', { headers, cache: 'no-store' }).catch(() => null);
+        if (!userCheck || userCheck.status === 401) {
+          const err = new Error('Token is invalid or expired.');
+          err.authError = true;
+          throw err;
+        }
       }
       let login = CATALOG_REPO_OWNER;
       try {
@@ -5779,17 +5747,18 @@
       const pubCount = document.getElementById('owner-published-count');
       const draftCount = document.getElementById('owner-draft-count');
 
-      if (studio) studio.classList.toggle('hidden', !productOwner.unlocked);
-      if (pill) pill.classList.toggle('hidden', !productOwner.unlocked);
-      if (btnLabel) btnLabel.textContent = productOwner.unlocked ? 'Owner Settings' : 'Owner';
+      const isOwnerActive = Boolean(productOwner.unlocked && productOwner.ghConnected);
+      if (studio) studio.classList.toggle('hidden', !isOwnerActive);
+      if (pill) pill.classList.toggle('hidden', !isOwnerActive);
+      if (btnLabel) btnLabel.textContent = isOwnerActive ? 'Token Settings' : 'Owner';
       if (pubCount) pubCount.textContent = String(productOwner.publishedItems.length);
       if (draftCount) draftCount.textContent = String(productOwner.localItems.length);
-      if (pubBtn) pubBtn.classList.toggle('hidden', !productOwner.ghConnected);
-      if (pubAllBtn) pubAllBtn.classList.toggle('hidden', !(productOwner.ghConnected && productOwner.localItems.length > 0));
+      if (pubBtn) pubBtn.classList.toggle('hidden', !isOwnerActive);
+      if (pubAllBtn) pubAllBtn.classList.toggle('hidden', !(isOwnerActive && productOwner.localItems.length > 0));
       if (syncStatus) {
-        syncStatus.textContent = productOwner.ghConnected
+        syncStatus.textContent = isOwnerActive
           ? `Connected to live website as @${productOwner.ghLogin} · Uploads publish to all customers.`
-          : 'Local device mode · Save drafts on this device or connect GitHub to publish live.';
+          : 'Owner login requires a verified GitHub token.';
       }
     }
 
@@ -5972,6 +5941,7 @@
       productOwner.lightboxIdx = Math.max(0, Math.min(startIdx, media.length - 1));
       renderLightboxStage();
       document.getElementById('product-lightbox')?.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
     }
 
     function renderLightboxStage() {
@@ -6002,52 +5972,34 @@
       if (modal) modal.classList.add('hidden');
       if (stage) stage.innerHTML = '';
       productOwner.lightboxItem = null;
-    }
-
-    function switchOwnerAuthTab(tab) {
-      const isGh = tab === 'github';
-      document.getElementById('owner-panel-github')?.classList.toggle('hidden', !isGh);
-      document.getElementById('owner-panel-pin')?.classList.toggle('hidden', isGh);
-      const ghTab = document.getElementById('owner-tab-github');
-      const pinTab = document.getElementById('owner-tab-pin');
-      if (ghTab) ghTab.className = `px-2.5 py-1.5 rounded-md text-xs ${isGh ? 'font-semibold bg-amber-500 text-slate-950' : 'font-medium text-slate-300 hover:text-white'}`;
-      if (pinTab) pinTab.className = `px-2.5 py-1.5 rounded-md text-xs ${!isGh ? 'font-semibold bg-amber-500 text-slate-950' : 'font-medium text-slate-300 hover:text-white'}`;
-
-      if (!isGh) {
-        const hasPin = Boolean(readStoredPinRecord());
-        const confirmWrap = document.getElementById('owner-pin-confirm-wrap');
-        const label = document.getElementById('owner-pin-label');
-        const hint = document.getElementById('owner-pin-hint');
-        const submitBtn = document.getElementById('btn-owner-pin-submit');
-        if (confirmWrap) confirmWrap.classList.toggle('hidden', hasPin);
-        if (label) label.textContent = hasPin ? 'Enter Owner PIN' : 'Create Owner PIN (4–12 characters)';
-        if (hint) hint.textContent = hasPin
-          ? 'Enter your device Owner PIN to unlock local jewellery uploads & drafts.'
-          : 'First time on this device: create a private Owner PIN to save jewellery photo & video drafts offline.';
-        if (submitBtn) submitBtn.textContent = hasPin ? 'Unlock Local Studio' : 'Set PIN & Unlock';
+      if (document.getElementById('owner-auth-modal')?.classList.contains('hidden')) {
+        document.body.style.overflow = '';
       }
     }
 
-    function openOwnerAuthModal(defaultTab = 'github') {
+    function openOwnerAuthModal() {
       const modal = document.getElementById('owner-auth-modal');
       const errGh = document.getElementById('owner-gh-error');
-      const errPin = document.getElementById('owner-pin-error');
       const tokenInput = document.getElementById('owner-gh-token');
       const disconnectBtn = document.getElementById('btn-owner-gh-disconnect');
       if (errGh) { errGh.classList.add('hidden'); errGh.textContent = ''; }
-      if (errPin) { errPin.classList.add('hidden'); errPin.textContent = ''; }
-      if (tokenInput) tokenInput.value = productOwner.ghToken || getStoredGitHubToken() || '';
+      if (tokenInput) {
+        tokenInput.type = 'password';
+        tokenInput.value = productOwner.ghToken || getStoredGitHubToken() || '';
+      }
+      const toggleBtn = document.getElementById('btn-toggle-gh-token');
+      if (toggleBtn) toggleBtn.textContent = 'Show';
       if (disconnectBtn) disconnectBtn.classList.toggle('hidden', !(productOwner.ghConnected || getStoredGitHubToken()));
-      switchOwnerAuthTab(defaultTab);
       modal?.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      setTimeout(() => tokenInput?.focus(), 40);
     }
 
     function closeOwnerAuthModal() {
       document.getElementById('owner-auth-modal')?.classList.add('hidden');
-      const pinIn = document.getElementById('owner-pin-input');
-      const pinConf = document.getElementById('owner-pin-confirm');
-      if (pinIn) pinIn.value = '';
-      if (pinConf) pinConf.value = '';
+      if (document.getElementById('product-lightbox')?.classList.contains('hidden')) {
+        document.body.style.overflow = '';
+      }
     }
 
     function collectProductFormData() {
@@ -6080,7 +6032,7 @@
     }
 
     async function handleSaveLocalProduct() {
-      if (!productOwner.unlocked || productOwner.busy) return;
+      if (!productOwner.unlocked || !productOwner.ghConnected || productOwner.busy) return;
       const item = collectProductFormData();
       if (!item) return;
       productOwner.busy = true;
@@ -6158,24 +6110,33 @@
           productOwner.ghConnected = true;
           productOwner.unlocked = true;
           renderProducts();
-        } catch {
-          storeGitHubToken('', false);
+        } catch (err) {
+          // Only clear saved token on explicit auth rejection, not temporary offline states
+          if (err && err.authError) storeGitHubToken('', false);
         }
       }
     }
 
     function bindEvents() {
-      // --- Jewellery Collection & Owner Upload Studio Events ---
-      document.getElementById('btn-owner-access')?.addEventListener('click', () => openOwnerAuthModal(productOwner.ghConnected ? 'github' : 'github'));
-      document.getElementById('btn-owner-settings')?.addEventListener('click', () => openOwnerAuthModal('github'));
+      // --- Jewellery Collection & Owner Upload Studio Events (GitHub Token Only) ---
+      document.getElementById('btn-owner-access')?.addEventListener('click', openOwnerAuthModal);
+      document.getElementById('btn-owner-settings')?.addEventListener('click', openOwnerAuthModal);
       document.getElementById('btn-close-owner-modal')?.addEventListener('click', closeOwnerAuthModal);
       document.getElementById('owner-auth-modal')?.addEventListener('click', (e) => {
         if (e.target.id === 'owner-auth-modal') closeOwnerAuthModal();
       });
-      document.getElementById('owner-tab-github')?.addEventListener('click', () => switchOwnerAuthTab('github'));
-      document.getElementById('owner-tab-pin')?.addEventListener('click', () => switchOwnerAuthTab('pin'));
 
-      document.getElementById('btn-owner-gh-verify')?.addEventListener('click', async () => {
+      document.getElementById('btn-toggle-gh-token')?.addEventListener('click', () => {
+        const input = document.getElementById('owner-gh-token');
+        const btn = document.getElementById('btn-toggle-gh-token');
+        if (!input || !btn) return;
+        const show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        btn.textContent = show ? 'Hide' : 'Show';
+      });
+
+      document.getElementById('owner-panel-github')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
         const tokenInput = document.getElementById('owner-gh-token');
         const remember = Boolean(document.getElementById('owner-gh-remember')?.checked);
         const errEl = document.getElementById('owner-gh-error');
@@ -6214,51 +6175,6 @@
         showToast('GitHub token removed and Owner Mode locked.', 'info');
       });
 
-      document.getElementById('btn-owner-pin-submit')?.addEventListener('click', async () => {
-        const pin = (document.getElementById('owner-pin-input')?.value || '').trim();
-        const confirmPin = (document.getElementById('owner-pin-confirm')?.value || '').trim();
-        const errEl = document.getElementById('owner-pin-error');
-        const showPinErr = (msg) => {
-          if (errEl) { errEl.textContent = msg; errEl.classList.remove('hidden'); }
-        };
-        if (errEl) errEl.classList.add('hidden');
-        if (pin.length < 4 || pin.length > 12) {
-          showPinErr('PIN must be 4 to 12 characters.');
-          return;
-        }
-        const stored = readStoredPinRecord();
-        if (!stored) {
-          if (pin !== confirmPin) {
-            showPinErr('PINs do not match.');
-            return;
-          }
-          const salt = generateRandomSalt();
-          const hash = await sha256Hex(`${salt}:${pin}`);
-          try {
-            localStorage.setItem(OWNER_PIN_STORAGE_KEY, JSON.stringify({ salt, hash }));
-          } catch {
-            showPinErr('Browser storage is unavailable.');
-            return;
-          }
-          productOwner.unlocked = true;
-          closeOwnerAuthModal();
-          await loadLocalProductsFromDB();
-          renderProducts();
-          showToast('Owner PIN set. Local Upload Studio unlocked!', 'success');
-          return;
-        }
-        const checkHash = await sha256Hex(`${stored.salt}:${pin}`);
-        if (checkHash !== stored.hash) {
-          showPinErr('Incorrect Owner PIN.');
-          return;
-        }
-        productOwner.unlocked = true;
-        closeOwnerAuthModal();
-        await loadLocalProductsFromDB();
-        renderProducts();
-        showToast('Local Upload Studio unlocked.', 'success');
-      });
-
       document.getElementById('btn-owner-lock')?.addEventListener('click', () => {
         productOwner.unlocked = false;
         clearPendingMedia();
@@ -6294,9 +6210,9 @@
 
       document.getElementById('product-form')?.addEventListener('submit', (e) => {
         e.preventDefault();
-        handleSaveLocalProduct();
+        handlePublishNewProduct();
       });
-      document.getElementById('btn-publish-product')?.addEventListener('click', handlePublishNewProduct);
+      document.getElementById('btn-save-local-product')?.addEventListener('click', handleSaveLocalProduct);
       document.getElementById('btn-publish-all-drafts')?.addEventListener('click', async () => {
         if (!productOwner.ghConnected || productOwner.busy) return;
         const ids = productOwner.localItems.map((x) => x.id);
@@ -6335,7 +6251,7 @@
           return;
         }
         const deleteBtn = event.target.closest('.product-delete');
-        if (deleteBtn && productOwner.unlocked && !productOwner.busy) {
+        if (deleteBtn && productOwner.unlocked && productOwner.ghConnected && !productOwner.busy) {
           const id = deleteBtn.dataset.productId;
           const source = deleteBtn.dataset.source;
           if (source === 'local') {

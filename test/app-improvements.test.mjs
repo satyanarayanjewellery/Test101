@@ -145,7 +145,7 @@ test('manifest and service worker are valid, referenced, and prevent cache poiso
   assert.ok(manifest.icons.some(i => i.sizes === '192x192'));
   assert.ok(manifest.icons.some(i => i.sizes === '512x512'));
   const sw = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
-  assert.match(sw, /sj-price-desk-v5/);
+  assert.match(sw, /sj-price-desk-v6/);
   assert.match(sw, /index\.html/);
   assert.match(sw, /skipWaiting/);
   const html = await loadHtml();
@@ -436,10 +436,18 @@ test('jewellery collection supports image/video uploads with owner-only access a
   const catalogJson = JSON.parse(await readFile(new URL('../catalog/products.json', import.meta.url), 'utf8'));
   assert.ok(Array.isArray(catalogJson), 'catalog/products.json must be a JSON array');
 
-  // Upload studio and owner modal stay hidden by default for regular visitors
+  // Upload studio and owner modal stay hidden by default for regular visitors,
+  // owner login is strictly GitHub token only (no device PIN bypass), and
+  // fixed modals live outside </main> so .app-view transforms never trap/clip them.
   assert.match(html, /<section id="owner-studio" class="hidden /);
   assert.match(html, /<div id="owner-auth-modal" class="jewel-modal-backdrop hidden"/);
   assert.match(html, /<div id="product-lightbox" class="jewel-modal-backdrop hidden"/);
+  assert.ok(!html.includes('owner-panel-pin'), 'PIN login panel should be removed (token-only owner access)');
+  assert.ok(!html.includes('owner-tab-pin'), 'PIN login tab should be removed (token-only owner access)');
+  const mainEndIdx = html.indexOf('</main>');
+  assert.ok(mainEndIdx > 0);
+  assert.ok(html.indexOf('id="owner-auth-modal"') > mainEndIdx, 'owner-auth-modal must be outside <main>/.app-view');
+  assert.ok(html.indexOf('id="product-lightbox"') > mainEndIdx, 'product-lightbox must be outside <main>/.app-view');
   assert.ok(html.includes('accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime"'));
 
   // Test sanitizeCatalogMediaUrl()
@@ -467,14 +475,15 @@ test('jewellery collection supports image/video uploads with owner-only access a
     if (url.includes('/repos/')) return { ok: true, status: 200, json: async () => ({ permissions: { push: true } }) };
     return { ok: true, status: 200, json: async () => ({ login: 'satyanarayanjewellery' }) };
   });
-  const okRes = await verifyPush('github_pat_valid');
+  const okRes = await verifyPush('  Bearer "github_pat_valid"  ');
   assert.equal(okRes.login, 'satyanarayanjewellery');
+  assert.equal(okRes.token, 'github_pat_valid');
 
   const verifyReadOnly = makeVerify(async () => ({ ok: true, status: 200, json: async () => ({ permissions: { push: false } }) }));
-  await assert.rejects(verifyReadOnly('github_pat_ro'), /read-only/i);
+  await assert.rejects(verifyReadOnly('github_pat_ro'), (e) => e.authError === true && /read-only/i.test(e.message));
 
   const verifyBad = makeVerify(async () => ({ ok: false, status: 401, json: async () => ({}) }));
-  await assert.rejects(verifyBad('github_pat_bad'), /invalid or expired/i);
+  await assert.rejects(verifyBad('github_pat_bad'), (e) => e.authError === true && /invalid or expired/i.test(e.message));
 
   // Test getVisibleCatalogItems() hides local drafts when locked
   const visStart = html.indexOf('    function getVisibleCatalogItems()');
