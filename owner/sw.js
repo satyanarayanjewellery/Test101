@@ -93,7 +93,7 @@ self.addEventListener('fetch', (event) => {
           }
           return res;
         })
-        .catch(() => caches.match('./manifest.webmanifest'))
+        .catch(() => caches.match('./manifest.webmanifest').then((cached) => cached || new Response('Offline', { status: 503 })))
     );
     return;
   }
@@ -111,7 +111,7 @@ self.addEventListener('fetch', (event) => {
           }
           return caches.match('./index.html').then((cached) => cached || res);
         })
-        .catch(() => caches.match('./index.html'))
+        .catch(() => caches.match('./index.html').then((cached) => cached || new Response('Offline', { status: 503 })))
     );
     return;
   }
@@ -127,7 +127,7 @@ self.addEventListener('fetch', (event) => {
           }
           return res;
         })
-        .catch(() => cached);
+        .catch(() => cached || new Response('Offline', { status: 503 }));
       return cached || networkFetch;
     })
   );
