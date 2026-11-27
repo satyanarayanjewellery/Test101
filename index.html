@@ -1008,16 +1008,8 @@
         <p id="print-board-meta" style="font-size:12px;color:#444">Cuttack · Indicative estimates, not firm quotes. Excludes making charges.</p>
       </div>
 
-      <footer class="text-[11px] text-slate-500 flex flex-col gap-1.5 px-1">
-        <div class="flex flex-wrap items-center justify-between gap-2">
-          <span id="footer-sources">Live 1g Bullion Rates &middot; Retail &amp; GST</span>
-          <span class="text-amber-300/75 font-mono select-none">GSTIN: 21AFNPP7926E1ZC</span>
-          <span>Informational only &middot; Not investment advice.</span>
-        </div>
-        <p class="text-[10px] text-slate-600 leading-relaxed">
-          <span id="statutory-badge">Priced with 15% import duty + 3% GST</span>
-          &middot; duty per Customs Notification 16/2026 (w.e.f. 13 May 2026, 10% BCD + 5% AIDC). Rates track live global spot &times; live USD/INR &times; statutory duty; GST (<span id="footer-gst-pct">3</span>%) shown separately.
-        </p>
+      <footer class="text-[11px] text-slate-500 px-1 text-right">
+        <span class="text-amber-300/75 font-mono select-none">GSTIN: 21AFNPP7926E1ZC</span>
       </footer>
     </div>
 
@@ -1031,7 +1023,7 @@
             <div class="min-w-0">
               <p class="shop-eyebrow">Satyanarayan Jewellers &middot; Cuttack</p>
               <h2 class="shop-hero-title">The Jewellery Shop</h2>
-              <p class="shop-hero-sub">Handcrafted gold, silver, diamond &amp; gemstone pieces, hallmarked and weighed in front of you. Transparent pricing, GST invoice, showroom pickup or insured delivery across India.</p>
+              <p class="shop-hero-sub">Handcrafted gold, silver, diamond &amp; gemstone pieces, hallmarked and weighed in front of you. Transparent pricing, GST invoice, showroom pickup.</p>
             </div>
             <div class="flex items-center gap-2 shrink-0">
               <span id="owner-mode-pill" class="hidden inline-flex items-center gap-1.5 text-[10px] font-semibold rounded-full px-2.5 py-1 bg-emerald-500/15 border border-emerald-500/30 text-emerald-300">
@@ -3499,13 +3491,6 @@
           // rupee. Nothing left to paint here — just reflect status.
           if (!havePrices) renderLiveStatusUI();
 
-          const footerEl = getEl('footer-sources');
-          if (footerEl && !state.ws.connected) {
-            const feedTag = state.live.goldSource ? ` (${state.live.goldSource})` : '';
-            const fxTag = state.live.fxSource ? ` · FX: ${state.live.fxSource}${state.live.fxLive ? ' (live)' : ''}` : '';
-            footerEl.textContent = `Live Feed${feedTag}${fxTag} · ${fmtTimeMs(state.live.lastSync)}`;
-          }
-
           if (firstEverConnect && !document.hidden) {
             connectLiveWebSocket();
           }
@@ -3949,20 +3934,11 @@
     // owner to re-verify once the regime is old enough that a change is plausible.
     function renderStatutoryNotice() {
       const g = statutoryRatesFor('gold');
-      const sv = statutoryRatesFor('silver');
-      const same = g.importDutyPct === sv.importDutyPct && g.gstPct === sv.gstPct;
       // Keep the prose copy in step with the data, so the page never states a duty it is not using.
       const exDuty = document.getElementById('ex-duty-pct');
       if (exDuty) exDuty.textContent = String(g.importDutyPct);
       const accDuty = document.getElementById('acc-duty-pct');
       if (accDuty) accDuty.textContent = String(g.importDutyPct);
-      const badge = document.getElementById('statutory-badge');
-      if (badge) {
-        badge.textContent = `Priced with ${same ? statutoryLabel('gold') : `gold ${statutoryLabel('gold')} · silver ${statutoryLabel('silver')}`}`;
-        badge.title = g.note || '';
-      }
-      const footerGst = document.getElementById('footer-gst-pct');
-      if (footerGst) footerGst.textContent = String(g.gstPct);
       const notice = document.getElementById('statutory-notice');
       if (!notice) return;
       const stale = statutoryIsStale();
@@ -4827,14 +4803,6 @@
       }
 
       if (state.activeView === 'news') renderNewsTicker();
-      if (fromWs && state.live.lastSync) {
-        const footerEl = getEl('footer-sources');
-        if (footerEl) {
-          const tps = state.ws.ticksPerSec > 0 ? ' · ' + state.ws.ticksPerSec + ' ticks/s' : '';
-          setText(footerEl, 'Live WS (' + (state.ws.winnerName || 'Stream') + ') · ' + fmtTimeMs(state.live.lastSync) + tps);
-        }
-      }
-
       if (animateReveal) {
         for (let i = 0; i < goldFlashTargets.length; i++) {
           const el = goldFlashTargets[i];
