@@ -15,7 +15,7 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(key => key !== CACHE).map(key => caches.delete(key))))
+      .then(keys => Promise.all(keys.filter(key => key !== CACHE && !key.startsWith('sj-owner-desk-')).map(key => caches.delete(key))))
       .then(() => self.clients.claim())
   );
 });
@@ -25,6 +25,9 @@ self.addEventListener('fetch', event => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
+
+  // Never intercept the dedicated Owner PWA scope; owner/sw.js manages /owner/ independently.
+  if (url.pathname.includes('/owner/') || url.pathname.endsWith('/owner')) return;
 
   // Always fetch live catalogue manifest from network so newly published jewellery appears immediately.
   if (url.pathname.endsWith('/catalog/products.json') || url.pathname === '/catalog/products.json') {
