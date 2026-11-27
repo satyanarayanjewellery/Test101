@@ -1895,7 +1895,8 @@
     const GOLD_RETAIL_PREMIUM = 1.0000; // Official landed parity (no arbitrary retail markup)
     const SILVER_MCX_PREMIUM = 1.0000; // Official landed parity (no arbitrary MCX markup)
     const SILVER_RETAIL_PREMIUM = 1.0000; // Official landed parity (no arbitrary retail markup)
-    const FX_REFRESH_MS = 15 * 60 * 1000; // Refresh USD/INR every 15 minutes (daily FX APIs don't tick per second)
+    const FX_REFRESH_MS = 15 * 60 * 1000; // Daily-reference FX: refresh at most every 15 minutes
+    const FX_LIVE_REFRESH_MS = 60 * 1000; // Live mid-market FX: refresh every minute (it ticks intraday)
     const WS_PROVIDERS = [
       {
         name: 'Binance',
@@ -1968,10 +1969,11 @@
     const USD_INR_MAX = 120;
     const USD_INR_MAX_MOVE_PCT = 0.02; // Reject a >2% jump vs the previous rate in one refresh
 
-    // All USD/INR feeds are daily reference rates (NOT intraday ticks); tiers are ordered by
-    // preference — freshest / most authoritative first — so the result is deterministic
-    // (no coin-flip between tier-1 providers). Each provider carries parseAsOf so the UI can
-    // show the rate's true "as of" date instead of the fetch time.
+    // FX feeds are tiered by freshness: tier 0 is genuinely live (seconds / ~5-min cadence mid-market
+    // quotes, browser-fetchable per their published CORS policy); tiers 1–3 are daily reference rates used
+    // as fallback. Each provider carries parseAsOf so the UI can show the rate's true "as of" moment, and
+    // `live: true` marks providers whose data ticks intraday. Tiers are ordered — freshest first — so the
+    // result is deterministic (no coin-flip between providers of the same tier).
     const parseIsoDateAsOf = (d) => {
       const s = typeof d === 'string' ? d.trim() : '';
       if (!s) return null;
@@ -1980,7 +1982,22 @@
     };
     const FX_TIERS = [
       [
-        // Tier 1: open.er-api — same-day daily update (~00:02 UTC), freshest free source
+        // Tier 0: LIVE mid-market quotes (per-second / 5-min cadence), no API key, CORS enabled.
+        // Reference data, not an executable quote; attribution shown in the footer.
+        { name: 'currency-converter.live', url: 'https://currency-converter.live/api/v1/cross?base=USD&symbols=INR',
+          parse: (j) => Number(j && j.data && j.data.rates && j.data.rates.INR),
+          parseAsOf: (j) => {
+            const q = j && j.data && j.data.quotes && j.data.quotes.INR;
+            return parseIsoDateAsOf((q && q.as_of) || (j && j.data && j.data.generated_at));
+          },
+          live: true },
+        { name: 'fxapi.app', url: 'https://fxapi.app/api/USD/INR.json',
+          parse: (j) => Number(j && j.rate),
+          parseAsOf: (j) => parseIsoDateAsOf(j && j.timestamp),
+          live: true }
+      ],
+      [
+        // Tier 1 (fallback): open.er-api — same-day daily update (~00:02 UTC), freshest daily source
         { name: 'open.er-api', url: 'https://open.er-api.com/v6/latest/USD', parse: (j) => Number(j && j.rates && j.rates.INR),
           parseAsOf: (j) => {
             const unix = Number(j && j.time_last_update_unix);
@@ -2169,6 +2186,8 @@
         { id: 'm-live-8', name: 'Gold-API',city: 'Global', country: 'Worldwide', currency: 'USD', metal: 'silver', type: 'live', url: 'https://api.gold-api.com/price/XAG', parse: (j) => Number(j && j.price) },
         { id: 'm-live-9', name: 'Swissquote', city: 'Global', country: 'Worldwide', currency: 'USD', metal: 'gold',   type: 'live', url: 'https://forex-data-feed.swissquote.com/public-quotes/bboquotes/instrument/XAU/USD', parse: parseSwissquoteMid },
         { id: 'm-live-10', name: 'Swissquote', city: 'Global', country: 'Worldwide', currency: 'USD', metal: 'silver', type: 'live', url: 'https://forex-data-feed.swissquote.com/public-quotes/bboquotes/instrument/XAG/USD', parse: parseSwissquoteMid },
+        { id: 'm-live-13', name: 'currency-converter.live (FX live)', city: 'Global', country: 'Worldwide', currency: 'USD', metal: 'fx', type: 'live', url: 'https://currency-converter.live/api/v1/cross?base=USD&symbols=INR', parse: (j) => Number(j && j.data && j.data.rates && j.data.rates.INR) },
+        { id: 'm-live-14', name: 'fxapi.app (FX live)', city: 'Global', country: 'Worldwide', currency: 'USD', metal: 'fx', type: 'live', url: 'https://fxapi.app/api/USD/INR.json', parse: (j) => Number(j && j.rate) },
         { id: 'm-live-12', name: 'er-api (FX)', city: 'Global', country: 'Worldwide', currency: 'USD', metal: 'fx', type: 'live', url: 'https://open.er-api.com/v6/latest/USD', parse: (j) => Number(j && j.rates && j.rates.INR) },
         { id: 'm-live-11', name: 'Frankfurter (FX)', city: 'Global', country: 'Worldwide', currency: 'USD', metal: 'fx', type: 'live', url: 'https://api.frankfurter.dev/v1/latest?base=USD&symbols=INR', parse: (j) => Number(j && j.rates && j.rates.INR) }
       ];
@@ -2234,6 +2253,8 @@
         isFetching: false,
         lastSync: null,
         lastFxSync: 0,
+        fxSource: '',
+        fxLive: false,
         usdInrAsOf: null,
         spotGold: null,
         spotSilver: null,
@@ -2737,7 +2758,7 @@
               if (Number.isFinite(val) && val > 0) {
                 PROVIDER_FAIL_STREAK[p.name] = 0;
                 delete PROVIDER_COOLDOWN_UNTIL[p.name];
-                return { val, source: p.name, asOf: extractFxAsOf(p, json) };
+                return { val, source: p.name, asOf: extractFxAsOf(p, json), live: !!p.live };
               }
               throw new Error(`${p.name}: invalid value`);
             } catch (err) {
@@ -2757,7 +2778,7 @@
               if (Number.isFinite(val) && val > 0) {
                 PROVIDER_FAIL_STREAK[p.name] = 0;
                 delete PROVIDER_COOLDOWN_UNTIL[p.name];
-                return { val, source: p.name, asOf: extractFxAsOf(p, json) };
+                return { val, source: p.name, asOf: extractFxAsOf(p, json), live: !!p.live };
               }
               throw new Error(`${p.name}: invalid value`);
             } catch (err) {
@@ -2807,7 +2828,7 @@
         const silverPromise = fetchFromTiers(SILVER_TIERS).then((res) => res.val);
 
         // Cache USD/INR for 15 minutes so we don't spam daily FX APIs on every tick
-        const needFx = isInitialConnect || isManual || !state.live.usdInr || (Date.now() - state.live.lastFxSync > FX_REFRESH_MS);
+        const needFx = isInitialConnect || isManual || !state.live.usdInr || (Date.now() - state.live.lastFxSync > (state.live.fxLive ? FX_LIVE_REFRESH_MS : FX_REFRESH_MS));
         const fxPromise = needFx
           ? fetchFromTiers(FX_TIERS)
               .then((res) => {
@@ -2822,6 +2843,8 @@
                   throw new Error(`USD/INR ${res.val} rejected (${check.reason})`);
                 }
                 state.live.lastFxSync = Date.now();
+                state.live.fxSource = res.source || '';
+                state.live.fxLive = !!res.live;
                 state.live.usdInrAsOf = res.asOf || null;
                 return check.value;
               })
@@ -2908,7 +2931,8 @@
           const footerEl = getEl('footer-sources');
           if (footerEl && !state.ws.connected) {
             const feedTag = state.live.goldSource ? ` (${state.live.goldSource})` : '';
-            footerEl.textContent = `Live Feed${feedTag} · ${fmtTimeMs(state.live.lastSync)}`;
+            const fxTag = state.live.fxSource ? ` · FX: ${state.live.fxSource}${state.live.fxLive ? ' (live)' : ''}` : '';
+            footerEl.textContent = `Live Feed${feedTag}${fxTag} · ${fmtTimeMs(state.live.lastSync)}`;
           }
 
           if (firstEverConnect && !document.hidden) {
@@ -2916,8 +2940,8 @@
           }
 
           if (isManual) {
-            const fxAsOf = fmtFxAsOf(state.live.usdInrAsOf);
-            showToast(`Live rates synced: Gold ${fmtUSD(state.prices.spotGold)}/oz · USD/INR ₹${state.live.usdInr.toFixed(2)}${fxAsOf ? ` (as of ${fxAsOf})` : ''}`, 'success');
+            const fxNote = state.live.fxLive ? ' (live)' : (() => { const a = fmtFxAsOf(state.live.usdInrAsOf); return a ? ` (as of ${a})` : ''; })();
+            showToast(`Live rates synced: Gold ${fmtUSD(state.prices.spotGold)}/oz · USD/INR ₹${state.live.usdInr.toFixed(2)}${fxNote}`, 'success');
           }
         } else {
           state.live.status = 'offline';
@@ -5056,13 +5080,18 @@
       setText(sEl, fmtINR(state.prices.silver999ExGstGram, 2));
       setText(rEl, '₹' + state.live.usdInr.toFixed(2));
       const asOf = fmtFxAsOf(state.live.usdInrAsOf);
+      const fxAsOfTs = Number(state.live.usdInrAsOf);
+      const fxIsLive = Boolean(state.live.fxLive) && Number.isFinite(fxAsOfTs) && fxAsOfTs > 0 && (Date.now() - fxAsOfTs) < 10 * 60 * 1000;
       const lEl = getEl('news-ticker-inr-label');
-      if (lEl) lEl.textContent = asOf ? `USD / INR · as of ${asOf}` : 'USD / INR (₹)';
+      if (lEl) lEl.textContent = fxIsLive ? 'USD / INR · live' : (asOf ? `USD / INR · as of ${asOf}` : 'USD / INR (₹)');
       if (rEl) {
-        const full = Number(state.live.usdInrAsOf);
-        rEl.title = Number.isFinite(full) && full > 0
-          ? `USD/INR rate as of ${new Date(full).toLocaleString('en-IN')} (daily reference rate, not an intraday tick)`
-          : 'Daily reference rate, not an intraday tick';
+        if (fxIsLive) {
+          rEl.title = `Live mid-market USD/INR via ${state.live.fxSource || 'live feed'} · updated ${new Date(fxAsOfTs).toLocaleTimeString('en-IN')} — reference rate, not an executable quote`;
+        } else {
+          rEl.title = Number.isFinite(fxAsOfTs) && fxAsOfTs > 0
+            ? `USD/INR rate as of ${new Date(fxAsOfTs).toLocaleString('en-IN')} (daily reference rate)`
+            : 'Daily reference rate';
+        }
       }
     }
 

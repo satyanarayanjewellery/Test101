@@ -148,7 +148,7 @@ test('manifest and service worker are valid, referenced, and prevent cache poiso
   assert.ok(manifest.icons.some(i => i.sizes === '192x192'));
   assert.ok(manifest.icons.some(i => i.sizes === '512x512'));
   const sw = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
-  assert.match(sw, /sj-price-desk-v8/);
+  assert.match(sw, /sj-price-desk-v9/);
   assert.match(sw, /index\.html/);
   assert.match(sw, /skipWaiting/);
   const html = await loadHtml();
@@ -941,25 +941,38 @@ test('USD/INR feeds are preference-ordered, as-of aware and sanity-guarded', asy
     { Number, Date, Math, JSON, Infinity }
   );
 
-  // Deterministic preference: tier 1 must be open.er-api alone; the duplicated CDN
-  // in tier 2; the staler ECB T+1 fix (Frankfurter) demoted to last resort.
+  // Deterministic preference: live mid-market quotes first (raced), then daily fallbacks —
+  // open.er-api, the duplicated currency-api CDNs, and the stale ECB T+1 fix (Frankfurter) last.
   // (JSON compare: vm-context arrays/objects don't share prototypes with this realm.)
   assert.equal(JSON.stringify(FX_TIERS.map((tier) => tier.map((p) => p.name))),
-    JSON.stringify([['open.er-api'], ['jsDelivr', 'Cloudflare'], ['Frankfurter']]));
+    JSON.stringify([['currency-converter.live', 'fxapi.app'], ['open.er-api'], ['jsDelivr', 'Cloudflare'], ['Frankfurter']]));
+  // Live providers must be flagged so the app polls them at 1-minute cadence and labels them live.
+  for (const p of FX_TIERS[0]) assert.equal(p.live, true, `${p.name} must carry live: true`);
+  for (const tier of FX_TIERS.slice(1)) for (const p of tier) {
+    assert.ok(!p.live, `${p.name} is a daily reference feed and must not be flagged live`);
+  }
   for (const tier of FX_TIERS) for (const p of tier) {
     assert.equal(typeof p.parse, 'function', `${p.name} needs a parse`);
     assert.equal(typeof p.parseAsOf, 'function', `${p.name} needs parseAsOf so the UI can show the rate's as-of date`);
   }
 
   // as-of extraction for each provider's real payload shape
-  const [tier1] = FX_TIERS;
-  const erApi = tier1[0];
+  const allProviders = FX_TIERS.flat();
+  const findProvider = (name) => {
+    const p = allProviders.find((x) => x.name === name);
+    assert.ok(p, `${name} must exist in FX_TIERS`);
+    return p;
+  };
+  const erApi = findProvider('open.er-api');
   assert.equal(extractFxAsOf(erApi, { time_last_update_unix: 1795737751 }), 1795737751000);
   assert.equal(extractFxAsOf(erApi, { time_last_update_utc: 'Fri, 27 Nov 2026 00:02:31 +0000' }), Date.parse('Fri, 27 Nov 2026 00:02:31 +0000'));
-  const frf = FX_TIERS.at(-1)[0];
+  const frf = findProvider('Frankfurter');
   assert.equal(extractFxAsOf(frf, { date: '2026-11-26' }), Date.parse('2026-11-26T00:00:00Z'));
-  const cdn = FX_TIERS[1][0];
+  const cdn = findProvider('jsDelivr');
   assert.equal(extractFxAsOf(cdn, { date: '2026-11-26' }), Date.parse('2026-11-26T00:00:00Z'));
+  const live = findProvider('currency-converter.live');
+  assert.equal(extractFxAsOf(live, { data: { quotes: { INR: { as_of: '2026-11-27T06:46:16+00:00' } }, generated_at: '2026-11-27T06:46:24+00:00' } }), Date.parse('2026-11-27T06:46:16+00:00'));
+  assert.equal(extractFxAsOf(findProvider('fxapi.app'), { timestamp: '2026-11-27T06:40:38.607Z' }), Date.parse('2026-11-27T06:40:38.607Z'));
   assert.equal(extractFxAsOf(erApi, {}), null, 'missing timestamp must yield null, not NaN');
   assert.equal(extractFxAsOf(erApi, { time_last_update_unix: 'garbage' }), null);
 
