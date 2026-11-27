@@ -148,7 +148,7 @@ test('manifest and service worker are valid, referenced, and prevent cache poiso
   assert.ok(manifest.icons.some(i => i.sizes === '192x192'));
   assert.ok(manifest.icons.some(i => i.sizes === '512x512'));
   const sw = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
-  assert.match(sw, /sj-price-desk-v7/);
+  assert.match(sw, /sj-price-desk-v8/);
   assert.match(sw, /index\.html/);
   assert.match(sw, /skipWaiting/);
   const html = await loadHtml();
@@ -925,4 +925,60 @@ test('mobile bottom nav is a single 7-column row that replaces the desktop tabs'
   const switchView = html.slice(switchStart, switchStart + 9000);
   assert.ok(!/lbl\.className\s*=/.test(switchView), 'label sizing must be left to the markup');
   assert.ok(switchView.includes("lbl.classList.toggle('font-semibold', active)"));
+});
+
+test('USD/INR feeds are preference-ordered, as-of aware and sanity-guarded', async () => {
+  const html = await loadHtml();
+  const fxStart = html.indexOf('    // USD/INR plausibility band');
+  const fxEnd = html.indexOf('    // Approximate USD cross-rates', fxStart);
+  assert.ok(fxStart >= 0 && fxEnd > fxStart, 'FX feed block must be locatable');
+
+  const { FX_TIERS, extractFxAsOf, validateUsdInr } = vm.runInNewContext(
+    [
+      html.slice(fxStart, fxEnd),
+      '({ FX_TIERS, extractFxAsOf, validateUsdInr })'
+    ].join('\n'),
+    { Number, Date, Math, JSON, Infinity }
+  );
+
+  // Deterministic preference: tier 1 must be open.er-api alone; the duplicated CDN
+  // in tier 2; the staler ECB T+1 fix (Frankfurter) demoted to last resort.
+  // (JSON compare: vm-context arrays/objects don't share prototypes with this realm.)
+  assert.equal(JSON.stringify(FX_TIERS.map((tier) => tier.map((p) => p.name))),
+    JSON.stringify([['open.er-api'], ['jsDelivr', 'Cloudflare'], ['Frankfurter']]));
+  for (const tier of FX_TIERS) for (const p of tier) {
+    assert.equal(typeof p.parse, 'function', `${p.name} needs a parse`);
+    assert.equal(typeof p.parseAsOf, 'function', `${p.name} needs parseAsOf so the UI can show the rate's as-of date`);
+  }
+
+  // as-of extraction for each provider's real payload shape
+  const [tier1] = FX_TIERS;
+  const erApi = tier1[0];
+  assert.equal(extractFxAsOf(erApi, { time_last_update_unix: 1795737751 }), 1795737751000);
+  assert.equal(extractFxAsOf(erApi, { time_last_update_utc: 'Fri, 27 Nov 2026 00:02:31 +0000' }), Date.parse('Fri, 27 Nov 2026 00:02:31 +0000'));
+  const frf = FX_TIERS.at(-1)[0];
+  assert.equal(extractFxAsOf(frf, { date: '2026-11-26' }), Date.parse('2026-11-26T00:00:00Z'));
+  const cdn = FX_TIERS[1][0];
+  assert.equal(extractFxAsOf(cdn, { date: '2026-11-26' }), Date.parse('2026-11-26T00:00:00Z'));
+  assert.equal(extractFxAsOf(erApi, {}), null, 'missing timestamp must yield null, not NaN');
+  assert.equal(extractFxAsOf(erApi, { time_last_update_unix: 'garbage' }), null);
+
+  // Sanity guard: plausible band + max move vs previous rate
+  assert.equal(validateUsdInr(92.52, null).ok, true);
+  assert.equal(validateUsdInr(92.52, null).value, 92.52);
+  assert.equal(validateUsdInr(94.0, 92.5).ok, true, 'a normal intraday-scale move must pass');
+  assert.equal(validateUsdInr(94.0, 92.5).value, 94.0);
+  assert.equal(validateUsdInr(9.25, null).reason, 'band');
+  assert.equal(validateUsdInr(150, null).reason, 'band');
+  assert.equal(validateUsdInr(0, null).reason, 'value');
+  assert.equal(validateUsdInr(NaN, null).reason, 'value');
+  assert.equal(validateUsdInr(95.5, 92.5).reason, 'move', '>2% jump in one refresh must be rejected');
+  assert.equal(validateUsdInr(89.0, 92.5).reason, 'move', '>2% drop in one refresh must be rejected');
+  assert.equal(validateUsdInr(92.5, 0).ok, true, 'a zero/absent previous rate must not trip the move guard');
+
+  // The guard and as-of stamp must actually be wired into the live sync path
+  assert.ok(html.includes('validateUsdInr(res.val, state.live.usdInr)'), 'syncLiveAPIs must validate via validateUsdInr');
+  assert.ok(html.includes('state.live.usdInrAsOf = res.asOf || null'), 'sync must store the payload as-of timestamp');
+  assert.ok(html.includes('usdInrAsOf: state.live.usdInrAsOf || null'), 'cached rates must persist the as-of timestamp');
+  assert.ok(html.includes('id="news-ticker-inr-label"'), 'the news ticker must carry an FX as-of label');
 });

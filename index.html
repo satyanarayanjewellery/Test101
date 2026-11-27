@@ -1158,7 +1158,7 @@
             <p id="news-ticker-silver" class="price-num text-xs sm:text-sm font-bold text-slate-100 tabular-nums mt-0.5">--</p>
           </div>
           <div class="rate-tile rounded-xl border-emerald-500/25 px-2.5 py-2 text-center">
-            <p class="text-[10px] text-emerald-300 font-medium">USD / INR (&#8377;)</p>
+            <p id="news-ticker-inr-label" class="text-[10px] text-emerald-300 font-medium">USD / INR (&#8377;)</p>
             <p id="news-ticker-inr" class="price-num text-xs sm:text-sm font-bold text-emerald-200 tabular-nums mt-0.5">--</p>
           </div>
         </div>
@@ -1962,18 +1962,75 @@
       ]
     ];
 
+    // USD/INR plausibility band and max single-refresh move. The rupee has traded roughly
+    // 83–93 in 2024–26; anything far outside this is a corrupt/garbage feed, not a rate.
+    const USD_INR_MIN = 60;
+    const USD_INR_MAX = 120;
+    const USD_INR_MAX_MOVE_PCT = 0.02; // Reject a >2% jump vs the previous rate in one refresh
+
+    // All USD/INR feeds are daily reference rates (NOT intraday ticks); tiers are ordered by
+    // preference — freshest / most authoritative first — so the result is deterministic
+    // (no coin-flip between tier-1 providers). Each provider carries parseAsOf so the UI can
+    // show the rate's true "as of" date instead of the fetch time.
+    const parseIsoDateAsOf = (d) => {
+      const s = typeof d === 'string' ? d.trim() : '';
+      if (!s) return null;
+      const t = Date.parse(/^\d{4}-\d{2}-\d{2}$/.test(s) ? `${s}T00:00:00Z` : s);
+      return Number.isFinite(t) ? t : null;
+    };
     const FX_TIERS = [
       [
-        { name: 'open.er-api', url: 'https://open.er-api.com/v6/latest/USD', parse: (j) => Number(j && j.rates && j.rates.INR) },
-        { name: 'Frankfurter', url: 'https://api.frankfurter.dev/v1/latest?base=USD&symbols=INR', parse: (j) => Number(j && j.rates && j.rates.INR) }
+        // Tier 1: open.er-api — same-day daily update (~00:02 UTC), freshest free source
+        { name: 'open.er-api', url: 'https://open.er-api.com/v6/latest/USD', parse: (j) => Number(j && j.rates && j.rates.INR),
+          parseAsOf: (j) => {
+            const unix = Number(j && j.time_last_update_unix);
+            return Number.isFinite(unix) && unix > 0 ? unix * 1000 : parseIsoDateAsOf(j && j.time_last_update_utc);
+          } }
       ],
       [
-        { name: 'jsDelivr', url: 'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json', parse: (j) => Number(j && j.usd && j.usd.inr) },
-        { name: 'Cloudflare', url: 'https://latest.currency-api.pages.dev/v1/currencies/usd.json', parse: (j) => Number(j && j.usd && j.usd.inr) }
+        // Tier 2: fawazahmed0 currency-api (daily) — same payload served by two CDNs, raced
+        { name: 'jsDelivr', url: 'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json', parse: (j) => Number(j && j.usd && j.usd.inr),
+          parseAsOf: (j) => parseIsoDateAsOf(j && j.date) },
+        { name: 'Cloudflare', url: 'https://latest.currency-api.pages.dev/v1/currencies/usd.json', parse: (j) => Number(j && j.usd && j.usd.inr),
+          parseAsOf: (j) => parseIsoDateAsOf(j && j.date) }
+      ],
+      [
+        // Tier 3: Frankfurter — ECB daily reference rate (fixation is T+1); authoritative but the stalest
+        { name: 'Frankfurter', url: 'https://api.frankfurter.dev/v1/latest?base=USD&symbols=INR', parse: (j) => Number(j && j.rates && j.rates.INR),
+          parseAsOf: (j) => parseIsoDateAsOf(j && j.date) }
       ]
     ];
 
-    // Approximate USD cross-rates for non-INR bullion markets (indicative daily reference; USD/INR is live).
+    // Extract the rate's as-of timestamp from a provider payload (null when unavailable/unparseable).
+    function extractFxAsOf(provider, json) {
+      if (!provider || typeof provider.parseAsOf !== 'function') return null;
+      try {
+        const t = provider.parseAsOf(json);
+        return Number.isFinite(t) && t > 0 ? t : null;
+      } catch { return null; }
+    }
+
+    // Pure sanity check for a candidate USD/INR rate vs the previous one.
+    // Returns { ok: true, value } or { ok: false, reason: 'band' | 'move' | 'value' }.
+    function validateUsdInr(v, prev) {
+      const n = Number(v);
+      if (!Number.isFinite(n) || n <= 0) return { ok: false, reason: 'value' };
+      if (n < USD_INR_MIN || n > USD_INR_MAX) return { ok: false, reason: 'band' };
+      const p = Number(prev);
+      if (Number.isFinite(p) && p > 0 && Math.abs(n - p) / p > USD_INR_MAX_MOVE_PCT) {
+        return { ok: false, reason: 'move' };
+      }
+      return { ok: true, value: n };
+    }
+
+    // Short "as of" label for FX UI, e.g. "26 Nov" (null when no timestamp is known).
+    function fmtFxAsOf(ts) {
+      const t = Number(ts);
+      if (!Number.isFinite(t) || t <= 0) return null;
+      try { return new Date(t).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }); } catch { return null; }
+    }
+
+    // Approximate USD cross-rates for non-INR bullion markets (indicative daily reference; USD/INR is a daily feed shown with its as-of date).
     const CURRENCY_PER_USD = {
       USD: 1, CNY: 7.25, HKD: 7.80, SGD: 1.35, AED: 3.6725, SAR: 3.75, QAR: 3.64, KWD: 0.308,
       JPY: 149.0, KRW: 1390.0, THB: 35.0, MYR: 4.40, IDR: 16000.0, PHP: 58.0, TWD: 32.20,
@@ -2112,8 +2169,8 @@
         { id: 'm-live-8', name: 'Gold-API',city: 'Global', country: 'Worldwide', currency: 'USD', metal: 'silver', type: 'live', url: 'https://api.gold-api.com/price/XAG', parse: (j) => Number(j && j.price) },
         { id: 'm-live-9', name: 'Swissquote', city: 'Global', country: 'Worldwide', currency: 'USD', metal: 'gold',   type: 'live', url: 'https://forex-data-feed.swissquote.com/public-quotes/bboquotes/instrument/XAU/USD', parse: parseSwissquoteMid },
         { id: 'm-live-10', name: 'Swissquote', city: 'Global', country: 'Worldwide', currency: 'USD', metal: 'silver', type: 'live', url: 'https://forex-data-feed.swissquote.com/public-quotes/bboquotes/instrument/XAG/USD', parse: parseSwissquoteMid },
-        { id: 'm-live-11', name: 'Frankfurter (FX)', city: 'Global', country: 'Worldwide', currency: 'USD', metal: 'fx', type: 'live', url: 'https://api.frankfurter.dev/v1/latest?base=USD&symbols=INR', parse: (j) => Number(j && j.rates && j.rates.INR) },
-        { id: 'm-live-12', name: 'er-api (FX)', city: 'Global', country: 'Worldwide', currency: 'USD', metal: 'fx', type: 'live', url: 'https://open.er-api.com/v6/latest/USD', parse: (j) => Number(j && j.rates && j.rates.INR) }
+        { id: 'm-live-12', name: 'er-api (FX)', city: 'Global', country: 'Worldwide', currency: 'USD', metal: 'fx', type: 'live', url: 'https://open.er-api.com/v6/latest/USD', parse: (j) => Number(j && j.rates && j.rates.INR) },
+        { id: 'm-live-11', name: 'Frankfurter (FX)', city: 'Global', country: 'Worldwide', currency: 'USD', metal: 'fx', type: 'live', url: 'https://api.frankfurter.dev/v1/latest?base=USD&symbols=INR', parse: (j) => Number(j && j.rates && j.rates.INR) }
       ];
       // --- Indicative city / bullion markets (modeled from live spot + basis spread) ---
       EXCHANGE_MARKETS.forEach((m) => {
@@ -2177,6 +2234,7 @@
         isFetching: false,
         lastSync: null,
         lastFxSync: 0,
+        usdInrAsOf: null,
         spotGold: null,
         spotSilver: null,
         usdInr: null,
@@ -2592,6 +2650,7 @@
           state.live.spotSilver = cached.spotSilver;
           state.live.usdInr = cached.usdInr;
           state.live.lastFxSync = cached.ts || 0;
+          state.live.usdInrAsOf = Number.isFinite(cached.usdInrAsOf) ? cached.usdInrAsOf : null;
           state.sessionOpen = {
             spotGold: cached.spotGold,
             spotSilver: cached.spotSilver,
@@ -2613,7 +2672,7 @@
       state.ws.lastPersistTs = now;
       try {
         lsSet(STORAGE_KEYS.lastRates, JSON.stringify({
-          spotGold, spotSilver, usdInr, ts: now
+          spotGold, spotSilver, usdInr, usdInrAsOf: state.live.usdInrAsOf || null, ts: now
         }));
       } catch { /* ignore */ }
     }
@@ -2678,7 +2737,7 @@
               if (Number.isFinite(val) && val > 0) {
                 PROVIDER_FAIL_STREAK[p.name] = 0;
                 delete PROVIDER_COOLDOWN_UNTIL[p.name];
-                return { val, source: p.name };
+                return { val, source: p.name, asOf: extractFxAsOf(p, json) };
               }
               throw new Error(`${p.name}: invalid value`);
             } catch (err) {
@@ -2698,7 +2757,7 @@
               if (Number.isFinite(val) && val > 0) {
                 PROVIDER_FAIL_STREAK[p.name] = 0;
                 delete PROVIDER_COOLDOWN_UNTIL[p.name];
-                return { val, source: p.name };
+                return { val, source: p.name, asOf: extractFxAsOf(p, json) };
               }
               throw new Error(`${p.name}: invalid value`);
             } catch (err) {
@@ -2752,8 +2811,19 @@
         const fxPromise = needFx
           ? fetchFromTiers(FX_TIERS)
               .then((res) => {
+                const check = validateUsdInr(res.val, state.live.usdInr);
+                if (!check.ok) {
+                  // Keep previous valid FX rate; stamp lastFxSync so we don't hammer daily APIs every tick.
+                  if (Number.isFinite(state.live.usdInr) && state.live.usdInr > 0) {
+                    console.warn(`USD/INR from ${res.source || 'feed'} rejected (${check.reason}: ${res.val}) — keeping ₹${state.live.usdInr.toFixed(2)}`);
+                    state.live.lastFxSync = Date.now();
+                    return state.live.usdInr;
+                  }
+                  throw new Error(`USD/INR ${res.val} rejected (${check.reason})`);
+                }
                 state.live.lastFxSync = Date.now();
-                return res.val;
+                state.live.usdInrAsOf = res.asOf || null;
+                return check.value;
               })
               .catch((err) => {
                 // Keep previous valid FX rate if refresh fails temporarily
@@ -2846,7 +2916,8 @@
           }
 
           if (isManual) {
-            showToast(`Live rates synced: Gold ${fmtUSD(state.prices.spotGold)}/oz · USD/INR ₹${state.live.usdInr.toFixed(2)}`, 'success');
+            const fxAsOf = fmtFxAsOf(state.live.usdInrAsOf);
+            showToast(`Live rates synced: Gold ${fmtUSD(state.prices.spotGold)}/oz · USD/INR ₹${state.live.usdInr.toFixed(2)}${fxAsOf ? ` (as of ${fxAsOf})` : ''}`, 'success');
           }
         } else {
           state.live.status = 'offline';
@@ -4984,6 +5055,15 @@
       setText(gEl, fmtINR(state.prices.gold999ExGstGram, 2));
       setText(sEl, fmtINR(state.prices.silver999ExGstGram, 2));
       setText(rEl, '₹' + state.live.usdInr.toFixed(2));
+      const asOf = fmtFxAsOf(state.live.usdInrAsOf);
+      const lEl = getEl('news-ticker-inr-label');
+      if (lEl) lEl.textContent = asOf ? `USD / INR · as of ${asOf}` : 'USD / INR (₹)';
+      if (rEl) {
+        const full = Number(state.live.usdInrAsOf);
+        rEl.title = Number.isFinite(full) && full > 0
+          ? `USD/INR rate as of ${new Date(full).toLocaleString('en-IN')} (daily reference rate, not an intraday tick)`
+          : 'Daily reference rate, not an intraday tick';
+      }
     }
 
     function updateNewsStatusPill(mode) {
