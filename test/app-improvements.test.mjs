@@ -995,3 +995,257 @@ test('USD/INR feeds are preference-ordered, as-of aware and sanity-guarded', asy
   assert.ok(html.includes('usdInrAsOf: state.live.usdInrAsOf || null'), 'cached rates must persist the as-of timestamp');
   assert.ok(html.includes('id="news-ticker-inr-label"'), 'the news ticker must carry an FX as-of label');
 });
+
+// ---------------------------------------------------------------------------
+// LIVE USD/INR ENGINE — gold & silver INR prices must always be calculated from
+// the freshest live mid-market rupee rate, with daily feeds only as a backstop.
+// ---------------------------------------------------------------------------
+async function loadFxEngine({ fetchFromTiers, state, now = () => 1_000_000 }) {
+  const html = await loadHtml();
+  const engineStart = html.indexOf('    // LIVE USD/INR ENGINE');
+  const engineEnd = html.indexOf('    async function syncLiveAPIs(', engineStart);
+  assert.ok(engineStart >= 0 && engineEnd > engineStart, 'live FX engine block must be locatable');
+  const constantsStart = html.indexOf('    const TROY_OZ_TO_GRAMS =');
+  const constantsEnd = html.indexOf('    const WS_PROVIDERS =', constantsStart);
+  const citiesStart = html.indexOf('    const CITIES = {');
+  const citiesEnd = html.indexOf('    };', citiesStart) + '    };'.length;
+  const computeStart = html.indexOf('    function computeCityPrices(');
+  const computeEnd = html.indexOf('    function formatIndianInt(', computeStart);
+  const fxStart = html.indexOf('    // USD/INR plausibility band');
+  const fxEnd = html.indexOf('    // Approximate USD cross-rates', fxStart);
+  assert.ok(constantsStart >= 0 && constantsEnd > constantsStart);
+  assert.ok(citiesStart >= 0 && citiesEnd > citiesStart);
+  assert.ok(computeStart >= 0 && computeEnd > computeStart);
+  assert.ok(fxStart >= 0 && fxEnd > fxStart);
+
+  const renders = [];
+  const persisted = [];
+  const timers = [];
+  const fakeDate = class extends Date { static now() { return now(); } };
+  const sandbox = {
+    Number, Date: fakeDate, Math, JSON, Infinity, Promise, console,
+    state,
+    fetchFromTiers,
+    fmtTime: () => '12:00',
+    renderPriceCards: (dirs) => renders.push(dirs),
+    updateRatesUpdatedLabel: () => {},
+    renderExchangeComparison: () => {},
+    renderMarketAccuracy: () => {},
+    renderChart: () => {},
+    updateAllTools: () => {},
+    renderNewsTicker: () => {},
+    persistCachedRates: (...args) => persisted.push(args),
+    document: { hidden: false },
+    setTimeout: (fn, ms) => { timers.push({ fn, ms }); return timers.length; },
+    clearTimeout: () => {}
+  };
+  vm.runInNewContext([
+    html.slice(constantsStart, constantsEnd),
+    html.slice(citiesStart, citiesEnd),
+    html.slice(computeStart, computeEnd),
+    html.slice(fxStart, fxEnd),
+    html.slice(engineStart, engineEnd),
+    'globalThis.__engine = { refreshLiveFx, applyLiveFxToPrices, scheduleFxSync };'
+  ].join('\n'), sandbox);
+  return { engine: sandbox.__engine, renders, persisted, timers, sandbox };
+}
+
+function makeFxState(overrides = {}) {
+  return {
+    cityId: 'cuttack',
+    marketMode: 'INR',
+    activeView: 'rates',
+    history: [],
+    prices: null,
+    live: {
+      spotGold: 4100, spotSilver: 48, usdInr: null,
+      lastFxSync: 0, lastFxAttempt: 0, isFxFetching: false, fxTimerId: null,
+      fxSource: '', fxLive: false, usdInrAsOf: null,
+      ...overrides
+    }
+  };
+}
+
+test('live FX engine prices gold & silver from the live mid-market tier and reprices immediately', async () => {
+  const clock = 1_000_000;
+  const calls = [];
+  let rate = 92.9;
+  const state = makeFxState();
+  const { engine, renders, persisted } = await loadFxEngine({
+    now: () => clock,
+    state,
+    fetchFromTiers: async (tiers) => {
+      calls.push(tiers.map((t) => t.map((p) => p.name)));
+      return { val: rate, source: 'currency-converter.live', asOf: clock - 30_000, live: true };
+    }
+  });
+
+  const first = await engine.refreshLiveFx(true);
+  assert.equal(first, 92.9);
+  assert.equal(state.live.usdInr, 92.9);
+  assert.equal(state.live.fxLive, true);
+  assert.equal(state.live.fxSource, 'currency-converter.live');
+  // Only the live mid-market tier is raced — daily feeds are not consulted when live works.
+  assert.equal(JSON.stringify(calls), JSON.stringify([[['currency-converter.live', 'fxapi.app']]]));
+  // Gold & silver are repriced from the live rate right away (no metal sync needed).
+  const expectedGold = Math.round((4100 * 92.9 / 31.1034768) * 1.15 * 10 * 1.03);
+  const expectedSilver = Math.round((48 * 92.9 / 31.1034768) * 1.15 * 1000 * 1.03);
+  assert.equal(state.prices.gold999, expectedGold);
+  assert.equal(state.prices.silver999, expectedSilver);
+  assert.equal(state.prices.usdInr, 92.9);
+  assert.equal(state.history.length, 1);
+  assert.equal(persisted.length, 1);
+
+  // Rupee weakens → every INR price moves up and the board flashes upward.
+  rate = 93.1;
+  const second = await engine.refreshLiveFx(true);
+  assert.equal(second, 93.1);
+  assert.ok(state.prices.gold999 > expectedGold, 'gold must reprice with the weaker rupee');
+  assert.ok(state.prices.silver999 > expectedSilver, 'silver must reprice with the weaker rupee');
+  assert.equal(JSON.stringify(renders[renders.length - 1]), JSON.stringify({ gold: 1, silver: 1 }));
+
+  // Rupee strengthens → prices move down, flash downward.
+  rate = 92.7;
+  await engine.refreshLiveFx(true);
+  assert.ok(state.prices.gold999 < expectedGold);
+  assert.equal(JSON.stringify(renders[renders.length - 1]), JSON.stringify({ gold: -1, silver: -1 }));
+});
+
+test('live FX engine retries the live tier every minute even while a daily fallback rate is held', async () => {
+  let clock = 1_000_000;
+  const calls = [];
+  // Held rate: a daily reference fetched 1 minute ago (well inside the 15-min horizon).
+  const state = makeFxState({ usdInr: 92.5, fxLive: false, fxSource: 'open.er-api', lastFxSync: clock - 60_000, lastFxAttempt: clock - 61_000 });
+  const { engine } = await loadFxEngine({
+    now: () => clock,
+    state,
+    fetchFromTiers: async (tiers) => {
+      calls.push(tiers.map((t) => t.map((p) => p.name)));
+      throw new Error('live tier down');
+    }
+  });
+
+  const kept = await engine.refreshLiveFx(false);
+  assert.equal(kept, 92.5, 'a fresh daily fallback rate must be kept while live is down');
+  assert.equal(state.live.usdInr, 92.5);
+  // Only the live tier was retried — the daily APIs are NOT re-hammered every minute.
+  assert.equal(JSON.stringify(calls), JSON.stringify([[['currency-converter.live', 'fxapi.app']]]));
+
+  // One minute later the live tier is retried again (not parked for 15 minutes).
+  clock += 61_000;
+  await engine.refreshLiveFx(false);
+  assert.equal(calls.length, 2, 'live tier must be retried at the 1-minute cadence');
+  assert.equal(JSON.stringify(calls[1]), JSON.stringify([['currency-converter.live', 'fxapi.app']]));
+
+  // Once the held rate goes stale (> 15 min), daily tiers backstop it.
+  clock += 16 * 60_000;
+  state.live.lastFxSync = clock - 16 * 60_000;
+  const dailyCalls = [];
+  const { engine: engine2 } = await loadFxEngine({
+    now: () => clock,
+    state,
+    fetchFromTiers: async (tiers) => {
+      dailyCalls.push(tiers.map((t) => t.map((p) => p.name)));
+      if (dailyCalls.length === 1) throw new Error('live tier down');
+      return { val: 92.7, source: 'open.er-api', asOf: clock - 3_600_000, live: false };
+    }
+  });
+  const backstop = await engine2.refreshLiveFx(false);
+  assert.equal(backstop, 92.7);
+  assert.equal(state.live.fxLive, false);
+  assert.equal(dailyCalls.length, 2, 'stale rate must fall back to the daily tiers');
+  assert.equal(JSON.stringify(dailyCalls[1]), JSON.stringify([['open.er-api'], ['jsDelivr', 'Cloudflare'], ['Frankfurter']]));
+});
+
+test('live FX engine keeps the last good rate on garbage feeds and shares one in-flight attempt', async () => {
+  const clock = 1_000_000;
+  const state = makeFxState({ usdInr: 92.5, lastFxSync: clock - 60_000, lastFxAttempt: clock - 61_000 });
+  let calls = 0;
+  const { engine } = await loadFxEngine({
+    now: () => clock,
+    state,
+    fetchFromTiers: async () => {
+      calls += 1;
+      return { val: 150, source: 'currency-converter.live', asOf: clock, live: true }; // outside the band
+    }
+  });
+  const kept = await engine.refreshLiveFx(true);
+  assert.equal(kept, 92.5, 'a band-rejected live quote must not reprice the board');
+  assert.equal(state.live.usdInr, 92.5);
+  assert.equal(state.prices, null, 'no reprice may happen on a rejected quote');
+
+  // Concurrent callers (metal sync + heartbeat) share a single in-flight attempt.
+  let release;
+  const gate = new Promise((resolve) => { release = resolve; });
+  let fetches = 0;
+  const state2 = makeFxState();
+  const { engine: engine2 } = await loadFxEngine({
+    clock,
+    state: state2,
+    fetchFromTiers: () => { fetches += 1; return gate.then(() => ({ val: 92.9, source: 'fxapi.app', asOf: clock, live: true })); }
+  });
+  const p1 = engine2.refreshLiveFx(true);
+  const p2 = engine2.refreshLiveFx(true);
+  assert.equal(p1, p2, 'concurrent refreshes must share one in-flight promise');
+  release();
+  const [r1, r2] = await Promise.all([p1, p2]);
+  assert.equal(r1, 92.9);
+  assert.equal(r2, 92.9);
+  assert.equal(fetches, 1, 'only one network attempt may run at a time');
+  assert.equal(state2.live.usdInr, 92.9);
+});
+
+test('live FX heartbeat runs every minute independent of metal syncs and pauses when hidden', async () => {
+  const clock = 1_000_000;
+  const state = makeFxState({ usdInr: 92.5, lastFxSync: clock, lastFxAttempt: clock });
+  const { engine, timers, sandbox } = await loadFxEngine({
+    clock,
+    state,
+    fetchFromTiers: async () => ({ val: 92.5, source: 'currency-converter.live', asOf: clock, live: true })
+  });
+  engine.scheduleFxSync();
+  assert.equal(timers.length, 1);
+  assert.equal(timers[0].ms, 60_000, 'heartbeat must tick at the live FX cadence (60s)');
+  // Firing the heartbeat reschedules itself and refreshes the rate.
+  timers[0].fn();
+  assert.equal(timers.length, 2, 'heartbeat must reschedule itself');
+  // Hidden tab: no new timer is armed.
+  sandbox.document.hidden = true;
+  engine.scheduleFxSync();
+  assert.equal(timers.length, 2, 'hidden tab must not arm the heartbeat');
+});
+
+test('live FX engine is wired into boot, sync, visibility and the INR board', async () => {
+  const html = await loadHtml();
+  // The metal sync delegates FX to the engine and never clobbers the engine-owned rate.
+  assert.ok(html.includes('const fxPromise = refreshLiveFx(isInitialConnect || isManual);'), 'syncLiveAPIs must delegate to refreshLiveFx');
+  assert.ok(!html.includes('state.live.usdInr = fxRes.value;'), 'syncLiveAPIs must not overwrite the engine-owned rate');
+  assert.ok(!html.includes('const needFx ='), 'the old 15-minute FX gate must be gone');
+  // Boot starts the dedicated heartbeat.
+  const bootStart = html.indexOf('(function bootApp() {');
+  const bootEnd = html.indexOf('    })();', bootStart);
+  const boot = html.slice(bootStart, bootEnd);
+  assert.ok(boot.includes('scheduleFxSync();'), 'boot must start the FX heartbeat');
+  // Visibility change pauses and resumes the heartbeat.
+  const visStart = html.indexOf("document.addEventListener('visibilitychange'");
+  const visEnd = html.indexOf('});', visStart);
+  const vis = html.slice(visStart, visEnd);
+  assert.ok(vis.includes('state.live.fxTimerId'), 'visibility handler must manage the FX timer');
+  assert.ok(vis.includes('scheduleFxSync();'), 'visibility handler must resume the heartbeat');
+  // The INR board shows the live rate every price is calculated from.
+  for (const id of ['inr-fx-strip', 'inr-fx-label', 'inr-fx-value', 'inr-fx-source']) {
+    assert.ok(html.includes(`id="${id}"`), `INR FX strip: ${id}`);
+  }
+  const stripStart = html.indexOf('function renderInrFxStrip(');
+  assert.ok(stripStart >= 0, 'renderInrFxStrip must exist');
+  const paintStart = html.indexOf('function renderPriceCardsNow(');
+  const paintEnd = html.indexOf('function renderNewsTicker(', paintStart);
+  const paint = html.slice(paintStart, paintEnd);
+  assert.ok(paint.includes('renderInrFxStrip();'), 'the INR paint path must render the FX strip');
+  // The engine reprices the whole board (history, flash, cache) when the rupee moves.
+  const applyStart = html.indexOf('function applyLiveFxToPrices(');
+  const applyEnd = html.indexOf('function scheduleFxSync(', applyStart);
+  const apply = html.slice(applyStart, applyEnd);
+  assert.ok(apply.includes('computeCityPrices(state.cityId, state.live.spotGold, state.live.spotSilver, state.live.usdInr)'), 'FX moves must recompute gold & silver');
+  assert.ok(apply.includes('persistCachedRates('), 'FX reprices must persist the cached rates');
+});

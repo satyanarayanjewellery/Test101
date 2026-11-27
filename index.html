@@ -479,6 +479,22 @@
 
       <!-- INDIA (INR) 2-CARD LAYOUT: GOLD & SILVER (CLEAN & SMOOTH) -->
       <section id="inr-rates-section" class="flex flex-col gap-3.5" aria-label="India Live Bullion Prices Per 1 Gram">
+        <!-- LIVE USD/INR STRIP — the rupee rate every gold & silver price below is calculated from -->
+        <div id="inr-fx-strip" class="glass-card rounded-2xl px-4 sm:px-6 py-2.5 flex items-center justify-between gap-3" aria-label="Live USD to INR rate used to calculate these prices">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <div class="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center shrink-0" aria-hidden="true">
+              <span class="text-base font-bold text-emerald-300">₹</span>
+            </div>
+            <div class="min-w-0">
+              <p id="inr-fx-label" class="text-[10px] sm:text-[11px] text-emerald-300 font-semibold leading-tight">USD / INR</p>
+              <p id="inr-fx-source" class="text-[9px] sm:text-[10px] text-slate-500 truncate mt-0.5">--</p>
+            </div>
+          </div>
+          <div class="text-right shrink-0">
+            <p id="inr-fx-value" class="price-num text-lg sm:text-xl font-bold text-emerald-200 tabular-nums leading-tight" title="Live USD/INR — the rate these gold &amp; silver prices are calculated from">₹--</p>
+            <p class="text-[9px] sm:text-[10px] text-slate-500 mt-0.5">rate used for every ₹ price below</p>
+          </div>
+        </div>
 
         <!-- GOLD CARD -->
         <div class="glass-card gold-gradient rounded-2xl p-3.5 sm:p-5 relative overflow-hidden">
@@ -2270,6 +2286,9 @@
         isFetching: false,
         lastSync: null,
         lastFxSync: 0,
+        lastFxAttempt: 0,
+        isFxFetching: false,
+        fxTimerId: null,
         fxSource: '',
         fxLive: false,
         usdInrAsOf: null,
@@ -2820,6 +2839,121 @@
       throw new Error(tierErrors.join(' | ') || 'All feeds unavailable');
     }
 
+    // =========================================================================
+    // LIVE USD/INR ENGINE — every rupee price on the desk is calculated from the
+    // freshest live mid-market USD/INR rate, never a stale daily fix.
+    // =========================================================================
+    // The live mid-market tier is retried every minute even while a daily fallback
+    // rate is held, so the desk climbs back to live FX as soon as the feed returns.
+    // Daily reference tiers are consulted only when no rate is held yet or the held
+    // rate has gone stale (> FX_REFRESH_MS) — they are a safety net, not the source.
+    // A single in-flight attempt is shared by the metal sync and the 60s heartbeat,
+    // so they never race each other or clobber a fresher rate with a stale one.
+    let fxInFlight = null;
+    function refreshLiveFx(force = false) {
+      if (fxInFlight) return fxInFlight;
+      const now = Date.now();
+      const haveRate = Number.isFinite(state.live.usdInr) && state.live.usdInr > 0;
+      if (!force && haveRate && now - state.live.lastFxAttempt < FX_LIVE_REFRESH_MS) {
+        return Promise.resolve(state.live.usdInr);
+      }
+      state.live.lastFxAttempt = now;
+      state.live.isFxFetching = true;
+      fxInFlight = (async () => {
+        try {
+          // Always race the live mid-market providers first.
+          let res = null;
+          try { res = await fetchFromTiers([FX_TIERS[0]]); } catch { res = null; }
+          // Fall back to daily reference feeds only when we hold nothing usable yet
+          // or the rate we hold is older than the daily-refresh horizon.
+          if (!res && (!haveRate || now - state.live.lastFxSync > FX_REFRESH_MS)) {
+            res = await fetchFromTiers(FX_TIERS.slice(1));
+          }
+          if (!res) {
+            if (haveRate) return state.live.usdInr; // keep last good rate, retry live next minute
+            throw new Error('USD/INR feeds unavailable');
+          }
+          const check = validateUsdInr(res.val, state.live.usdInr);
+          if (!check.ok) {
+            // Keep previous valid FX rate; the next minute's attempt retries the live tier.
+            if (haveRate) {
+              console.warn(`USD/INR from ${res.source || 'feed'} rejected (${check.reason}: ${res.val}) — keeping ₹${state.live.usdInr.toFixed(2)}`);
+              return state.live.usdInr;
+            }
+            throw new Error(`USD/INR ${res.val} rejected (${check.reason})`);
+          }
+          state.live.lastFxSync = Date.now();
+          state.live.fxSource = res.source || '';
+          state.live.fxLive = !!res.live;
+          state.live.usdInrAsOf = res.asOf || null;
+          state.live.usdInr = check.value;
+          // Rupee moved → reprice gold & silver immediately; don't wait for the next metal sync.
+          applyLiveFxToPrices();
+          return check.value;
+        } finally {
+          state.live.isFxFetching = false;
+          fxInFlight = null;
+        }
+      })();
+      return fxInFlight;
+    }
+
+    // Reprice the whole INR board (gold + silver, every purity) the moment the live
+    // rupee rate changes, so prices never lag the FX feed waiting for a metal sync.
+    function applyLiveFxToPrices() {
+      if (!Number.isFinite(state.live.spotGold) || !Number.isFinite(state.live.spotSilver) || !Number.isFinite(state.live.usdInr)) return;
+      const prevPrices = state.prices;
+      const nextPrices = computeCityPrices(state.cityId, state.live.spotGold, state.live.spotSilver, state.live.usdInr);
+      if (prevPrices
+        && prevPrices.spotGold === nextPrices.spotGold
+        && prevPrices.spotSilver === nextPrices.spotSilver
+        && prevPrices.usdInr === nextPrices.usdInr) return;
+      state.prices = nextPrices;
+      state.live.lastSync = new Date();
+      const lastHist = state.history[state.history.length - 1];
+      if (!lastHist || lastHist.spotGold !== nextPrices.spotGold || lastHist.spotSilver !== nextPrices.spotSilver || lastHist.usdInr !== nextPrices.usdInr) {
+        state.history.push({
+          time: fmtTime(state.live.lastSync),
+          spotGold: nextPrices.spotGold,
+          spotSilver: nextPrices.spotSilver,
+          usdInr: nextPrices.usdInr
+        });
+        if (state.history.length > 80) state.history.shift();
+      }
+      const goldFlashDir = !prevPrices ? null
+        : (state.marketMode === 'INR'
+          ? (nextPrices.gold999 === prevPrices.gold999 ? null : (nextPrices.gold999 > prevPrices.gold999 ? 1 : -1))
+          : (nextPrices.spotGold === prevPrices.spotGold ? null : (nextPrices.spotGold > prevPrices.spotGold ? 1 : -1)));
+      const silverFlashDir = !prevPrices ? null
+        : (state.marketMode === 'INR'
+          ? (nextPrices.silver999 === prevPrices.silver999 ? null : (nextPrices.silver999 > prevPrices.silver999 ? 1 : -1))
+          : (nextPrices.spotSilver === prevPrices.spotSilver ? null : (nextPrices.spotSilver > prevPrices.spotSilver ? 1 : -1)));
+      renderPriceCards({ gold: goldFlashDir, silver: silverFlashDir }, false);
+      updateRatesUpdatedLabel();
+      if (state.activeView === 'exchanges') renderExchangeComparison();
+      if (state.activeView === 'accuracy') renderMarketAccuracy();
+      if (state.activeView === 'charts') renderChart();
+      if (state.activeView === 'tools') updateAllTools();
+      if (state.activeView === 'news') renderNewsTicker();
+      persistCachedRates(state.live.spotGold, state.live.spotSilver, state.live.usdInr);
+    }
+
+    // Dedicated 60s heartbeat for live USD/INR, independent of the metal-sync cadence
+    // (WS basis syncs run every 30s and REST can back off to 60s) — the rupee rate
+    // stays fresh no matter what the metal feeds are doing. Paused while tab is hidden.
+    function scheduleFxSync() {
+      if (state.live.fxTimerId) {
+        clearTimeout(state.live.fxTimerId);
+        state.live.fxTimerId = null;
+      }
+      if (document.hidden) return;
+      state.live.fxTimerId = setTimeout(() => {
+        state.live.fxTimerId = null;
+        scheduleFxSync();
+        refreshLiveFx(false).catch(() => { /* keep last good rate */ });
+      }, FX_LIVE_REFRESH_MS);
+    }
+
     async function syncLiveAPIs(isManual = false, isInitialConnect = false) {
       if (state.live.isFetching) return;
       state.live.isFetching = true;
@@ -2844,33 +2978,9 @@
 
         const silverPromise = fetchFromTiers(SILVER_TIERS).then((res) => res.val);
 
-        // Cache USD/INR for 15 minutes so we don't spam daily FX APIs on every tick
-        const needFx = isInitialConnect || isManual || !state.live.usdInr || (Date.now() - state.live.lastFxSync > (state.live.fxLive ? FX_LIVE_REFRESH_MS : FX_REFRESH_MS));
-        const fxPromise = needFx
-          ? fetchFromTiers(FX_TIERS)
-              .then((res) => {
-                const check = validateUsdInr(res.val, state.live.usdInr);
-                if (!check.ok) {
-                  // Keep previous valid FX rate; stamp lastFxSync so we don't hammer daily APIs every tick.
-                  if (Number.isFinite(state.live.usdInr) && state.live.usdInr > 0) {
-                    console.warn(`USD/INR from ${res.source || 'feed'} rejected (${check.reason}: ${res.val}) — keeping ₹${state.live.usdInr.toFixed(2)}`);
-                    state.live.lastFxSync = Date.now();
-                    return state.live.usdInr;
-                  }
-                  throw new Error(`USD/INR ${res.val} rejected (${check.reason})`);
-                }
-                state.live.lastFxSync = Date.now();
-                state.live.fxSource = res.source || '';
-                state.live.fxLive = !!res.live;
-                state.live.usdInrAsOf = res.asOf || null;
-                return check.value;
-              })
-              .catch((err) => {
-                // Keep previous valid FX rate if refresh fails temporarily
-                if (state.live.usdInr) return state.live.usdInr;
-                throw err;
-              })
-          : Promise.resolve(state.live.usdInr);
+        // USD/INR is owned by the dedicated live FX engine: live mid-market first,
+        // retried every minute, daily reference feeds only backstopping a stale rate.
+        const fxPromise = refreshLiveFx(isInitialConnect || isManual);
 
         const [goldRes, silverRes, fxRes] = await Promise.allSettled([goldPromise, silverPromise, fxPromise]);
         const allOk = goldRes.status === 'fulfilled' && silverRes.status === 'fulfilled' && fxRes.status === 'fulfilled';
@@ -2878,12 +2988,12 @@
         if (allOk) {
           const prevSpotGold = state.live.spotGold;
           const prevSpotSilver = state.live.spotSilver;
-          const prevUsdInr = state.live.usdInr;
           const prevPrices = state.prices;
 
           state.live.spotGold = goldRes.value;
           state.live.spotSilver = silverRes.value;
-          state.live.usdInr = fxRes.value;
+          // state.live.usdInr is owned by refreshLiveFx (it may already have applied a
+          // fresher rate mid-sync); fxRes.value only gates the allOk check below.
           state.live.lastSync = new Date();
           state.live.status = 'live';
           state.live.restFailStreak = 0;
@@ -2912,10 +3022,10 @@
             if (Math.abs(diffS) < state.live.spotSilver * 0.08) state.ws.basisSilver = diffS;
           }
 
+          // FX-only moves are already repriced by applyLiveFxToPrices inside the engine.
           const pricesChanged = firstEverConnect
             || prevSpotGold !== state.live.spotGold
-            || prevSpotSilver !== state.live.spotSilver
-            || prevUsdInr !== state.live.usdInr;
+            || prevSpotSilver !== state.live.spotSilver;
 
           if (pricesChanged) {
             state.history.push({
@@ -3843,6 +3953,33 @@
       priceRenderRaf = requestAnimationFrame(flushPriceRender);
     }
 
+    // Live USD/INR chip on the India (INR) board — shows the exact rupee rate every
+    // gold & silver price below is calculated from, and whether it is live or a
+    // daily reference fallback.
+    function renderInrFxStrip() {
+      const val = Number(state.live.usdInr);
+      const valEl = getEl('inr-fx-value');
+      if (!Number.isFinite(val) || val <= 0) {
+        setText(valEl, '₹--');
+        setText(getEl('inr-fx-label'), 'USD / INR');
+        setText(getEl('inr-fx-source'), 'waiting for live feed…');
+        return;
+      }
+      const fxTs = Number(state.live.usdInrAsOf);
+      const fxIsLive = Boolean(state.live.fxLive) && Number.isFinite(fxTs) && fxTs > 0 && (Date.now() - fxTs) < 10 * 60 * 1000;
+      const asOf = fmtFxAsOf(state.live.usdInrAsOf);
+      setText(getEl('inr-fx-label'), fxIsLive ? 'USD / INR · live' : (asOf ? `USD / INR · as of ${asOf}` : 'USD / INR'));
+      setText(valEl, '₹' + val.toFixed(4));
+      setText(getEl('inr-fx-source'), state.live.fxSource
+        ? (fxIsLive ? `live · ${state.live.fxSource}` : `${state.live.fxSource}${asOf ? ` · as of ${asOf}` : ''}`)
+        : (asOf ? `as of ${asOf}` : 'daily reference rate'));
+      if (valEl) {
+        valEl.title = fxIsLive
+          ? `Live mid-market USD/INR via ${state.live.fxSource || 'live feed'} — every gold & silver price below is calculated from this rate`
+          : 'USD/INR daily reference rate — every gold & silver price below is calculated from this rate';
+      }
+    }
+
     function renderPriceCardsNow(flashDirs = null, animateReveal = false, fromWs = false) {
       const p = state.prices;
       if (!p || !state.sessionOpen) return;
@@ -3860,6 +3997,9 @@
           getEl('usd-spot-section').classList.add('hidden');
           lastPaintedMode = 'INR';
         }
+
+        // --- LIVE USD/INR STRIP (the rupee rate these prices are calculated from) ---
+        renderInrFxStrip();
 
         // --- ROW 1: GOLD WITHOUT GST (1 GRAM — 999 | 995 | 916 | 750) ---
         const gEx999 = getEl('gold-exgst-999-price');
@@ -7878,10 +8018,18 @@
             clearTimeout(state.live.timerId);
             state.live.timerId = null;
           }
+          if (state.live.fxTimerId) {
+            clearTimeout(state.live.fxTimerId);
+            state.live.fxTimerId = null;
+          }
           disconnectLiveWebSocket();
-        } else if (state.live.connected) {
-          connectLiveWebSocket();
-          syncLiveAPIs(false, false);
+        } else {
+          // The live USD/INR heartbeat resumes even if the metal feeds never connected.
+          scheduleFxSync();
+          if (state.live.connected) {
+            connectLiveWebSocket();
+            syncLiveAPIs(false, false);
+          }
         }
       });
 
@@ -8056,6 +8204,7 @@
       renderRateOfDay(state.prices);
       connectLiveWebSocket();
       syncLiveAPIs(false, true);
+      scheduleFxSync();
 
       // 2. Bind UI events immediately so taps work at T=0ms
       bindEvents();
