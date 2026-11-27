@@ -1689,3 +1689,16 @@ test('rates footer and shop introduction omit the removed copy', async () => {
   assert.ok(hero?.includes('showroom pickup.'));
   assert.ok(!hero.includes('insured delivery'));
 });
+
+
+test('collection omits the removed certification and pricing statements', async () => {
+  const html = await loadHtml();
+  const start = html.indexOf('<section class="shop-gallery"');
+  const end = html.indexOf('</section>', start);
+  assert.ok(start >= 0 && end > start);
+  const gallery = html.slice(start, end);
+  assert.ok(gallery.includes('Our Collection'));
+  assert.ok(gallery.includes('id="product-list"'));
+  assert.ok(!gallery.includes('Every piece is BIS hallmarked'));
+  assert.ok(!gallery.includes('Prices shown are indicative'));
+});
