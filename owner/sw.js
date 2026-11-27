@@ -1,7 +1,7 @@
 // Offline-ready Service Worker for the Satyanarayan Jewellers Owner PWA (/owner/).
 // Scoped independently to ./ so the Owner PWA installs side-by-side with the customer
 // Price Desk PWA without interfering with customer caching or live GitHub API calls.
-const CACHE = 'sj-owner-desk-v3';
+const CACHE = 'sj-owner-desk-v4';
 const SHELL = [
   './index.html',
   './styles.css',
@@ -17,10 +17,23 @@ function isCacheable(res) {
   return Boolean(res && res.ok && res.type === 'basic');
 }
 
+function isCoreShellAsset(pathname) {
+  return pathname.endsWith('/owner/styles.css')
+    || pathname.endsWith('/owner/app.js')
+    || pathname.endsWith('/styles.css')
+    || pathname.endsWith('/app.js');
+}
+
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE)
-      .then((cache) => cache.addAll(SHELL))
+      .then((cache) => Promise.all(
+        SHELL.map((asset) => fetch(new Request(asset, { cache: 'reload' })).then((res) => {
+          if (!res.ok) throw new Error(`Shell asset failed: ${asset}`);
+          return cache.put(asset, res);
+        }))
+      ))
+      .then(() => self.skipWaiting())
   );
 });
 
@@ -33,6 +46,18 @@ self.addEventListener('activate', (event) => {
           .map((key) => caches.delete(key))
       ))
       .then(() => self.clients.claim())
+      .then(() => (self.clients.matchAll
+        ? self.clients.matchAll({ type: 'window', includeUncontrolled: true })
+        : Promise.resolve([])))
+      .then((clients) => Promise.all(
+        clients
+          .filter((client) => {
+            const url = new URL(client.url);
+            return url.origin === self.location.origin
+              && (url.pathname.includes('/owner/') || url.pathname.endsWith('/owner'));
+          })
+          .map((client) => (typeof client.navigate === 'function' ? client.navigate(client.url).catch(() => null) : null))
+      ))
   );
 });
 
@@ -116,7 +141,26 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Static same-origin assets (owner shell + published catalogue media): stale-while-revalidate.
+  // Core JS & CSS shell files: network-first with cache: 'no-cache' so owner app.js and styles.css
+  // always stay in sync with network-first index.html navigations, falling back to cache offline.
+  if (isCoreShellAsset(url.pathname)) {
+    const cacheKey = url.pathname.endsWith('styles.css') ? './styles.css' : './app.js';
+    event.respondWith(
+      fetch(req, { cache: 'no-cache' })
+        .then((res) => {
+          if (isCacheable(res)) {
+            const copy = res.clone();
+            caches.open(CACHE).then((cache) => cache.put(cacheKey, copy));
+            return res;
+          }
+          return caches.match(cacheKey).then((cached) => cached || caches.match(req)).then((cached) => cached || res);
+        })
+        .catch(() => caches.match(cacheKey).then((cached) => cached || caches.match(req)).then((cached) => cached || new Response('Offline', { status: 503 })))
+    );
+    return;
+  }
+
+  // Static same-origin assets (icons + published catalogue media): stale-while-revalidate.
   event.respondWith(
     caches.match(req).then((cached) => {
       const networkFetch = fetch(req)
