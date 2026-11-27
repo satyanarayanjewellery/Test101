@@ -1,7 +1,7 @@
 // Minimal offline-shell service worker for Satyanarayan Jewellers Price Desk.
 // Caches the static app shell with cache-poisoning guards; live market APIs and
 // catalog/products.json always hit the network so visitors see fresh rates and items.
-const CACHE = 'sj-price-desk-v13';
+const CACHE = 'sj-price-desk-v14';
 const SHELL = ['./index.html', './manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
 
 function isCacheable(res) {
@@ -17,6 +17,14 @@ self.addEventListener('activate', event => {
     caches.keys()
       .then(keys => Promise.all(keys.filter(key => key !== CACHE && !key.startsWith('sj-owner-desk-')).map(key => caches.delete(key))))
       .then(() => self.clients.claim())
+      .then(() => self.clients.matchAll({ type: 'window', includeUncontrolled: true }))
+      .then(clients => Promise.all(clients
+        .filter(client => {
+          const url = new URL(client.url);
+          // Do not reload the separately-scoped Owner PWA when the customer shell updates.
+          return url.origin === self.location.origin && !url.pathname.includes('/owner/') && !url.pathname.endsWith('/owner');
+        })
+        .map(client => client.navigate(client.url).catch(() => null))))
   );
 });
 
