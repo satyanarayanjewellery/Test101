@@ -1,7 +1,7 @@
 // Minimal offline-shell service worker for Satyanarayan Jewellers Price Desk.
 // Caches the static app shell with cache-poisoning guards; live market APIs and
 // catalog/products.json always hit the network so visitors see fresh rates and items.
-const CACHE = 'sj-price-desk-v10';
+const CACHE = 'sj-price-desk-v11';
 const SHELL = ['./index.html', './manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
 
 function isCacheable(res) {
@@ -30,6 +30,23 @@ self.addEventListener('fetch', event => {
   if (url.pathname.endsWith('/catalog/products.json') || url.pathname === '/catalog/products.json') {
     event.respondWith(
       fetch(req).catch(() => new Response('[]', { headers: { 'content-type': 'application/json' } }))
+    );
+    return;
+  }
+
+  // Statutory duty/GST is policy data: a stale cached copy would misprice every rupee figure, so
+  // it always goes to the network and only a previously good cached copy may stand in offline.
+  if (url.pathname.endsWith('/catalog/statutory-rates.json') || url.pathname === '/catalog/statutory-rates.json') {
+    event.respondWith(
+      fetch(req)
+        .then(res => {
+          if (isCacheable(res)) {
+            const copy = res.clone();
+            caches.open(CACHE).then(cache => cache.put(req, copy));
+          }
+          return res;
+        })
+        .catch(() => caches.match(req).then(cached => cached || Response.error()))
     );
     return;
   }
