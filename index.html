@@ -488,23 +488,6 @@
 
       <!-- INDIA (INR) 2-CARD LAYOUT: GOLD & SILVER (CLEAN & SMOOTH) -->
       <section id="inr-rates-section" class="flex flex-col gap-3.5" aria-label="India Live Bullion Prices Per 1 Gram">
-        <!-- LIVE USD/INR STRIP — the rupee rate every gold & silver price below is calculated from -->
-        <div id="inr-fx-strip" class="glass-card rounded-2xl px-4 sm:px-6 py-2.5 flex items-center justify-between gap-3" aria-label="Live USD to INR rate used to calculate these prices">
-          <div class="flex items-center gap-2.5 min-w-0">
-            <div class="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center shrink-0" aria-hidden="true">
-              <span class="text-base font-bold text-emerald-300">₹</span>
-            </div>
-            <div class="min-w-0">
-              <p id="inr-fx-label" class="text-[10px] sm:text-[11px] text-emerald-300 font-semibold leading-tight">USD / INR</p>
-              <p id="inr-fx-source" class="text-[9px] sm:text-[10px] text-slate-500 truncate mt-0.5">--</p>
-            </div>
-          </div>
-          <div class="text-right shrink-0">
-            <p id="inr-fx-value" class="price-num text-lg sm:text-xl font-bold text-emerald-200 tabular-nums leading-tight" title="Live USD/INR — the rate these gold &amp; silver prices are calculated from">₹--</p>
-            <p class="text-[9px] sm:text-[10px] text-slate-500 mt-0.5">rate used for every ₹ price below</p>
-          </div>
-        </div>
-
         <!-- GOLD CARD -->
         <div class="glass-card gold-gradient rounded-2xl p-3.5 sm:p-5 relative overflow-hidden">
           <div class="flex items-center justify-between gap-2 mb-3">
@@ -826,23 +809,25 @@
 
       <!-- GLOBAL SPOT (USD) CARDS WITH 999 / 995 / 916 / 750 PURITIES -->
       <section id="usd-spot-section" class="hidden flex flex-col gap-3.5" aria-label="Global Spot USD Prices">
-        <!-- USD/INR LIVE FX STRIP — global spot is priced in USD; this shows the live rupee conversion rate -->
-        <div id="usd-spot-fx" class="glass-card rounded-2xl px-4 sm:px-6 py-3 flex items-center justify-between gap-3" aria-label="USD to INR live exchange rate">
-          <div class="flex items-center gap-3 min-w-0">
-            <div class="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center shrink-0" aria-hidden="true">
-              <span class="text-lg font-bold text-emerald-300">₹</span>
+        <!-- LIVE USD/INR STRIP — the exchange rate used for India prices -->
+        <div id="usd-spot-fx" class="glass-card rounded-2xl px-4 sm:px-6 py-2.5 flex items-center justify-between gap-3" aria-label="USD to INR exchange rate used to calculate India prices">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <div class="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center shrink-0" aria-hidden="true">
+              <span class="text-base font-bold text-emerald-300">₹</span>
             </div>
             <div class="min-w-0">
               <p id="usd-spot-fx-label" class="text-[10px] sm:text-[11px] text-emerald-300 font-semibold leading-tight">USD / INR</p>
-              <p class="text-[10px] sm:text-[11px] text-slate-400 leading-tight mt-1 whitespace-nowrap">1 INR = $<span id="usd-spot-fx-inrper">--</span></p>
+              <p id="usd-spot-fx-source" class="text-[9px] sm:text-[10px] text-slate-500 truncate mt-0.5">--</p>
+              <p class="text-[9px] sm:text-[10px] text-slate-400 mt-0.5">1 INR = $<span id="usd-spot-fx-inrper">--</span></p>
             </div>
           </div>
           <div class="text-right shrink-0">
-            <p id="usd-spot-fx-value" class="price-num text-2xl font-bold text-emerald-200 tabular-nums leading-tight" title="USD/INR — 1 US Dollar in rupees">₹--</p>
+            <p id="usd-spot-fx-value" class="price-num text-lg sm:text-xl font-bold text-emerald-200 tabular-nums leading-tight" title="Live USD/INR — the rate these gold &amp; silver prices are calculated from">₹--</p>
+            <p class="text-[9px] sm:text-[10px] text-slate-500 mt-0.5">rate used for India ₹ prices</p>
             <p id="usd-spot-fx-delta" class="text-[9px] sm:text-[10px] tabular-nums text-slate-500 mt-1">-- vs open</p>
-            <p id="usd-spot-fx-source" class="text-[9px] text-slate-500 truncate mt-1">--</p>
           </div>
         </div>
+
         <!-- GOLD USD CARD -->
         <div class="glass-card gold-gradient rounded-2xl p-3.5 sm:p-5 relative overflow-hidden">
           <div class="flex items-start justify-between gap-2 mb-3">
@@ -4551,30 +4536,46 @@
       }, PRICE_PAINT_STALL_MS);
     }
 
-    // Live USD/INR chip on the India (INR) board — shows the exact rupee rate every
-    // gold & silver price below is calculated from, and whether it is live or a
-    // daily reference fallback.
-    function renderInrFxStrip() {
+    // Live USD/INR on the global spot board, including its source and freshness.
+    function renderGlobalFxStrip() {
       const val = Number(state.live.usdInr);
-      const valEl = getEl('inr-fx-value');
+      const valEl = getEl('usd-spot-fx-value');
       if (!Number.isFinite(val) || val <= 0) {
         setText(valEl, '₹--');
-        setText(getEl('inr-fx-label'), 'USD / INR');
-        setText(getEl('inr-fx-source'), 'waiting for live feed…');
+        setText(getEl('usd-spot-fx-label'), 'USD / INR');
+        setText(getEl('usd-spot-fx-source'), 'waiting for live feed…');
+        setText(getEl('usd-spot-fx-inrper'), '--');
+        setText(getEl('usd-spot-fx-delta'), '-- vs open');
         return;
       }
       const fxTs = Number(state.live.usdInrAsOf);
       const fxIsLive = Boolean(state.live.fxLive) && Number.isFinite(fxTs) && fxTs > 0 && (Date.now() - fxTs) < 10 * 60 * 1000;
       const asOf = fmtFxAsOf(state.live.usdInrAsOf);
-      setText(getEl('inr-fx-label'), fxIsLive ? 'USD / INR · live' : (asOf ? `USD / INR · as of ${asOf}` : 'USD / INR'));
+      setText(getEl('usd-spot-fx-label'), fxIsLive ? 'USD / INR · live' : (asOf ? `USD / INR · as of ${asOf}` : 'USD / INR'));
       setText(valEl, '₹' + val.toFixed(4));
-      setText(getEl('inr-fx-source'), state.live.fxSource
+      setText(getEl('usd-spot-fx-inrper'), (1 / val).toFixed(5));
+      const fxOpen = Number(state.sessionOpen && state.sessionOpen.usdInr);
+      const deltaEl = getEl('usd-spot-fx-delta');
+      if (deltaEl) {
+        const d = val - fxOpen;
+        if (!Number.isFinite(fxOpen) || fxOpen <= 0) {
+          deltaEl.textContent = '-- vs open';
+          deltaEl.className = 'text-[9px] sm:text-[10px] tabular-nums text-slate-500 mt-1';
+        } else if (Math.abs(d) < 0.0005) {
+          deltaEl.textContent = '◆ flat vs open';
+          deltaEl.className = 'text-[9px] sm:text-[10px] tabular-nums text-slate-500 mt-1';
+        } else {
+          deltaEl.textContent = `${d > 0 ? '▲' : '▼'} ${Math.abs(d).toFixed(4)} · rupee ${d > 0 ? 'weaker' : 'stronger'} vs open`;
+          deltaEl.className = `text-[9px] sm:text-[10px] tabular-nums mt-1 ${d > 0 ? 'text-rose-300' : 'text-emerald-300'}`;
+        }
+      }
+      setText(getEl('usd-spot-fx-source'), state.live.fxSource
         ? (fxIsLive ? `live · ${state.live.fxSource}` : `${state.live.fxSource}${asOf ? ` · as of ${asOf}` : ''}`)
         : (asOf ? `as of ${asOf}` : 'daily reference rate'));
       if (valEl) {
         valEl.title = fxIsLive
-          ? `Live mid-market USD/INR via ${state.live.fxSource || 'live feed'} — every gold & silver price below is calculated from this rate`
-          : 'USD/INR daily reference rate — every gold & silver price below is calculated from this rate';
+          ? `Live mid-market USD/INR via ${state.live.fxSource || 'live feed'} — India gold & silver prices are calculated from this rate`
+          : 'USD/INR daily reference rate — India gold & silver prices are calculated from this rate';
       }
     }
 
@@ -4595,9 +4596,6 @@
           getEl('usd-spot-section').classList.add('hidden');
           lastPaintedMode = 'INR';
         }
-
-        // --- LIVE USD/INR STRIP (the rupee rate these prices are calculated from) ---
-        renderInrFxStrip();
 
         // --- ROW 1: GOLD WITHOUT GST (1 GRAM — 999 | 995 | 916 | 750) ---
         const gEx999 = getEl('gold-exgst-999-price');
@@ -4705,50 +4703,7 @@
           lastPaintedMode = 'USD';
         }
 
-        // --- USD/INR LIVE FX STRIP (how global spot converts to rupees) ---
-        const fxVal = Number(state.live.usdInr);
-        if (Number.isFinite(fxVal) && fxVal > 0) {
-          const fxTs = Number(state.live.usdInrAsOf);
-          const fxIsLive = Boolean(state.live.fxLive) && Number.isFinite(fxTs) && fxTs > 0 && (Date.now() - fxTs) < 10 * 60 * 1000;
-          const fxAsOf = fmtFxAsOf(state.live.usdInrAsOf);
-          const fxLabel = getEl('usd-spot-fx-label');
-          if (fxLabel) fxLabel.textContent = fxIsLive ? 'USD / INR · live' : (fxAsOf ? `USD / INR · as of ${fxAsOf}` : 'USD / INR');
-          setText(getEl('usd-spot-fx-value'), '₹' + fxVal.toFixed(4));
-          setText(getEl('usd-spot-fx-inrper'), (1 / fxVal).toFixed(5));
-          const fxOpen = Number(state.sessionOpen && state.sessionOpen.usdInr);
-          const fxDelta = getEl('usd-spot-fx-delta');
-          if (fxDelta) {
-            if (Number.isFinite(fxOpen) && fxOpen > 0) {
-              const d = fxVal - fxOpen;
-              if (Math.abs(d) < 0.0005) {
-                fxDelta.textContent = '◆ flat vs open';
-                fxDelta.className = 'text-[9px] sm:text-[10px] tabular-nums text-slate-500 mt-1';
-              } else {
-                // Higher USD/INR = rupee weaker vs USD
-                fxDelta.textContent = `${d > 0 ? '▲' : '▼'} ${Math.abs(d).toFixed(4)} · rupee ${d > 0 ? 'weaker' : 'stronger'} vs open`;
-                fxDelta.className = `text-[9px] sm:text-[10px] tabular-nums mt-1 ${d > 0 ? 'text-rose-300' : 'text-emerald-300'}`;
-              }
-            } else {
-              fxDelta.textContent = '-- vs open';
-              fxDelta.className = 'text-[9px] sm:text-[10px] tabular-nums text-slate-500 mt-1';
-            }
-          }
-          const fxValue = getEl('usd-spot-fx-value');
-          if (fxValue) {
-            fxValue.title = fxIsLive
-              ? `Live mid-market USD/INR via ${state.live.fxSource || 'live feed'} — 1 US Dollar in rupees`
-              : 'USD/INR daily reference rate — 1 US Dollar in rupees';
-          }
-          const fxSource = getEl('usd-spot-fx-source');
-          if (fxSource) {
-            fxSource.textContent = state.live.fxSource
-              ? (fxIsLive ? `live · ${state.live.fxSource}` : `${state.live.fxSource}${fxAsOf ? ` · as of ${fxAsOf}` : ''}`)
-              : (fxAsOf ? `as of ${fxAsOf}` : 'daily reference rate');
-            fxSource.title = fxIsLive
-              ? `Live mid-market USD/INR via ${state.live.fxSource} — reference rate, not an executable quote`
-              : 'Daily reference rate, not an intraday tick';
-          }
-        }
+        renderGlobalFxStrip();
 
         const goldMain = getEl('gold-main-price');
         const goldSec = getEl('gold-secondary-price');

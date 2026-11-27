@@ -1269,7 +1269,7 @@ test('live FX heartbeat runs every minute independent of metal syncs and pauses 
   assert.equal(timers.length, 2, 'hidden tab must not arm the heartbeat');
 });
 
-test('live FX engine is wired into boot, sync, visibility and the INR board', async () => {
+test('live FX engine is wired into boot, sync, visibility and the global spot board', async () => {
   const html = await loadHtml();
   // The metal sync delegates FX to the engine and never clobbers the engine-owned rate.
   assert.ok(html.includes('const fxPromise = refreshLiveFx(isInitialConnect || isManual);'), 'syncLiveAPIs must delegate to refreshLiveFx');
@@ -1286,16 +1286,24 @@ test('live FX engine is wired into boot, sync, visibility and the INR board', as
   const vis = html.slice(visStart, visEnd);
   assert.ok(vis.includes('state.live.fxTimerId'), 'visibility handler must manage the FX timer');
   assert.ok(vis.includes('scheduleFxSync();'), 'visibility handler must resume the heartbeat');
-  // The INR board shows the live rate every price is calculated from.
-  for (const id of ['inr-fx-strip', 'inr-fx-label', 'inr-fx-value', 'inr-fx-source']) {
-    assert.ok(html.includes(`id="${id}"`), `INR FX strip: ${id}`);
+  // The FX strip appears only on the global spot board and reports the rate used for India prices.
+  const inrStart = html.indexOf('<section id="inr-rates-section"');
+  const usdStart = html.indexOf('<section id="usd-spot-section"');
+  const usdEnd = html.indexOf('</section>', usdStart);
+  assert.ok(inrStart >= 0 && usdStart > inrStart && usdEnd > usdStart);
+  const inrBoard = html.slice(inrStart, usdStart);
+  const usdBoard = html.slice(usdStart, usdEnd);
+  for (const id of ['usd-spot-fx', 'usd-spot-fx-label', 'usd-spot-fx-value', 'usd-spot-fx-source', 'usd-spot-fx-inrper', 'usd-spot-fx-delta']) {
+    assert.ok(usdBoard.includes(`id="${id}"`), `global FX strip: ${id}`);
+    assert.ok(!inrBoard.includes(`id="${id}"`));
   }
-  const stripStart = html.indexOf('function renderInrFxStrip(');
-  assert.ok(stripStart >= 0, 'renderInrFxStrip must exist');
+  assert.ok(usdBoard.includes('rate used for India ₹ prices'));
+  assert.ok(!html.includes('id="inr-fx-strip"'));
+  assert.ok(html.includes('function renderGlobalFxStrip('));
   const paintStart = html.indexOf('function renderPriceCardsNow(');
   const paintEnd = html.indexOf('function renderNewsTicker(', paintStart);
   const paint = html.slice(paintStart, paintEnd);
-  assert.ok(paint.includes('renderInrFxStrip();'), 'the INR paint path must render the FX strip');
+  assert.ok(paint.includes('renderGlobalFxStrip();'), 'the global spot paint path must render the FX strip');
   // The engine reprices the whole board (history, flash, cache) when the rupee moves.
   const applyStart = html.indexOf('function applyLiveFxToPrices(');
   const applyEnd = html.indexOf('function scheduleFxSync(', applyStart);
@@ -1639,7 +1647,7 @@ test('price accuracy surfaces stay consistent with the priced board', async () =
 test('the price board cannot sit on stale numbers when the frame clock stalls', async () => {
   const html = await loadHtml();
   const start = html.indexOf('    function renderPriceCards(');
-  const end = html.indexOf('    // Live USD/INR chip on the India (INR) board', start);
+  const end = html.indexOf('    function renderGlobalFxStrip()', start);
   assert.ok(start >= 0 && end > start);
   const paint = html.slice(start, end);
   // A queued frame must always have a timer backstop, otherwise a backgrounded tab / powersave
