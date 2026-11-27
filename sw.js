@@ -1,7 +1,7 @@
 // Minimal offline-shell service worker for Satyanarayan Jewellers Price Desk.
 // Caches the static app shell with cache-poisoning guards; live market APIs and
 // catalog/products.json always hit the network so visitors see fresh rates and items.
-const CACHE = 'sj-price-desk-v12';
+const CACHE = 'sj-price-desk-v13';
 const SHELL = ['./index.html', './manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
 
 function isCacheable(res) {

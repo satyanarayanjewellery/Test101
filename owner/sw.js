@@ -1,7 +1,7 @@
 // Offline-ready Service Worker for the Satyanarayan Jewellers Owner PWA (/owner/).
 // Scoped independently to ./ so the Owner PWA installs side-by-side with the customer
 // Price Desk PWA without interfering with customer caching or live GitHub API calls.
-const CACHE = 'sj-owner-desk-v2';
+const CACHE = 'sj-owner-desk-v3';
 const SHELL = [
   './index.html',
   './styles.css',
