@@ -895,8 +895,7 @@ test('Rate of the Day explains a missed noon window instead of waiting forever',
   const end = html.indexOf('    function renderPriceCards(', start);
   const fn = html.slice(start, end);
   assert.ok(fn.includes('const hour = new Date().getHours();'));
-  assert.ok(fn.includes("hour < 12 ? 'Awaiting 12 PM'"));
-  assert.ok(fn.includes('window has closed'), 'must explain the closed window');
+  assert.ok(fn.includes("hour < 12 ? 'Awaiting 12 PM' : (hour === 12 ? 'Capturing now…' : 'Tomorrow · 12 PM')"));
   assert.ok(!fn.includes("dateEl.textContent = 'Awaiting 12 PM';\n"), 'must not always say Awaiting 12 PM');
 });
 
@@ -1701,4 +1700,90 @@ test('collection omits the removed certification and pricing statements', async 
   assert.ok(gallery.includes('id="product-list"'));
   assert.ok(!gallery.includes('Every piece is BIS hallmarked'));
   assert.ok(!gallery.includes('Prices shown are indicative'));
+});
+
+
+test('rates footer shows only sync time and ticks/s alongside GSTIN', async () => {
+  const html = await loadHtml();
+  const footer = html.slice(html.indexOf('      <footer class="text-[11px]'), html.indexOf('      </footer>') + '      </footer>'.length);
+  assert.ok(footer.includes('id="footer-sync-meta"'));
+  assert.ok(footer.includes('GSTIN: 21AFNPP7926E1ZC'));
+  assert.ok(!footer.includes('Live WS'));
+  assert.ok(!footer.includes('Live Feed'));
+
+  const fmtStart = html.indexOf('    function fmtTimeMs(');
+  const fmtEnd = html.indexOf('    function escapeHtml(', fmtStart);
+  const metaStart = html.indexOf('    function formatFooterSyncMeta(');
+  const metaEnd = html.indexOf('    function renderPriceCardsNow(', metaStart);
+  assert.ok(fmtStart >= 0 && fmtEnd > fmtStart && metaStart >= 0 && metaEnd > metaStart);
+
+  let rendered = null;
+  const state = {
+    live: { lastSync: null },
+    ws: { connected: false, ticksPerSec: 0 }
+  };
+  const el = { id: 'footer-sync-meta', textContent: '--:--:--.---' };
+  const ctx = vm.createContext({
+    Date,
+    state,
+    getEl: (id) => (id === 'footer-sync-meta' ? el : null),
+    setText: (node, val) => { node.textContent = val; rendered = val; }
+  });
+  vm.runInContext(html.slice(fmtStart, fmtEnd) + '\n' + html.slice(metaStart, metaEnd), ctx);
+
+  assert.equal(ctx.formatFooterSyncMeta(null, 0), '--:--:--.---');
+  assert.equal(ctx.formatFooterSyncMeta(new Date('invalid'), 5), '--:--:--.---');
+
+  const sample = new Date(2026, 10, 27, 18, 45, 12, 34);
+  assert.equal(ctx.formatFooterSyncMeta(sample, 0), '18:45:12.034');
+  assert.equal(ctx.formatFooterSyncMeta(sample, 4), '18:45:12.034 · 4 ticks/s');
+
+  // Offline / cached state keeps placeholder.
+  ctx.renderFooterSyncMeta();
+  assert.equal(rendered, '--:--:--.---');
+
+  // REST sync updates time without ticks when WS is disconnected.
+  state.live.lastSync = sample;
+  state.ws.ticksPerSec = 9;
+  state.ws.connected = false;
+  ctx.renderFooterSyncMeta();
+  assert.equal(rendered, '18:45:12.034');
+
+  // Connected WS appends ticks/s.
+  state.ws.connected = true;
+  ctx.renderFooterSyncMeta();
+  assert.equal(rendered, '18:45:12.034 · 9 ticks/s');
+
+  // Wiring checks: REST sync, price render, WS close, and WS disconnect all refresh the footer readout.
+  const syncBody = html.slice(html.indexOf('async function syncLiveAPIs('), html.indexOf('function scheduleRetrySync('));
+  assert.ok(syncBody.includes('renderFooterSyncMeta();'));
+  const paintBody = html.slice(html.indexOf('function renderPriceCardsNow('), html.indexOf('function updateDeltaBadge('));
+  assert.ok(paintBody.includes('renderFooterSyncMeta();'));
+  const wsCloseBody = html.slice(html.indexOf('ws.onclose = () => {'), html.indexOf('function disconnectLiveWebSocket('));
+  assert.ok(wsCloseBody.includes('renderFooterSyncMeta();'));
+  const disconnectBody = html.slice(html.indexOf('function disconnectLiveWebSocket('), html.indexOf('function sanitizeStatutoryPayload('));
+  assert.ok(disconnectBody.includes('renderFooterSyncMeta();'));
+});
+
+
+test('Rate of the Day is scoped to India (INR) mode and omits the caption line', async () => {
+  const html = await loadHtml();
+  const ratesStart = html.indexOf('<div id="view-rates"');
+  const inrStart = html.indexOf('<section id="inr-rates-section"', ratesStart);
+  const inrEnd = html.indexOf('</section>', inrStart);
+  const usdStart = html.indexOf('<section id="usd-spot-section"', inrEnd);
+  const usdEnd = html.indexOf('</section>', usdStart);
+  assert.ok(ratesStart >= 0 && inrStart > ratesStart && inrEnd > inrStart && usdStart > inrEnd && usdEnd > usdStart);
+
+  const beforeInr = html.slice(ratesStart, inrStart);
+  const inrBoard = html.slice(inrStart, inrEnd);
+  const usdBoard = html.slice(usdStart, usdEnd);
+
+  assert.ok(!beforeInr.includes('id="rate-of-day-section"'), 'must not sit above India (INR) board');
+  assert.ok(inrBoard.includes('id="rate-of-day-section"'), 'must live inside India (INR) board');
+  assert.ok(!usdBoard.includes('id="rate-of-day-section"'), 'must not appear in Global Spot (USD) board');
+
+  assert.ok(!html.includes('id="rate-of-day-caption"'), 'caption element must be removed');
+  assert.ok(!inrBoard.includes('Retail ex-GST per gram'), 'caption text must be removed');
+  assert.ok(inrBoard.includes('id="rate-of-day-date"'), 'capture time badge must remain');
 });
