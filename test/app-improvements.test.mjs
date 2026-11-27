@@ -148,13 +148,15 @@ test('manifest and service worker are valid, referenced, and prevent cache poiso
   assert.ok(manifest.icons.some(i => i.sizes === '192x192'));
   assert.ok(manifest.icons.some(i => i.sizes === '512x512'));
   const sw = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
-  assert.match(sw, /sj-price-desk-v13/);
+  assert.match(sw, /sj-price-desk-v14/);
   assert.match(sw, /index\.html/);
   assert.match(sw, /skipWaiting/);
+  assert.match(sw, /client\.navigate\(client\.url\)/,
+    'a worker update must refresh already-open customer apps, including legacy shells without update listeners');
+  assert.match(sw, /!url\.pathname\.includes\('\/owner\/'\)/,
+    'customer worker updates must not navigate the separately-scoped Owner PWA');
   const html = await loadHtml();
   assert.ok(html.includes("navigator.serviceWorker.register('sw.js')"));
-  assert.ok(html.includes("navigator.serviceWorker.addEventListener('controllerchange'"),
-    'an installed customer app must reload after an updated worker takes control');
 
   // Execute sw.js in a mock ServiceWorkerGlobalScope to verify non-OK responses are not cached
   const listeners = {};
@@ -164,13 +166,18 @@ test('manifest and service worker are valid, referenced, and prevent cache poiso
     match: async (k) => cacheStore.get(typeof k === 'string' ? k : k.url)
   };
   let nextFetchRes = { ok: false, status: 500, type: 'basic', clone() { return { ...this }; } };
+  const navigatedClients = [];
+  const windowClients = [
+    { url: 'https://example.com/shop/', navigate: async (url) => { navigatedClients.push(url); } },
+    { url: 'https://example.com/shop/owner/', navigate: async (url) => { navigatedClients.push(url); } }
+  ];
   const swContext = {
     URL,
     self: {
       location: { origin: 'https://example.com' },
       addEventListener: (type, fn) => { listeners[type] = fn; },
       skipWaiting: () => {},
-      clients: { claim: () => {} }
+      clients: { claim: async () => {}, matchAll: async () => windowClients }
     },
     caches: {
       open: async () => cacheApi,
@@ -181,6 +188,12 @@ test('manifest and service worker are valid, referenced, and prevent cache poiso
     fetch: async () => nextFetchRes
   };
   vm.runInNewContext(sw, swContext);
+
+  // A newly activated customer worker refreshes stale customer windows, but leaves Owner PWA open.
+  let activation;
+  listeners.activate({ waitUntil: (promise) => { activation = promise; } });
+  await activation;
+  assert.deepEqual(navigatedClients, ['https://example.com/shop/']);
 
   // 1. Navigation returning HTTP 500 should fall back to cached shell and NOT overwrite cache
   let responded;
