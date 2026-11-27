@@ -1657,3 +1657,13 @@ test('the price board cannot sit on stale numbers when the frame clock stalls', 
   assert.ok(flush.includes('clearTimeout(priceThrottleTimer)'), 'flush must clear the stall timer');
   assert.match(html, /const PRICE_PAINT_STALL_MS = \d+;/);
 });
+
+test('exchange comparison and accuracy checker are owner-only views', async () => {
+  const html = await loadHtml();
+  for (const view of ['exchanges', 'accuracy']) {
+    assert.match(html, new RegExp(`data-owner-view-nav data-app-view="${view}"[^>]* hidden`));
+  }
+  assert.match(html, /querySelectorAll\?\.\('\[data-owner-view-nav\]'\).*nav\.hidden = !isOwnerActive/);
+  assert.match(html, /ownerOnlyView && !isOwnerActive\) viewName = 'rates'/);
+  assert.ok(html.includes('id="mobile-nav-grid" class="grid grid-cols-7'));
+});
