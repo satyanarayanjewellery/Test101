@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="Private Owner Desk PWA for Satyanarayan Jewellers, Cuttack — manage jewellery catalogue, live bullion rates, exchange comparison, market accuracy calibration, and statutory duty & GST." />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#090607" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="SJ Owner" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <link rel="preconnect" href="https://forex-data-feed.swissquote.com" crossorigin />
+  <link rel="preconnect" href="https://api.gold-api.com" crossorigin />
+  <link rel="preconnect" href="https://fstream.binance.com" crossorigin />
+  <link rel="preconnect" href="https://ws.okx.com:8443" crossorigin />
+  <link rel="preconnect" href="https://stream.bybit.com" crossorigin />
+  <link rel="stylesheet" href="styles.css" />
+  <title>SJ Owner — Satyanarayan Jewellers Owner Desk</title>
+</head>
+<body>
+  <div id="toast-stack" class="toast-stack" aria-live="polite" role="status"></div>
+
+  <!-- Service Worker Update Available Banner -->
+  <div id="sw-update-banner" class="update-banner hidden" role="status">
+    <span>A newer version of SJ Owner Desk is ready.</span>
+    <button id="btn-sw-reload" type="button" class="btn btn-gold btn-xs">Reload Now</button>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- OWNER SIGN-IN GATE (Strict GitHub Token Auth — Workspace Hidden Below) -->
+  <!-- ===================================================================== -->
+  <section id="auth-gate" class="auth-gate" aria-labelledby="auth-title">
+    <div class="auth-card">
+      <div class="auth-brand">
+        <div class="auth-logo">
+          <img src="icons/icon-192.png" alt="Satyanarayan Jewellers Owner" width="54" height="54" />
+        </div>
+        <div>
+          <p class="auth-eyebrow">Private Owner App</p>
+          <h1 id="auth-title" class="auth-title">Satyanarayan Jewellers</h1>
+          <p class="auth-sub">Cuttack · GSTIN 21AFNPP7926E1ZC</p>
+        </div>
+      </div>
+
+      <div id="auth-checking" class="info-box hidden" style="margin-bottom:0.9rem;">
+        <strong>Verifying saved owner session…</strong>
+        <p style="margin-top:0.25rem;color:var(--text-muted);">Checking repository write access on <span class="mono">satyanarayanjewellery/shop</span>.</p>
+      </div>
+
+      <div class="info-box" style="margin-bottom:0.95rem;">
+        <strong>GitHub Owner Verification Required</strong>
+        <p style="margin-top:0.25rem;color:var(--text-muted);">
+          Paste your GitHub Fine-Grained Personal Access Token with <strong>Contents: Read and write</strong> on
+          <span class="mono" style="color:var(--gold-soft);">satyanarayanjewellery/shop</span>.
+        </p>
+        <p style="margin-top:0.45rem;">
+          <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener noreferrer" style="font-weight:700;">Create Fine-Grained Token on GitHub ↗</a>
+        </p>
+      </div>
+
+      <form id="auth-form" style="display:flex;flex-direction:column;gap:0.8rem;" novalidate>
+        <div class="field">
+          <label for="auth-token-input" class="field-label">GitHub Personal Access Token</label>
+          <div class="input-row">
+            <input id="auth-token-input" class="input mono" type="password" autocomplete="off" spellcheck="false" autocapitalize="off" placeholder="github_pat_..." required />
+            <button id="btn-auth-toggle-vis" type="button" class="btn btn-ghost btn-sm" aria-label="Show or hide token">Show</button>
+          </div>
+        </div>
+
+        <label class="checkbox-row">
+          <input id="auth-remember" type="checkbox" checked />
+          Stay signed in on this device (enables offline drafts &amp; quick launch)
+        </label>
+
+        <p id="auth-error" class="error-text hidden" role="alert"></p>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;flex-wrap:wrap;margin-top:0.15rem;">
+          <a href="../index.html" class="btn btn-ghost btn-sm">← Customer Storefront</a>
+          <button id="btn-auth-submit" type="submit" class="btn btn-gold">Verify &amp; Open Owner Desk</button>
+        </div>
+      </form>
+
+      <div id="auth-install-wrap" class="hidden" style="margin-top:1rem;padding-top:0.9rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:0.6rem;flex-wrap:wrap;">
+        <span style="font-size:0.74rem;color:var(--text-muted);">Install SJ Owner on your home screen</span>
+        <button id="btn-install-auth" type="button" class="btn btn-gold-outline btn-sm">Install Owner App</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================================== -->
+  <!-- AUTHENTICATED OWNER DESK SHELL                                        -->
+  <!-- ===================================================================== -->
+  <div id="owner-app" class="hidden">
+    <header class="app-header">
+      <div class="header-top">
+        <div class="brand-wrap">
+          <div class="brand-icon">
+            <img src="icons/icon-192.png" alt="SJ Owner" width="40" height="40" />
+          </div>
+          <div style="min-width:0;">
+            <div class="brand-name-row">
+              <span class="brand-name">SJ Owner Desk</span>
+              <span id="owner-user-pill" class="pill pill-green"><span class="dot dot-green"></span><span id="owner-user-label">@owner</span></span>
+              <span id="live-status-pill" class="pill"><span class="dot"></span>Connecting…</span>
+            </div>
+            <div class="brand-meta">
+              <span id="header-clock" class="mono tabular">--:--:-- IST</span>
+              <span>·</span>
+              <span id="header-market-pill">Checking market…</span>
+              <span class="mono" style="color:var(--gold-soft);">GSTIN: 21AFNPP7926E1ZC</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="header-actions no-print">
+          <button id="btn-install-header" type="button" class="btn btn-gold-outline btn-sm hidden">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+            Install App
+          </button>
+          <a href="../index.html" target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-sm" title="Preview customer storefront">Storefront ↗</a>
+          <button id="btn-lock-owner" type="button" class="btn btn-red btn-sm" title="Lock Owner Desk">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Lock
+          </button>
+        </div>
+      </div>
+
+      <!-- Desktop 5-Tab Bar -->
+      <nav class="desktop-nav" aria-label="Owner Desk Sections">
+        <div class="desktop-nav-inner">
+          <button type="button" class="nav-btn is-active" data-view="desk">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+            Desk &amp; Rates
+          </button>
+          <button type="button" class="nav-btn" data-view="catalog">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m4.3 7.5 7.7 4.4 7.7-4.4M12 21v-9.1"/></svg>
+            Catalogue
+            <span id="nav-draft-badge" class="nav-badge hidden">0</span>
+          </button>
+          <button type="button" class="nav-btn" data-view="exchanges">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            Exchanges
+          </button>
+          <button type="button" class="nav-btn" data-view="accuracy">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+            Accuracy
+          </button>
+          <button type="button" class="nav-btn" data-view="settings">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+            Tools &amp; Rules
+          </button>
+        </div>
+      </nav>
+    </header>
+
+    <main class="main-wrap">
+      <!-- Offline / Cache Notice -->
+      <div id="offline-banner" class="notice-box hidden" style="margin-bottom:0.9rem;" role="status">
+        <span id="offline-banner-text"></span>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- VIEW 1: OWNER DESK & LIVE RATES                                   -->
+      <!-- ================================================================= -->
+      <section id="view-desk" class="view view-animate" aria-label="Owner Desk and Live Rates">
+        <!-- Owner KPI Summary -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <span class="kpi-label">Live Catalogue</span>
+            <span id="kpi-live-items" class="kpi-val tabular">0</span>
+            <span class="kpi-sub">Published on shop</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Local Drafts</span>
+            <span id="kpi-draft-items" class="kpi-val tabular">0</span>
+            <span class="kpi-sub">Waiting to publish</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Statutory Regime</span>
+            <span id="kpi-statutory" class="kpi-val tabular">15% + 3%</span>
+            <span id="kpi-statutory-sub" class="kpi-sub">Duty + GST (Gold/Silver)</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Market Variance</span>
+            <span id="kpi-variance" class="kpi-val tabular">—</span>
+            <span id="kpi-variance-sub" class="kpi-sub">Open Accuracy to audit</span>
+          </div>
+        </div>
+
+        <!-- Live Rates Desk -->
+        <div class="card">
+          <div class="section-head">
+            <div>
+              <h2 class="section-title">Live Bullion Price Desk</h2>
+              <p id="rates-freshness-sub" class="section-sub">Connecting to live bullion &amp; USD/INR feeds…</p>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;" class="no-print">
+              <label for="desk-city" class="sr-only">City</label>
+              <select id="desk-city" class="select" style="width:auto;padding:0.38rem 0.65rem;font-size:0.76rem;">
+                <option value="cuttack">Cuttack, OD</option>
+                <option value="mumbai">Mumbai, MH</option>
+                <option value="delhi">Delhi, DL</option>
+                <option value="bengaluru">Bengaluru, KA</option>
+                <option value="chennai">Chennai, TN</option>
+                <option value="hyderabad">Hyderabad, TS</option>
+                <option value="kolkata">Kolkata, WB</option>
+                <option value="ahmedabad">Ahmedabad, GJ</option>
+                <option value="pune">Pune, MH</option>
+                <option value="jaipur">Jaipur, RJ</option>
+                <option value="lucknow">Lucknow, UP</option>
+                <option value="patna">Patna, BR</option>
+              </select>
+              <div class="mode-switch" role="group" aria-label="Rate display mode">
+                <button id="btn-mode-inr" type="button" class="is-active">India ₹</button>
+                <button id="btn-mode-usd" type="button">Global $</button>
+              </div>
+              <button id="btn-refresh-rates" type="button" class="btn btn-ghost btn-sm" title="Refresh feeds now">↻ Sync</button>
+            </div>
+          </div>
+
+          <!-- INR Metals Grid -->
+          <div id="inr-board" class="metals-grid">
+            <div class="card card-gold">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;">
+                <div>
+                  <span class="pill pill-gold">GOLD · PER 10g &amp; 1g</span>
+                  <p id="gold-calib-note" style="font-size:0.68rem;color:var(--text-muted);margin-top:0.25rem;">Landed parity · excl. &amp; incl. GST</p>
+                </div>
+                <span id="gold-source-badge" class="pill">--</span>
+              </div>
+              <div class="rate-tiles">
+                <div class="rate-tile hi">
+                  <div class="tile-tag">999 / 24K (10g)</div>
+                  <div id="r-g999-ex" class="tile-main tabular">₹--</div>
+                  <div id="r-g999-gst" class="tile-sub tabular">Incl. GST: ₹-- · 1g: ₹--</div>
+                </div>
+                <div class="rate-tile">
+                  <div class="tile-tag">995 Fine (10g)</div>
+                  <div id="r-g995-ex" class="tile-main tabular">₹--</div>
+                  <div id="r-g995-gst" class="tile-sub tabular">Incl. GST: ₹-- · 1g: ₹--</div>
+                </div>
+                <div class="rate-tile hi">
+                  <div class="tile-tag">916 / 22K (10g)</div>
+                  <div id="r-g916-ex" class="tile-main tabular">₹--</div>
+                  <div id="r-g916-gst" class="tile-sub tabular">Incl. GST: ₹-- · 1g: ₹--</div>
+                </div>
+                <div class="rate-tile">
+                  <div class="tile-tag">750 / 18K (10g)</div>
+                  <div id="r-g750-ex" class="tile-main tabular">₹--</div>
+                  <div id="r-g750-gst" class="tile-sub tabular">Incl. GST: ₹-- · 1g: ₹--</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card card-silver">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;">
+                <div>
+                  <span class="pill">SILVER · PER 1 KG &amp; 1g</span>
+                  <p id="silver-calib-note" style="font-size:0.68rem;color:var(--text-muted);margin-top:0.25rem;">Retail &amp; MCX landed parity</p>
+                </div>
+                <span id="silver-mcx-badge" class="pill tabular">MCX: ₹--</span>
+              </div>
+              <div class="rate-tiles">
+                <div class="rate-tile rate-tile-silver hi">
+                  <div class="tile-tag">999 Fine (1 kg)</div>
+                  <div id="r-s999-ex" class="tile-main tabular">₹--</div>
+                  <div id="r-s999-gst" class="tile-sub tabular">Incl. GST: ₹-- · 1g: ₹--</div>
+                </div>
+                <div class="rate-tile rate-tile-silver">
+                  <div class="tile-tag">925 Sterling (1 kg)</div>
+                  <div id="r-s925-ex" class="tile-main tabular">₹--</div>
+                  <div id="r-s925-gst" class="tile-sub tabular">Incl. GST: ₹-- · 1g: ₹--</div>
+                </div>
+                <div class="rate-tile rate-tile-silver">
+                  <div class="tile-tag">750 Alloy (1 kg)</div>
+                  <div id="r-s750-ex" class="tile-main tabular">₹--</div>
+                  <div id="r-s750-gst" class="tile-sub tabular">Incl. GST: ₹-- · 1g: ₹--</div>
+                </div>
+                <div class="rate-tile rate-tile-silver">
+                  <div class="tile-tag">Rate of Day (12 PM)</div>
+                  <div id="r-rod-916" class="tile-main tabular">--</div>
+                  <div id="r-rod-meta" class="tile-sub">22K/g noon capture</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Global Spot USD Panel -->
+          <div id="usd-board" class="metals-grid hidden">
+            <div class="card card-gold">
+              <span class="pill pill-gold">XAU / USD · GLOBAL SPOT</span>
+              <div id="r-spot-gold" class="tile-main tabular" style="font-size:1.8rem;margin-top:0.55rem;">$--</div>
+              <div id="r-spot-gold-g" class="tile-sub tabular">Per gram: $--</div>
+            </div>
+            <div class="card card-silver">
+              <span class="pill">XAG / USD · GLOBAL SPOT</span>
+              <div id="r-spot-silver" class="tile-main tabular" style="font-size:1.8rem;margin-top:0.55rem;">$--</div>
+              <div id="r-spot-silver-g" class="tile-sub tabular">Per gram: $--</div>
+            </div>
+          </div>
+
+          <!-- FX & Spot Provenance Strip -->
+          <div class="fx-strip">
+            <div class="fx-box">
+              <div class="fx-label">USD / INR Rate</div>
+              <div id="fx-val" class="fx-val tabular">₹--</div>
+              <div id="fx-meta" class="fx-meta">Syncing FX…</div>
+            </div>
+            <div class="fx-box">
+              <div class="fx-label">Global Gold (XAU)</div>
+              <div id="fx-xau" class="fx-val tabular">$--/oz</div>
+              <div id="fx-xau-meta" class="fx-meta">Live spot</div>
+            </div>
+            <div class="fx-box">
+              <div class="fx-label">Global Silver (XAG)</div>
+              <div id="fx-xag" class="fx-val tabular">$--/oz</div>
+              <div id="fx-xag-meta" class="fx-meta">Live spot</div>
+            </div>
+            <div class="fx-box">
+              <div class="fx-label">Duty &amp; GST Model</div>
+              <div id="fx-statutory" class="fx-val tabular">15% + 3%</div>
+              <div id="fx-statutory-meta" class="fx-meta">catalog/statutory-rates.json</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Daily Rate Broadcast & Quick Owner Actions -->
+        <div class="card no-print">
+          <div class="section-head" style="margin-bottom:0.65rem;">
+            <div>
+              <h3 class="section-title">Daily Rate Broadcast &amp; Quick Actions</h3>
+              <p class="section-sub">Share formatted Cuttack rates with customers or jump to key owner workflows.</p>
+            </div>
+          </div>
+          <div class="actions-row">
+            <button id="btn-share-wa" type="button" class="btn btn-green btn-sm">Share on WhatsApp</button>
+            <button id="btn-copy-rates" type="button" class="btn btn-ghost btn-sm">Copy Rate Text</button>
+            <button id="btn-native-share" type="button" class="btn btn-ghost btn-sm">Share Sheet</button>
+            <button id="btn-print-rates" type="button" class="btn btn-ghost btn-sm">Print Board</button>
+            <a href="https://whatsapp.com/channel/0029Vb9XXVnKgsNmtesNKy1A" target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-sm">WhatsApp Channel ↗</a>
+          </div>
+          <div class="actions-row" style="margin-top:0.65rem;padding-top:0.65rem;border-top:1px solid var(--border);">
+            <button type="button" class="btn btn-gold btn-sm" data-jump-view="catalog">+ Upload Jewellery</button>
+            <button id="btn-desk-publish-drafts" type="button" class="btn btn-green btn-sm hidden">Publish All Drafts</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-jump-view="accuracy">Audit Accuracy</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-jump-subtab="statutory">Edit Duty &amp; GST</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-jump-subtab="calc">Counter Quote Calc</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- VIEW 2: JEWELLERY CATALOGUE & UPLOAD STUDIO                       -->
+      <!-- ================================================================= -->
+      <section id="view-catalog" class="view hidden" aria-label="Jewellery Catalogue Studio">
+        <div class="card" style="border-color:rgba(212,175,55,0.34);">
+          <div class="section-head">
+            <div>
+              <h2 class="section-title">Owner Upload Studio</h2>
+              <p id="studio-sync-status" class="section-sub">Connected to GitHub · Photos auto-optimize to WebP before live publish.</p>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.45rem;flex-wrap:wrap;">
+              <span class="pill tabular">Live: <strong id="studio-live-count" style="color:var(--green-soft);">0</strong> · Drafts: <strong id="studio-draft-count" style="color:var(--gold-soft);">0</strong></span>
+              <button id="btn-publish-all-drafts" type="button" class="btn btn-green btn-sm hidden">Publish All Drafts</button>
+              <button id="btn-reload-catalog" type="button" class="btn btn-ghost btn-sm">↻ Refresh</button>
+            </div>
+          </div>
+
+          <form id="upload-form" style="display:flex;flex-direction:column;gap:0.85rem;">
+            <div>
+              <div id="upload-dropzone" class="dropzone" tabindex="0" role="button" aria-label="Choose jewellery photos or videos">
+                <input id="upload-media-input" type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime" class="hidden" />
+                <input id="upload-camera-input" type="file" accept="image/*" capture="environment" class="hidden" />
+                <p style="font-size:0.86rem;font-weight:700;color:var(--gold-cream);">Tap or drop jewellery photos &amp; videos</p>
+                <p style="font-size:0.7rem;color:var(--text-muted);margin-top:0.2rem;">JPG, PNG, WebP, GIF (≤ 12 MB) · MP4, WebM, MOV (≤ 20 MB live publish, ≤ 50 MB local) · Max 6 files</p>
+                <div style="display:flex;justify-content:center;gap:0.5rem;margin-top:0.65rem;flex-wrap:wrap;">
+                  <button id="btn-pick-files" type="button" class="btn btn-gold-outline btn-xs">Choose Gallery Files</button>
+                  <button id="btn-take-photo" type="button" class="btn btn-ghost btn-xs">Take Counter Photo</button>
+                </div>
+              </div>
+              <div id="upload-previews" class="media-previews hidden"></div>
+            </div>
+
+            <div class="form-grid">
+              <label class="field span-2 md-span-3">
+                <span class="field-label">Jewellery Name *</span>
+                <input id="f-name" class="input" required maxlength="80" placeholder="e.g. 22K Bridal Temple Necklace" />
+              </label>
+              <label class="field md-span-1">
+                <span class="field-label">Category</span>
+                <select id="f-category" class="select">
+                  <option value="Gold">Gold</option>
+                  <option value="Silver">Silver</option>
+                  <option value="Other">Other</option>
+                </select>
+              </label>
+              <div class="field md-span-2">
+                <label for="f-purity" class="field-label">Purity</label>
+                <input id="f-purity" class="input" maxlength="20" placeholder="22K 916 HUID" />
+                <div class="quick-chips" aria-label="Quick purity presets">
+                  <button type="button" class="chip-btn" data-fill-purity="22K 916">22K 916</button>
+                  <button type="button" class="chip-btn" data-fill-purity="24K 999">24K 999</button>
+                  <button type="button" class="chip-btn" data-fill-purity="18K 750">18K 750</button>
+                  <button type="button" class="chip-btn" data-fill-purity="999 Silver">999 Silver</button>
+                  <button type="button" class="chip-btn" data-fill-purity="925 Sterling">925</button>
+                </div>
+              </div>
+
+              <label class="field md-span-1">
+                <span class="field-label">Weight (g)</span>
+                <input id="f-weight" class="input tabular" type="number" min="0" step="0.001" placeholder="0.000" />
+              </label>
+              <label class="field md-span-2">
+                <span class="field-label">Price ₹ (blank = On request)</span>
+                <input id="f-price" class="input tabular" type="number" min="0" step="0.01" placeholder="Optional" />
+              </label>
+              <label class="field md-span-1">
+                <span class="field-label">SKU / Code</span>
+                <input id="f-sku" class="input" maxlength="40" placeholder="SJ-001" />
+              </label>
+              <label class="field span-2 md-span-2">
+                <span class="field-label">Short Note</span>
+                <input id="f-note" class="input" maxlength="160" placeholder="Ready in Cuttack showroom" />
+              </label>
+            </div>
+
+            <div id="upload-progress" class="progress-wrap hidden">
+              <div class="progress-top">
+                <span id="upload-progress-text">Uploading…</span>
+                <span id="upload-progress-pct" class="tabular">0%</span>
+              </div>
+              <div class="progress-track"><div id="upload-progress-bar" class="progress-fill"></div></div>
+            </div>
+
+            <div style="display:flex;justify-content:flex-end;gap:0.5rem;flex-wrap:wrap;">
+              <button id="btn-save-draft" type="button" class="btn btn-ghost">Save Local Draft</button>
+              <button id="btn-publish-live" type="submit" class="btn btn-gold">Upload &amp; Publish Live</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Inventory List -->
+        <div class="card">
+          <div class="section-head" style="margin-bottom:0.7rem;">
+            <div>
+              <h3 class="section-title">Shop Inventory</h3>
+              <p id="catalog-count-label" class="section-sub">Loading catalogue…</p>
+            </div>
+          </div>
+
+          <div class="filter-bar">
+            <div id="catalog-filters" class="filter-pills" role="group" aria-label="Filter items">
+              <button type="button" class="filter-pill is-active" data-cat-filter="all">All</button>
+              <button type="button" class="filter-pill" data-cat-filter="live">Live</button>
+              <button type="button" class="filter-pill" data-cat-filter="draft">Drafts</button>
+              <button type="button" class="filter-pill" data-cat-filter="Gold">Gold</button>
+              <button type="button" class="filter-pill" data-cat-filter="Silver">Silver</button>
+              <button type="button" class="filter-pill" data-cat-filter="Other">Other</button>
+            </div>
+            <input id="catalog-search" class="input" type="search" placeholder="Search name, purity, SKU…" style="flex:1;min-width:11rem;padding:0.42rem 0.7rem;font-size:0.78rem;" />
+            <select id="catalog-sort" class="select" style="width:auto;padding:0.42rem 0.65rem;font-size:0.76rem;">
+              <option value="new">Newest</option>
+              <option value="price-asc">Price: Low → High</option>
+              <option value="price-desc">Price: High → Low</option>
+              <option value="name">Name A–Z</option>
+            </select>
+          </div>
+
+          <div id="catalog-grid" class="catalog-grid">
+            <div class="empty-state">Loading catalogue…</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- VIEW 3: GLOBAL EXCHANGE COMPARISON (~100 MARKETS)                 -->
+      <!-- ================================================================= -->
+      <section id="view-exchanges" class="view hidden" aria-label="Global Exchange Comparison">
+        <div class="card">
+          <div class="section-head">
+            <div>
+              <h2 class="section-title">Exchange Comparison</h2>
+              <p class="section-sub">Satyanarayan Jewellers (Cuttack) vs ~100 Indian &amp; global bullion markets — duty-loaded INR landed parity.</p>
+            </div>
+            <button id="btn-refresh-exchanges" type="button" class="btn btn-gold btn-sm">↻ Refresh</button>
+          </div>
+
+          <div class="filter-bar">
+            <input id="ex-search" class="input" type="search" placeholder="Search exchange, city or country…" style="flex:1;min-width:11rem;padding:0.45rem 0.75rem;font-size:0.8rem;" />
+            <div class="filter-pills" role="group" aria-label="Metal filter">
+              <button type="button" class="filter-pill is-active" data-ex-metal="gold">Gold</button>
+              <button type="button" class="filter-pill" data-ex-metal="silver">Silver</button>
+              <button type="button" class="filter-pill" data-ex-metal="both">Both</button>
+            </div>
+            <select id="ex-sort" class="select" style="width:auto;padding:0.45rem 0.65rem;font-size:0.78rem;">
+              <option value="diff">Closest to us</option>
+              <option value="az">Name A → Z</option>
+            </select>
+          </div>
+
+          <div class="actions-row" style="margin-bottom:0.75rem;">
+            <span id="ex-stat-total" class="pill">Markets: —</span>
+            <span id="ex-stat-cheaper" class="pill pill-red">Cheaper than us: —</span>
+            <span id="ex-stat-pricier" class="pill pill-green">Pricier than us: —</span>
+            <span id="ex-updated" style="margin-left:auto;font-size:0.7rem;color:var(--text-dim);">—</span>
+          </div>
+
+          <div id="ex-empty" class="empty-state hidden">Waiting for live rates from the Desk…</div>
+
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Exchange / Market</th>
+                  <th>Landed INR · Local</th>
+                  <th style="text-align:right;">vs Our Shop</th>
+                </tr>
+              </thead>
+              <tbody id="ex-body"></tbody>
+            </table>
+          </div>
+
+          <p style="font-size:0.7rem;color:var(--text-dim);margin-top:0.75rem;line-height:1.55;">
+            Indicative landed comparison using live global spot (XAU/XAG), each market's typical basis spread, and India's <span id="ex-duty-label">15</span>% import duty (ex-GST). Gold per 10g; silver per 1 kg.
+          </p>
+        </div>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- VIEW 4: MARKET ACCURACY & CALIBRATION                             -->
+      <!-- ================================================================= -->
+      <section id="view-accuracy" class="view hidden" aria-label="Market Accuracy and Calibration">
+        <div class="card">
+          <div class="section-head">
+            <div>
+              <h2 class="section-title">Market Accuracy &amp; Calibration</h2>
+              <p class="section-sub">Audit live direct exchange feeds vs Satyanarayan Jewellers and nudge spot calibration if needed.</p>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.45rem;flex-wrap:wrap;">
+              <select id="acc-metal" class="select" style="width:auto;padding:0.42rem 0.65rem;font-size:0.78rem;">
+                <option value="gold">Gold</option>
+                <option value="silver">Silver</option>
+              </select>
+              <button id="btn-refresh-acc" type="button" class="btn btn-gold btn-sm">↻ Audit Feeds</button>
+              <button id="btn-calibrate" type="button" class="btn btn-green btn-sm">Calibrate to Consensus</button>
+              <button id="btn-reset-calib" type="button" class="btn btn-ghost btn-sm hidden">Reset (0%)</button>
+            </div>
+          </div>
+
+          <div id="acc-statutory-notice" class="notice-box hidden" style="margin-bottom:0.85rem;"></div>
+
+          <div class="kpi-grid" style="margin-bottom:0.9rem;">
+            <div class="kpi-card">
+              <span class="kpi-label">Shop Base (ex-GST)</span>
+              <span id="acc-stat-shop" class="kpi-val tabular">—</span>
+              <span id="acc-stat-unit" class="kpi-sub">Per 10g</span>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-label">Market Consensus</span>
+              <span id="acc-stat-consensus" class="kpi-val tabular">—</span>
+              <span class="kpi-sub">Median of live feeds</span>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-label">Variance vs Market</span>
+              <span id="acc-stat-variance" class="kpi-val tabular">—</span>
+              <span class="kpi-sub">+ means above consensus</span>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-label">Feeds Audited</span>
+              <span id="acc-stat-live" class="kpi-val tabular">—</span>
+              <span id="acc-updated" class="kpi-sub">—</span>
+            </div>
+          </div>
+
+          <div id="acc-empty" class="empty-state">Tap "Audit Feeds" or wait for live rates to run exchange verification.</div>
+          <div id="acc-list" class="acc-list"></div>
+        </div>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- VIEW 5: TOOLS, DUTY/GST RULES & OWNER APP SETTINGS                -->
+      <!-- ================================================================= -->
+      <section id="view-settings" class="view hidden" aria-label="Counter Tools, Statutory Rules and App Settings">
+        <div class="subtabs" role="tablist" aria-label="Tools and settings sections">
+          <button type="button" class="subtab-btn is-active" data-subtab="calc" role="tab" aria-selected="true">Counter Calculators</button>
+          <button type="button" class="subtab-btn" data-subtab="statutory" role="tab" aria-selected="false">Duty &amp; GST Publisher</button>
+          <button type="button" class="subtab-btn" data-subtab="app" role="tab" aria-selected="false">PWA &amp; Security</button>
+        </div>
+
+        <!-- SUBTAB A: COUNTER CALCULATORS -->
+        <div id="subpanel-calc" class="view">
+          <div class="metals-grid">
+            <!-- Jewellery Quote Calculator -->
+            <div class="card">
+              <h3 class="section-title" style="margin-bottom:0.2rem;">Jewellery Quote Calculator</h3>
+              <p class="section-sub" style="margin-bottom:0.85rem;">Instant counter estimate with making charges &amp; live statutory GST.</p>
+              <div class="form-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));">
+                <label class="field span-2">
+                  <span class="field-label">Metal &amp; Purity</span>
+                  <select id="calc-metal" class="select">
+                    <option value="22K">Gold 916 / 22K (91.6%)</option>
+                    <option value="24K">Gold 999 / 24K (99.9%)</option>
+                    <option value="995">Gold 995 Fine (99.5%)</option>
+                    <option value="18K">Gold 750 / 18K (75.0%)</option>
+                    <option value="S999">Silver 999 Fine</option>
+                    <option value="S925">Silver 925 Sterling</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span class="field-label">Weight</span>
+                  <input id="calc-weight" class="input tabular" type="number" min="0" step="0.01" value="10" />
+                </label>
+                <label class="field">
+                  <span class="field-label">Unit</span>
+                  <select id="calc-unit" class="select">
+                    <option value="g">Grams (g)</option>
+                    <option value="10g">10 Grams</option>
+                    <option value="kg">Kilogram (kg)</option>
+                    <option value="oz">Troy oz</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span class="field-label">Making Charge</span>
+                  <input id="calc-making" class="input tabular" type="number" min="0" step="0.1" value="8" />
+                </label>
+                <label class="field">
+                  <span class="field-label">Making Type</span>
+                  <select id="calc-making-type" class="select">
+                    <option value="pct">Percentage (%)</option>
+                    <option value="per_g">₹ per gram</option>
+                    <option value="flat">Flat ₹</option>
+                  </select>
+                </label>
+              </div>
+              <label class="checkbox-row" style="margin:0.75rem 0;">
+                <input id="calc-gst" type="checkbox" checked />
+                Include statutory GST (<span id="calc-gst-label">3</span>%)
+              </label>
+              <div class="quote-box">
+                <div class="quote-line"><span>Metal Value</span><strong id="q-base" class="tabular">₹--</strong></div>
+                <div class="quote-line"><span>Making (<span id="q-making-lbl">8%</span>)</span><strong id="q-making" class="tabular">₹--</strong></div>
+                <div class="quote-line"><span>GST</span><strong id="q-gst" class="tabular">₹--</strong></div>
+                <div class="quote-total"><span>Grand Total</span><span id="q-total" class="tabular">₹--</span></div>
+              </div>
+              <div class="actions-row" style="margin-top:0.7rem;">
+                <button id="btn-copy-quote" type="button" class="btn btn-ghost btn-sm">Copy Quote</button>
+                <button id="btn-wa-quote" type="button" class="btn btn-green btn-sm">Send Quote on WhatsApp</button>
+              </div>
+            </div>
+
+            <!-- Old Gold / Old Silver Exchange -->
+            <div class="card">
+              <h3 class="section-title" style="margin-bottom:0.2rem;">Old Gold &amp; Silver Exchange</h3>
+              <p class="section-sub" style="margin-bottom:0.85rem;">Hallmark (0% deduction) vs Non-Hallmark (30% deduction) with stone weight.</p>
+              <div class="mode-switch" style="margin-bottom:0.75rem;" role="group" aria-label="Exchange metal">
+                <button id="btn-excalc-gold" type="button" class="is-active">Old Gold</button>
+                <button id="btn-excalc-silver" type="button">Old Silver</button>
+              </div>
+              <div class="form-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));">
+                <label class="field">
+                  <span class="field-label">Purity (%)</span>
+                  <input id="excalc-purity" class="input tabular" type="number" min="1" max="100" step="0.1" value="91.6" />
+                </label>
+                <label class="field">
+                  <span class="field-label">Gross Weight (g)</span>
+                  <input id="excalc-weight" class="input tabular" type="number" min="0" step="0.01" value="10" />
+                </label>
+                <label class="field">
+                  <span class="field-label">Stone / Lac (g)</span>
+                  <input id="excalc-stone" class="input tabular" type="number" min="0" step="0.01" value="0" />
+                </label>
+                <label class="field">
+                  <span class="field-label">New Bill ₹ (optional)</span>
+                  <input id="excalc-newbill" class="input tabular" type="number" min="0" step="1" placeholder="Balance check" />
+                </label>
+              </div>
+              <label class="checkbox-row" style="margin:0.75rem 0;">
+                <input id="excalc-hallmark" type="checkbox" checked />
+                BIS Hallmarked (0% deduction · unchecked = 30% non-hallmark deduction)
+              </label>
+              <div class="quote-box">
+                <div class="quote-line"><span>Net Metal Weight</span><strong id="exq-netg" class="tabular">10.00 g</strong></div>
+                <div class="quote-line"><span>Gross Value</span><strong id="exq-gross" class="tabular">₹--</strong></div>
+                <div class="quote-line"><span>Deduction (<span id="exq-ded-pct">0%</span>)</span><strong id="exq-ded" class="tabular">₹0</strong></div>
+                <div class="quote-total"><span>Exchange Credit</span><span id="exq-net" class="tabular">₹--</span></div>
+                <div id="exq-balance-row" class="quote-line hidden" style="padding-top:0.35rem;border-top:1px dashed var(--border);"><span>Customer Pays / Receives</span><strong id="exq-balance" class="tabular">₹--</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUBTAB B: STATUTORY DUTY & GST LIVE PUBLISHER -->
+        <div id="subpanel-statutory" class="view hidden">
+          <div class="card">
+            <div class="section-head">
+              <div>
+                <h3 class="section-title">Statutory Import Duty &amp; GST Manager</h3>
+                <p class="section-sub">Publishes directly to <span class="mono">catalog/statutory-rates.json</span> — updates both Customer &amp; Owner PWAs on next load with zero code edit.</p>
+              </div>
+              <button id="btn-reload-statutory" type="button" class="btn btn-ghost btn-sm">↻ Reload Live File</button>
+            </div>
+
+            <form id="statutory-form" style="display:flex;flex-direction:column;gap:0.9rem;" novalidate>
+              <div class="metals-grid">
+                <div class="info-box">
+                  <strong style="display:block;margin-bottom:0.6rem;">Gold Bullion Landing Tax</strong>
+                  <div class="form-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));">
+                    <label class="field">
+                      <span class="field-label">Import Duty (%)</span>
+                      <input id="st-gold-duty" class="input tabular" type="number" min="0.1" max="60" step="0.25" required />
+                    </label>
+                    <label class="field">
+                      <span class="field-label">GST (%)</span>
+                      <input id="st-gold-gst" class="input tabular" type="number" min="0" max="30" step="0.25" required />
+                    </label>
+                    <label class="field">
+                      <span class="field-label">Effective From</span>
+                      <input id="st-gold-eff" class="input mono" type="date" required />
+                    </label>
+                    <label class="field">
+                      <span class="field-label">Verified On</span>
+                      <input id="st-gold-ver" class="input mono" type="date" required />
+                    </label>
+                    <label class="field span-2">
+                      <span class="field-label">Government Notification / Note</span>
+                      <input id="st-gold-note" class="input" maxlength="220" />
+                    </label>
+                  </div>
+                </div>
+
+                <div class="info-box">
+                  <strong style="display:block;margin-bottom:0.6rem;">Silver Bullion Landing Tax</strong>
+                  <div class="form-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));">
+                    <label class="field">
+                      <span class="field-label">Import Duty (%)</span>
+                      <input id="st-silver-duty" class="input tabular" type="number" min="0.1" max="60" step="0.25" required />
+                    </label>
+                    <label class="field">
+                      <span class="field-label">GST (%)</span>
+                      <input id="st-silver-gst" class="input tabular" type="number" min="0" max="30" step="0.25" required />
+                    </label>
+                    <label class="field">
+                      <span class="field-label">Effective From</span>
+                      <input id="st-silver-eff" class="input mono" type="date" required />
+                    </label>
+                    <label class="field">
+                      <span class="field-label">Verified On</span>
+                      <input id="st-silver-ver" class="input mono" type="date" required />
+                    </label>
+                    <label class="field span-2">
+                      <span class="field-label">Government Notification / Note</span>
+                      <input id="st-silver-note" class="input" maxlength="220" />
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Live Impact Preview -->
+              <div>
+                <p class="field-label" style="margin-bottom:0.4rem;">Live ₹ Impact Preview (Cuttack, Incl. GST — before publishing)</p>
+                <div class="preview-diff-grid">
+                  <div class="fx-box">
+                    <div class="fx-label">Gold 999 (10g)</div>
+                    <div id="st-prev-g999" class="fx-val tabular">—</div>
+                    <div id="st-diff-g999" class="fx-meta">No change</div>
+                  </div>
+                  <div class="fx-box">
+                    <div class="fx-label">Gold 916 / 22K (10g)</div>
+                    <div id="st-prev-g916" class="fx-val tabular">—</div>
+                    <div id="st-diff-g916" class="fx-meta">No change</div>
+                  </div>
+                  <div class="fx-box">
+                    <div class="fx-label">Silver 999 (1 kg)</div>
+                    <div id="st-prev-s999" class="fx-val tabular">—</div>
+                    <div id="st-diff-s999" class="fx-meta">No change</div>
+                  </div>
+                </div>
+              </div>
+
+              <p id="st-error" class="error-text hidden" role="alert"></p>
+
+              <div style="display:flex;justify-content:flex-end;gap:0.5rem;flex-wrap:wrap;">
+                <button id="btn-st-mark-today" type="button" class="btn btn-ghost btn-sm">Stamp Verified Today</button>
+                <button id="btn-st-publish" type="submit" class="btn btn-gold">Publish Statutory Rates to GitHub</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- SUBTAB C: PWA INSTALL, SECURITY & DIAGNOSTICS -->
+        <div id="subpanel-app" class="view hidden">
+          <div class="metals-grid">
+            <div class="card">
+              <h3 class="section-title" style="margin-bottom:0.2rem;">Install SJ Owner PWA</h3>
+              <p id="pwa-install-status" class="section-sub" style="margin-bottom:0.85rem;">Installs as a separate standalone Owner app beside the Customer Price Desk.</p>
+              <div class="actions-row" style="margin-bottom:0.85rem;">
+                <button id="btn-install-settings" type="button" class="btn btn-gold hidden">Install Owner App Now</button>
+                <button id="btn-check-sw-update" type="button" class="btn btn-ghost btn-sm">Check for App Update</button>
+              </div>
+              <div class="info-box">
+                <strong style="display:block;margin-bottom:0.4rem;">Manual Home Screen Install</strong>
+                <ol class="pwa-steps">
+                  <li><strong>Android (Chrome / Edge):</strong> Tap the browser menu (<strong>⋮</strong>) → <strong>Add to Home screen</strong> / <strong>Install app</strong>.</li>
+                  <li><strong>iPhone / iPad (Safari):</strong> Tap the <strong>Share</strong> icon → <strong>Add to Home Screen</strong> → name it <strong>SJ Owner</strong>.</li>
+                  <li><strong>Desktop (Chrome / Edge):</strong> Click the install icon in the address bar to pin SJ Owner as its own window.</li>
+                </ol>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3 class="section-title" style="margin-bottom:0.2rem;">Owner Session &amp; GitHub Access</h3>
+              <p id="sec-session-meta" class="section-sub" style="margin-bottom:0.85rem;">Connected to satyanarayanjewellery/shop (branch: main)</p>
+              <div class="info-box" style="margin-bottom:0.85rem;">
+                <p><strong>Service Worker:</strong> <span id="diag-sw">Checking…</span></p>
+                <p style="margin-top:0.25rem;"><strong>Display Mode:</strong> <span id="diag-display">Browser Tab</span></p>
+                <p style="margin-top:0.25rem;"><strong>Network:</strong> <span id="diag-net">Online</span></p>
+                <p style="margin-top:0.25rem;"><strong>Offline Drafts (IndexedDB):</strong> <span id="diag-drafts" class="tabular">0</span></p>
+              </div>
+              <div class="actions-row">
+                <button id="btn-sec-lock" type="button" class="btn btn-ghost btn-sm">Lock Owner Desk</button>
+                <button id="btn-sec-clear-cache" type="button" class="btn btn-ghost btn-sm">Reset Rate Cache</button>
+                <button id="btn-sec-disconnect" type="button" class="btn btn-red btn-sm">Disconnect Token</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Mobile 5-Tab Bottom Navigation Bar -->
+    <nav class="mobile-nav no-print" aria-label="Owner Bottom Navigation">
+      <div class="mobile-nav-grid">
+        <button type="button" class="mnav-btn is-active" data-view="desk">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+          <span>Desk</span>
+        </button>
+        <button type="button" class="mnav-btn" data-view="catalog">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m4.3 7.5 7.7 4.4 7.7-4.4M12 21v-9.1"/></svg>
+          <span>Catalogue</span>
+          <span id="mnav-draft-badge" class="mnav-dot hidden">0</span>
+        </button>
+        <button type="button" class="mnav-btn" data-view="exchanges">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          <span>Exchanges</span>
+        </button>
+        <button type="button" class="mnav-btn" data-view="accuracy">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+          <span>Accuracy</span>
+        </button>
+        <button type="button" class="mnav-btn" data-view="settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.6.85 1 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span>Tools</span>
+        </button>
+      </div>
+    </nav>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- EDIT JEWELLERY MODAL                                                  -->
+  <!-- ===================================================================== -->
+  <div id="edit-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
+    <div class="modal-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;margin-bottom:0.85rem;">
+        <div>
+          <h3 id="edit-modal-title" class="section-title">Edit Jewellery Item</h3>
+          <p id="edit-modal-sub" class="section-sub">Update details and sync.</p>
+        </div>
+        <button id="btn-close-edit" type="button" class="btn btn-ghost btn-xs" aria-label="Close">✕</button>
+      </div>
+      <form id="edit-form" style="display:flex;flex-direction:column;gap:0.75rem;">
+        <input id="edit-id" type="hidden" />
+        <input id="edit-source" type="hidden" />
+        <div class="form-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));">
+          <label class="field span-2">
+            <span class="field-label">Jewellery Name *</span>
+            <input id="edit-name" class="input" required maxlength="80" />
+          </label>
+          <label class="field">
+            <span class="field-label">Category</span>
+            <select id="edit-category" class="select">
+              <option value="Gold">Gold</option>
+              <option value="Silver">Silver</option>
+              <option value="Other">Other</option>
+            </select>
+          </label>
+          <label class="field">
+            <span class="field-label">Purity</span>
+            <input id="edit-purity" class="input" maxlength="20" />
+          </label>
+          <label class="field">
+            <span class="field-label">Weight (g)</span>
+            <input id="edit-weight" class="input tabular" type="number" min="0" step="0.001" />
+          </label>
+          <label class="field">
+            <span class="field-label">Price ₹ (0 = On request)</span>
+            <input id="edit-price" class="input tabular" type="number" min="0" step="0.01" />
+          </label>
+          <label class="field">
+            <span class="field-label">SKU / Code</span>
+            <input id="edit-sku" class="input" maxlength="40" />
+          </label>
+          <label class="field">
+            <span class="field-label">Short Note</span>
+            <input id="edit-note" class="input" maxlength="160" />
+          </label>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:0.5rem;margin-top:0.25rem;">
+          <button id="btn-cancel-edit" type="button" class="btn btn-ghost btn-sm">Cancel</button>
+          <button id="btn-save-edit" type="submit" class="btn btn-gold btn-sm">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MEDIA LIGHTBOX MODAL                                                  -->
+  <!-- ===================================================================== -->
+  <div id="lightbox-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="lb-title">
+    <div class="modal-card" style="max-width:48rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;margin-bottom:0.65rem;">
+        <div style="min-width:0;">
+          <h3 id="lb-title" class="section-title">Preview</h3>
+          <p id="lb-meta" class="section-sub"></p>
+        </div>
+        <button id="btn-close-lb" type="button" class="btn btn-ghost btn-xs" aria-label="Close">✕</button>
+      </div>
+      <div id="lb-stage" class="lightbox-stage"></div>
+      <div id="lb-nav" style="display:flex;align-items:center;justify-content:space-between;margin-top:0.65rem;" class="hidden">
+        <button id="btn-lb-prev" type="button" class="btn btn-ghost btn-xs">← Prev</button>
+        <span id="lb-counter" class="pill tabular">1 / 1</span>
+        <button id="btn-lb-next" type="button" class="btn btn-ghost btn-xs">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- CONFIRM DELETE MODAL                                                  -->
+  <!-- ===================================================================== -->
+  <div id="confirm-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+    <div class="modal-card" style="max-width:25rem;">
+      <h3 id="confirm-title" class="section-title">Confirm Action</h3>
+      <p id="confirm-msg" class="section-sub" style="margin:0.5rem 0 1rem;color:var(--text-2);"></p>
+      <div style="display:flex;justify-content:flex-end;gap:0.5rem;">
+        <button id="btn-confirm-cancel" type="button" class="btn btn-ghost btn-sm">Cancel</button>
+        <button id="btn-confirm-ok" type="button" class="btn btn-red btn-sm">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js" defer></script>
+</body>
+</html>

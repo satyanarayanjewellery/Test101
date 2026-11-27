@@ -1,0 +1,50 @@
+{
+  "name": "Satyanarayan Jewellers — Owner Desk",
+  "short_name": "SJ Owner",
+  "description": "Private Owner PWA for Satyanarayan Jewellers, Cuttack: upload & edit jewellery, monitor live bullion rates, compare global markets, calibrate accuracy, and update statutory duty & GST.",
+  "id": "./index.html",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#090607",
+  "theme_color": "#090607",
+  "categories": ["business", "finance", "productivity"],
+  "lang": "en-IN",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Upload Jewellery",
+      "short_name": "Upload",
+      "description": "Add photos or videos and publish to the live shop",
+      "url": "./index.html#catalog",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Market Accuracy",
+      "short_name": "Accuracy",
+      "description": "Compare live exchanges and calibrate rates",
+      "url": "./index.html#accuracy",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Global Exchanges",
+      "short_name": "Exchanges",
+      "description": "Compare Satyanarayan Jewellers vs 100 bullion markets",
+      "url": "./index.html#exchanges",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Duty & GST Rules",
+      "short_name": "Duty & GST",
+      "description": "Review or publish Indian import duty & GST rates",
+      "url": "./index.html#settings",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ]
+}
