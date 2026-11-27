@@ -382,6 +382,10 @@
           </button>
         </div>
 
+        <button id="btn-install-customer-pwa" type="button" class="hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/40 text-amber-200 text-xs font-semibold transition-colors duration-150">
+          Install App
+        </button>
+
 
       </div>
     </div>
@@ -8815,6 +8819,28 @@
       setInterval(updateRatesUpdatedLabel, 10000);
       if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
         navigator.serviceWorker.register('sw.js').catch(() => { /* offline shell optional */ });
+      }
+      // In-app PWA install prompt (enables side-by-side install alongside SJ Owner on Android Chrome)
+      const installBtn = document.getElementById('btn-install-customer-pwa');
+      if (installBtn) {
+        let deferredInstallPrompt = null;
+        const isStandalone = () => (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+        window.addEventListener('beforeinstallprompt', (e) => {
+          e.preventDefault();
+          deferredInstallPrompt = e;
+          if (!isStandalone()) installBtn.classList.remove('hidden');
+        });
+        installBtn.addEventListener('click', async () => {
+          if (!deferredInstallPrompt) return;
+          deferredInstallPrompt.prompt();
+          await deferredInstallPrompt.userChoice.catch(() => {});
+          deferredInstallPrompt = null;
+          installBtn.classList.add('hidden');
+        });
+        window.addEventListener('appinstalled', () => {
+          deferredInstallPrompt = null;
+          installBtn.classList.add('hidden');
+        });
       }
       window.addEventListener('resize', () => {
         if (priceChart && state.activeView === 'charts') priceChart.resize();
