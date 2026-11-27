@@ -333,6 +333,7 @@ test('Bug Fix 4: Both Service Workers normalize ?t= cache keys and never return 
       },
       fetch: async (req) => {
         if (fetchMode === 'offline') throw new Error('network down');
+        if (fetchMode === 'http-error') return { ok: false, status: 503, type: 'basic', body: 'upstream unavailable' };
         const body = req.url.includes('products.json') ? '[{"id":"p1"}]' : '{"gold":{"importDutyPct":15}}';
         return { ok: true, status: 200, type: 'basic', body, clone() { return { ...this }; } };
       }
@@ -355,6 +356,24 @@ test('Bug Fix 4: Both Service Workers normalize ?t= cache keys and never return 
     });
     await p;
     assert.ok(cacheStore.has('/shop/catalog/products.json'), `${label}: products cached by pathname`);
+
+    // HTTP errors resolve fetch() rather than rejecting it. They must still fall back to the last
+    // good policy/catalog response instead of surfacing a 503 or replacing the cached copy.
+    fetchMode = 'http-error';
+    listeners.fetch({
+      request: { method: 'GET', mode: 'cors', url: 'https://example.com/shop/catalog/statutory-rates.json?t=err' },
+      respondWith: (resP) => { p = resP; }
+    });
+    const failedStat = await p;
+    assert.equal(failedStat.body, '{"gold":{"importDutyPct":15}}', `${label}: HTTP statutory error uses cached data`);
+    listeners.fetch({
+      request: { method: 'GET', mode: 'cors', url: 'https://example.com/shop/catalog/products.json?t=err' },
+      respondWith: (resP) => { p = resP; }
+    });
+    const failedProducts = await p;
+    assert.equal(failedProducts.body, '[{"id":"p1"}]', `${label}: HTTP catalog error uses cached data`);
+    assert.equal(cacheStore.get('/shop/catalog/statutory-rates.json').body, '{"gold":{"importDutyPct":15}}', `${label}: bad policy response never poisons cache`);
+    assert.equal(cacheStore.get('/shop/catalog/products.json').body, '[{"id":"p1"}]', `${label}: bad catalog response never poisons cache`);
 
     // 2. Offline fetch with a DIFFERENT ?t=222 hits the cached pathname!
     fetchMode = 'offline';
