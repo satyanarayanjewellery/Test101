@@ -398,10 +398,10 @@
         <button data-app-view="rates" type="button" class="app-nav-desktop flex-1 inline-flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-semibold transition-colors duration-150 bg-amber-500/15 text-amber-300 border border-amber-500/30">
           <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg> Rates
         </button>
-        <button data-app-view="exchanges" type="button" class="app-nav-desktop flex-1 inline-flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-medium transition-colors duration-150 text-slate-400 hover:text-white border border-transparent hover:bg-slate-900/70">
+        <button data-owner-view-nav data-app-view="exchanges" type="button" hidden class="app-nav-desktop flex-1 inline-flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-medium transition-colors duration-150 text-slate-400 hover:text-white border border-transparent hover:bg-slate-900/70">
           <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 18"/><polyline points="6 12 18 12"/></svg> Exchanges
         </button>
-        <button data-app-view="accuracy" type="button" class="app-nav-desktop flex-1 inline-flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-medium transition-colors duration-150 text-slate-400 hover:text-white border border-transparent hover:bg-slate-900/70">
+        <button data-owner-view-nav data-app-view="accuracy" type="button" hidden class="app-nav-desktop flex-1 inline-flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-medium transition-colors duration-150 text-slate-400 hover:text-white border border-transparent hover:bg-slate-900/70">
           <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/><path d="M12 6V12"/><path d="M12 18V12"/></svg> Accuracy
         </button>
         <button data-app-view="products" type="button" class="app-nav-desktop flex-1 inline-flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-medium transition-colors duration-150 text-slate-400 hover:text-white border border-transparent hover:bg-slate-900/70">
@@ -1838,7 +1838,7 @@
 
   <!-- Mobile Bottom Navigation Bar (7 Tabs — Rates Centered in Middle) -->
   <nav id="mobile-nav-bar" class="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-slate-800/90 bg-[#090607]/98" style="padding-bottom: env(safe-area-inset-bottom);" aria-label="Bottom navigation">
-    <div class="grid grid-cols-7 h-16 max-w-lg mx-auto px-1">
+    <div id="mobile-nav-grid" class="grid grid-cols-7 h-16 max-w-lg mx-auto px-1">
       <button data-app-view="charts" type="button" class="app-nav-mobile relative flex flex-col items-center justify-center gap-0.5 text-slate-400 hover:text-slate-200 transition-colors duration-150">
         <span class="nav-indicator hidden absolute top-0 w-8 h-0.5 rounded-full bg-amber-400"></span>
         <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
@@ -1855,12 +1855,12 @@
         </span>
         <span class="nav-label text-[9px] font-semibold">Rates</span>
       </button>
-      <button data-app-view="exchanges" type="button" class="app-nav-mobile relative flex flex-col items-center justify-center gap-0.5 text-slate-400 hover:text-slate-200 transition-colors duration-150">
+      <button data-owner-view-nav data-app-view="exchanges" type="button" hidden class="app-nav-mobile relative flex flex-col items-center justify-center gap-0.5 text-slate-400 hover:text-slate-200 transition-colors duration-150">
         <span class="nav-indicator hidden absolute top-0 w-8 h-0.5 rounded-full bg-amber-400"></span>
         <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 18"/><polyline points="6 12 18 12"/></svg>
         <span class="nav-label text-[9px] font-medium">Exchanges</span>
       </button>
-      <button data-app-view="accuracy" type="button" class="app-nav-mobile relative flex flex-col items-center justify-center gap-0.5 text-slate-400 hover:text-slate-200 transition-colors duration-150">
+      <button data-owner-view-nav data-app-view="accuracy" type="button" hidden class="app-nav-mobile relative flex flex-col items-center justify-center gap-0.5 text-slate-400 hover:text-slate-200 transition-colors duration-150">
         <span class="nav-indicator hidden absolute top-0 w-8 h-0.5 rounded-full bg-amber-400"></span>
         <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/><path d="M12 6V12"/><path d="M12 18V12"/></svg>
         <span class="nav-label text-[8px] font-medium">Accuracy</span>
@@ -6969,6 +6969,9 @@
       if (isAgentAlias) viewName = 'tools';
       const views = ['charts', 'news', 'rates', 'products', 'exchanges', 'accuracy', 'tools'];
       if (!views.includes(viewName)) return;
+      const ownerOnlyView = viewName === 'exchanges' || viewName === 'accuracy';
+      const isOwnerActive = Boolean(productOwner.unlocked && productOwner.ghConnected);
+      if (ownerOnlyView && !isOwnerActive) viewName = 'rates';
       state.activeView = viewName;
 
       // Show brand + city + INR/USD header bar ONLY on the Rates screen
@@ -7720,6 +7723,7 @@
       const isOwnerActive = Boolean(productOwner.unlocked && productOwner.ghConnected);
       if (studio) studio.classList.toggle('hidden', !isOwnerActive);
       if (pill) pill.classList.toggle('hidden', !isOwnerActive);
+      (document.querySelectorAll?.('[data-owner-view-nav]') || []).forEach((nav) => { nav.hidden = !isOwnerActive; });
       // Owner entry button stays hidden for customers until Owner Mode is live or the secret reveal fired
       if (accessBtn) accessBtn.classList.toggle('hidden', !(isOwnerActive || productOwner.accessRevealed));
       if (btnLabel) btnLabel.textContent = isOwnerActive ? 'Token Settings' : 'Owner';
@@ -8294,6 +8298,7 @@
         concealOwnerAccess();
         closeOwnerAuthModal();
         renderProducts();
+        if (state.activeView === 'exchanges' || state.activeView === 'accuracy') switchAppView('rates');
         showToast('GitHub token removed and Owner Mode locked.', 'info');
       });
 
@@ -8302,6 +8307,7 @@
         concealOwnerAccess();
         clearPendingMedia();
         renderProducts();
+        if (state.activeView === 'exchanges' || state.activeView === 'accuracy') switchAppView('rates');
         showToast('Owner Mode locked. Showing customer gallery view.', 'info');
       });
 
