@@ -3121,7 +3121,7 @@
 
   function updateOrderBadges() {
     const activeCount = state.orders.items.filter((o) => o.status !== 'Delivered').length;
-    ['desk-orders-badge', 'subtab-orders-badge'].forEach((id) => {
+    ['top-orders-badge', 'desk-orders-badge', 'subtab-orders-badge'].forEach((id) => {
       const el = $(id);
       if (!el) return;
       el.textContent = String(activeCount);
@@ -3296,10 +3296,16 @@
     if (!('serviceWorker' in navigator)) return;
     const isSecure = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
     if (!isSecure) return;
-    navigator.serviceWorker.register('./sw.js', { scope: './' }).then((reg) => {
+    const hadController = Boolean(navigator.serviceWorker.controller);
+    navigator.serviceWorker.register('./sw.js', { scope: './', updateViaCache: 'none' }).then((reg) => {
       state.pwa.swReg = reg;
+      reg.update().catch(() => {});
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') reg.update().catch(() => {});
+      });
       if (reg.waiting) {
         state.pwa.waitingWorker = reg.waiting;
+        reg.waiting.postMessage({ type: 'SKIP_WAITING' });
         $('sw-update-banner')?.classList.remove('hidden');
       }
       reg.addEventListener('updatefound', () => {
@@ -3308,6 +3314,7 @@
         next.addEventListener('statechange', () => {
           if (next.state === 'installed' && navigator.serviceWorker.controller) {
             state.pwa.waitingWorker = next;
+            next.postMessage({ type: 'SKIP_WAITING' });
             $('sw-update-banner')?.classList.remove('hidden');
           }
         });
@@ -3317,7 +3324,7 @@
 
     let reloading = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (reloading) return;
+      if (!hadController || reloading) return;
       reloading = true;
       window.location.reload();
     });

@@ -80,6 +80,9 @@ test('2. Owner Service Worker and Customer Service Worker have isolated scopes a
   assert.doesNotThrow(() => new vm.Script(rootSw, { filename: 'sw.js' }));
 
   assert.match(ownerSw, /const CACHE = 'sj-owner-desk-v\d+'/);
+  assert.match(ownerSw, /self\.skipWaiting\(\)/, 'Owner SW install must skipWaiting so installed Owner PWAs upgrade immediately');
+  assert.match(ownerSw, /client\.navigate\(client\.url\)/, 'Owner SW activate must refresh open /owner/ windows');
+  assert.match(ownerSw, /isCoreShellAsset/, 'Owner SW must fetch styles.css and app.js network-first');
   assert.match(ownerSw, /key\.startsWith\('sj-owner-desk-'\)/, 'Owner SW should only delete its own cache namespace');
   assert.match(ownerSw, /SKIP_WAITING/, 'Owner SW should support controlled update reload');
   assert.match(ownerSw, /catalog\/products\.json/);
