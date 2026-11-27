@@ -3874,10 +3874,10 @@
         setText(getEl('gold-usd-999-oz'), 'oz: ' + fmtUSD(gPrice));
         setText(gUsd995G, fmtUSD((gPrice * (995 / 999)) / TROY_OZ_TO_GRAMS));
         setText(getEl('gold-usd-995-oz'), 'oz: ' + fmtUSD(gPrice * (995 / 999)));
-        setText(gUsd916G, fmtUSD((gPrice * (22 / 24)) / TROY_OZ_TO_GRAMS));
-        setText(getEl('gold-usd-916-oz'), 'oz: ' + fmtUSD(gPrice * (22 / 24)));
-        setText(gUsd750G, fmtUSD((gPrice * (18 / 24)) / TROY_OZ_TO_GRAMS));
-        setText(getEl('gold-usd-750-oz'), 'oz: ' + fmtUSD(gPrice * (18 / 24)));
+        setText(gUsd916G, fmtUSD((gPrice * (916 / 999)) / TROY_OZ_TO_GRAMS));
+        setText(getEl('gold-usd-916-oz'), 'oz: ' + fmtUSD(gPrice * (916 / 999)));
+        setText(gUsd750G, fmtUSD((gPrice * (750 / 999)) / TROY_OZ_TO_GRAMS));
+        setText(getEl('gold-usd-750-oz'), 'oz: ' + fmtUSD(gPrice * (750 / 999)));
 
         const silverMain = getEl('silver-main-price');
         const silverSec = getEl('silver-secondary-price');
@@ -5250,7 +5250,7 @@
 
       const baseRounded = Math.round(baseValue);
       const makingRounded = Math.round(makingCharges);
-      const gstRounded = Math.round((baseRounded + makingRounded) * (gstPct / 100));
+      const gstRounded = Math.round((baseValue + makingCharges) * (gstPct / 100));
       const grandTotal = baseRounded + makingRounded + gstRounded;
 
       const ratePerGramEl = document.getElementById('quote-rate-per-gram');
