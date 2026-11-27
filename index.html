@@ -1724,7 +1724,7 @@
             <thead>
               <tr>
                 <th style="width:36%">Exchange<span class="text-slate-500 font-normal text-[10px] block mt-0.5">· city, country · metal</span></th>
-                <th style="width:32%">Their price<span class="text-slate-500 font-normal text-[10px] block mt-0.5">INR per unit · local rate</span></th>
+                <th style="width:32%">Their price<span class="text-slate-500 font-normal text-[10px] block mt-0.5">INR landed (duty incl.) · local rate</span></th>
                 <th style="width:32%">vs Satyanarayan Jewellers<span class="text-slate-500 font-normal text-[10px] block mt-0.5">₹ difference · %</span></th>
               </tr>
             </thead>
@@ -1732,7 +1732,7 @@
           </table>
         </div>
 
-        <p class="ex-note mt-3">Prices are indicative estimates derived from live global spot (XAU/XAG) and each market's typical basis spread — not firm quotes. Indian rates include ~15% import duty; GST is excluded. Gold compared per 10 g, silver per 1 kg. Refresh anytime for the latest spot.</p>
+        <p class="ex-note mt-3">Prices are indicative estimates derived from live global spot (XAU/XAG) and each market's typical basis spread — not firm quotes. Every market is shown at India's landed cost (global quote + ~15% import duty) so the comparison with our price is like-for-like; GST is excluded. Gold compared per 10 g, silver per 1 kg. Refresh anytime for the latest spot.</p>
       </section>
     </div>
 
@@ -1772,7 +1772,7 @@
 
         <div id="accuracy-body"></div>
 
-        <p class="acc-note mt-3">Live prices are fetched from your browser directly to each exchange (CORS permitting). Feeds that can't be reached show as "Failed". Indicative markets are modeled from live spot XAU/XAG with each city's typical basis spread. Calibration nudges your spot price toward the exchange consensus while keeping India's ~15% import duty and local premium intact — so your quoted price stays accurate to the market, not drifted.</p>
+        <p class="acc-note mt-3">Live prices are fetched from your browser directly to each exchange (CORS permitting). Feeds that can't be reached show as "Failed". Global quotes are converted at India's landed cost (+15% import duty) so they are comparable with our ex-GST shop price; indicative markets are modeled from live spot XAU/XAG with each city's typical basis spread. Calibration nudges your spot price toward the exchange consensus while keeping India's ~15% import duty and local premium intact — so your quoted price stays accurate to the market, not drifted.</p>
       </section>
     </div>
 
@@ -1982,7 +1982,8 @@
 
     // ~100 bullion exchanges & city markets used for the exchange comparison view.
     // basisPct = typical premium/discount vs global spot (indicative). 'both' markets trade gold & silver.
-    // Indian retail prices (incl. Satyanarayan Jewellers) add ~15% import duty; GST is excluded everywhere here.
+    // Every quote here is landed at India's ~15% import duty (global parity markets included) so comparisons
+    // with Satyanarayan Jewellers' price are like-for-like; GST is excluded everywhere.
     const EXCHANGE_MARKETS = [
       { id: 'x-001', name: 'Satyanarayan Jewellers', city: 'Cuttack', state: 'Odisha', country: 'India', currency: 'INR', metal: 'gold', basisPct: 0, isShop: true },
       { id: 'x-002', name: 'MCX', city: 'Mumbai', state: 'Maharashtra', country: 'India', currency: 'INR', metal: 'both', basisPct: 0.10 },
@@ -3196,29 +3197,45 @@
     function computeExchangeRows() {
       const p = state.prices;
       if (!p || !Number.isFinite(p.spotGold) || !Number.isFinite(p.spotSilver) || !Number.isFinite(p.usdInr)) return null;
-      const metal = state.exchanges.metal;
+      const filterMetal = state.exchanges.metal === 'silver' || state.exchanges.metal === 'both' ? state.exchanges.metal : 'gold';
+      // Quote bracket never becomes 'both': the 'Both' filter lists every venue but quotes in gold.
+      const metal = filterMetal === 'silver' ? 'silver' : 'gold';
       const usdInr = p.usdInr;
-      // Shop's comparable base: ex-GST per 10g (gold) / per kg (silver), already includes ~15% India import duty.
-      const shopBase = metal === 'gold' ? p.gold999ExGst : p.silver999ExGst;
+      // Shop's comparable bases: ex-GST per 10g (gold) / per kg (silver), already including ~15% import duty.
+      const goldBase = p.gold999ExGst;
+      const silverBase = p.silver999ExGst;
+      const shopBase = metal === 'silver' ? silverBase : goldBase;
       const rows = [];
       for (const m of EXCHANGE_MARKETS) {
         if (m.isShop) continue;
-        if (m.metal !== 'both' && m.metal !== metal) continue;
+        // 'both' lists every venue; the specific filters keep only venues that trade that metal.
+        if (filterMetal !== 'both' && m.metal !== 'both' && m.metal !== filterMetal) continue;
+        // Each row is quoted in the selected bracket; a 'both' venue trades both metals.
+        const quoteMetal = metal;
+        const base = quoteMetal === 'gold' ? goldBase : silverBase;
+        // `cpu` is local currency per USD, so one unit of local currency buys (usdInr / cpu) rupees.
+        // Spot is quoted in USD, so this conversion applies to *every* market — INR included, where
+        // cpu = 1 and the factor is the plain USD→INR rate. Forcing 1 for INR markets previously
+        // priced MCX/IBJA gold at ~₹1,300 per 10g instead of ~₹1,33,000.
         const cpu = CURRENCY_PER_USD[m.currency] || 1;
-        const inrPerUnit = m.currency === 'INR' ? 1 : usdInr / cpu;
+        const inrPerUnit = usdInr / cpu;
         const premium = 1 + m.basisPct / 100;
+        // Every market is modeled from duty-free global spot, so India's import duty is added to all
+        // of them (MCX/IBJA included) — only then are they comparable with our landed shop price.
+        const duty = INDIA_IMPORT_DUTY_MULTIPLIER;
         let theirInr, local;
-        if (metal === 'gold') {
+        if (quoteMetal === 'gold') {
           const usdPerGram = (p.spotGold / TROY_OZ_TO_GRAMS) * premium;
-          theirInr = usdPerGram * cpu * inrPerUnit * 10; // INR per 10g
+          theirInr = usdPerGram * cpu * inrPerUnit * 10 * duty; // INR per 10g (landed)
           local = usdPerGram * cpu; // local currency per gram
         } else {
           const usdPerKg = (p.spotSilver / TROY_OZ_TO_GRAMS) * 1000 * premium;
-          theirInr = usdPerKg * cpu * inrPerUnit; // INR per kg
+          theirInr = usdPerKg * cpu * inrPerUnit * duty; // INR per kg (landed)
           local = usdPerKg * cpu; // local currency per kg
         }
-        const diffAmt = theirInr - shopBase;
-        rows.push({ ...m, theirInr, local, diffAmt, diffPct: shopBase > 0 ? (diffAmt / shopBase) * 100 : 0 });
+        const diffAmt = theirInr - base;
+        // `quoteMetal` is the bracket the price is quoted in (never 'both'), `m.metal` stays for the badge.
+        rows.push({ ...m, quoteMetal, theirInr, local, diffAmt, diffPct: base > 0 ? (diffAmt / base) * 100 : 0 });
       }
       const sortBy = state.exchanges.sortBy || 'diff';
       rows.sort(sortBy === 'az'
@@ -3226,7 +3243,7 @@
         : (a, b) => Math.abs(a.diffPct) - Math.abs(b.diffPct) || a.name.localeCompare(b.name));
       rows.unshift({
         id: 'x-sj', name: 'Satyanarayan Jewellers', city: 'Cuttack', state: 'Odisha', country: 'India', currency: 'INR',
-        metal: 'gold', basisPct: 0, isShop: true,
+        metal, quoteMetal: metal, basisPct: 0, isShop: true,
         theirInr: shopBase,
         local: metal === 'gold' ? shopBase / 10 : shopBase,
         diffAmt: 0, diffPct: 0
@@ -3255,27 +3272,32 @@
       let cheaper = 0, pricier = 0;
       for (const r of filtered) {
         if (r.isShop) continue;
-        if (r.diffAmt < 0) cheaper += 1; else if (r.diffAmt > 0) pricier += 1;
+        // Anything inside ₹1 is "at par" — floating-point noise must not be counted as a difference.
+        if (r.diffAmt < -1) cheaper += 1; else if (r.diffAmt > 1) pricier += 1;
       }
       if (statTotal) statTotal.textContent = `Markets compared: ${Math.max(0, filtered.length - 1)} of ${EXCHANGE_MARKETS.length - 1}`;
       if (statCheaper) statCheaper.textContent = `Cheaper than us: ${cheaper}`;
       if (statPricier) statPricier.textContent = `Pricier than us: ${pricier}`;
       if (stamp) stamp.textContent = `Live · ${fmtTime(new Date())} IST`;
-      const metalKey = state.exchanges.metal === 'gold' ? 'gold' : (state.exchanges.metal === 'silver' ? 'silver' : 'both');
       let html = '';
       for (const r of filtered) {
         const isShop = r.isShop;
-        const dir = r.diffAmt > 0 ? 'up' : (r.diffAmt < 0 ? 'down' : 'zero');
-        const sign = r.diffAmt > 0 ? '+' : (r.diffAmt < 0 ? '−' : '');
+        const atPar = !isShop && Math.abs(r.diffAmt) < 1;
+        const dir = isShop ? 'zero' : (atPar ? 'zero' : (r.diffAmt > 0 ? 'up' : 'down'));
+        const sign = dir === 'up' ? '+' : (dir === 'down' ? '−' : '');
         const absAmt = fmtINR(Math.abs(r.diffAmt), 0);
-        const diffText = isShop ? '— reference' : `${sign}${Math.abs(r.diffPct).toFixed(2)}%`;
+        const diffText = isShop ? '— reference' : (atPar ? '±0.00%' : `${sign}${Math.abs(r.diffPct).toFixed(2)}%`);
         const status = isShop ? 'Your shop price — reference row'
+          : atPar ? 'Same as Satyanarayan Jewellers'
           : r.diffAmt < 0 ? 'Cheaper than Satyanarayan Jewellers'
-          : r.diffAmt > 0 ? 'Pricier than Satyanarayan Jewellers' : 'Same as Satyanarayan Jewellers';
-        const cityLabel = r.city + (r.state ? ', ' + r.state : '');
-        const unitLabel = state.exchanges.metal === 'gold' ? '/g' : '/kg';
+          : 'Pricier than Satyanarayan Jewellers';
+        const cityLabel = (r.city || '') + (r.state ? ', ' + r.state : '');
+        // Local figures are quoted per gram for gold and per kg for silver; the shop reference row
+        // follows the same rule so the "local rate" column is never labelled with the wrong unit.
+        const rowMetal = r.quoteMetal || (r.metal === 'silver' ? 'silver' : 'gold');
+        const unitLabel = rowMetal === 'gold' ? '/g' : '/kg';
         const localSymbol = r.currency === 'INR' ? '₹' : r.currency + ' ';
-        const metalLabel = r.isShop ? (state.exchanges.metal.charAt(0).toUpperCase() + state.exchanges.metal.slice(1)) : (r.metal === 'both' ? 'Gold & Silver' : r.metal.charAt(0).toUpperCase() + r.metal.slice(1));
+        const metalLabel = r.metal === 'both' ? 'Gold & Silver' : r.metal.charAt(0).toUpperCase() + r.metal.slice(1);
         html += `<tr class="ex-row${isShop ? ' ex-ref' : ''}">
           <td class="ex-td-exchange">
             <div class="ex-name">${escapeHtml(r.name)}</div>
@@ -3288,7 +3310,7 @@
           </td>
           <td class="diff-cell">
             <div class="ex-diff ex-diff-${dir}" title="${escapeHtml(status)}">${diffText}</div>
-            <div class="ex-diff-note">${dir === 'zero' ? 'Reference price' : sign + absAmt} · ${escapeHtml(status)}</div>
+            <div class="ex-diff-note">${isShop ? escapeHtml(status) : (dir === 'zero' ? 'At par · ' + escapeHtml(status) : sign + absAmt + ' · ' + escapeHtml(status))}</div>
           </td>
         </tr>`;
       }
@@ -3344,7 +3366,7 @@
       try {
         const p = state.prices;
         if (!p) return;
-        const metal = ma.metal || 'gold';
+        const metal = ma.metal === 'silver' ? 'silver' : 'gold';
         const shopBase = metal === 'gold' ? p.gold999ExGst : p.silver999ExGst;
         ma.shopBase = shopBase;
         const results = [];
@@ -3370,13 +3392,18 @@
             const usdPrice = f.parse(json);
             if (Number.isFinite(usdPrice) && usdPrice > 0) {
               const perGram = usdPrice / TROY_OZ_TO_GRAMS;
-              const theirInr = metal === 'gold' ? perGram * resolvedUsdInr * 10 : perGram * 1000 * resolvedUsdInr;
-              results.push({ ...f, type: 'live', theirInr, local: usdPrice, valid: true, usdPrice });
+              // Global feeds quote at parity; load India's import duty so the figure is comparable
+              // with the shop's landed (ex-GST) price instead of looking ~15% cheaper.
+              const theirInr = (metal === 'gold'
+                ? perGram * resolvedUsdInr * 10
+                : perGram * 1000 * resolvedUsdInr) * INDIA_IMPORT_DUTY_MULTIPLIER;
+              // `local` is the exchange's own quote, which is USD per troy ounce for these feeds.
+              results.push({ ...f, type: 'live', theirInr, local: usdPrice, localUnit: '/oz', valid: true, usdPrice });
             } else {
-              results.push({ ...f, valid: false });
+              results.push({ ...f, type: 'live', valid: false, theirInr: null, local: NaN, usdPrice: NaN });
             }
           } catch {
-            results.push({ ...f, valid: false });
+            results.push({ ...f, type: 'live', valid: false, theirInr: null, local: NaN, usdPrice: NaN });
           }
         });
 
@@ -3385,19 +3412,23 @@
         for (const f of indFeeds) {
           const premium = 1 + f.basisPct / 100;
           const theirInr = shopBase * premium;
-          results.push({ ...f, type: 'indicative', theirInr, local: metal === 'gold' ? theirInr / 10 : theirInr / 1000, valid: true, usdPrice: NaN });
+          results.push({ ...f, type: 'indicative', theirInr, local: metal === 'gold' ? theirInr / 10 : theirInr / 1000, localUnit: metal === 'gold' ? '/g' : '/kg', valid: true, usdPrice: NaN });
         }
 
-        results.sort((a, b) => (b.theirInr || 0) - (a.theirInr || 0));
+        // Failed feeds carry no price — sort them to the bottom instead of treating them as 0.
+        results.sort((a, b) => (Number.isFinite(b.theirInr) ? b.theirInr : -Infinity) - (Number.isFinite(a.theirInr) ? a.theirInr : -Infinity));
 
         const liveVals = results.filter((r) => r.valid && r.type === 'live').map((r) => r.usdPrice).filter((v) => Number.isFinite(v));
         const consensusUsd = median(liveVals);
-        const consensusInr = consensusUsd ? (consensusUsd / TROY_OZ_TO_GRAMS) * (metal === 'gold' ? 10 : 1000) * resolvedUsdInr : null;
+        const consensusInr = consensusUsd
+          ? (consensusUsd / TROY_OZ_TO_GRAMS) * (metal === 'gold' ? 10 : 1000) * resolvedUsdInr * INDIA_IMPORT_DUTY_MULTIPLIER
+          : null;
 
         ma.feeds = results;
         ma.consensus = consensusInr;
         ma.consensusUsd = consensusUsd;
         ma.liveCount = results.filter((r) => r.valid && r.type === 'live').length;
+        // Positive = shop price above the market (the UI documents it this way), so compare shop → consensus.
         ma.variancePct = consensusInr && shopBase > 0 ? ((shopBase - consensusInr) / consensusInr) * 100 : 0;
         ma.lastFetch = new Date();
         if (isManual) showToast(`Market accuracy refreshed · ${ma.liveCount} live feeds · ${results.length} markets`, 'success');
@@ -3423,7 +3454,7 @@
         return;
       }
       if (empty) empty.hidden = true;
-      const metal = ma.metal || 'gold';
+      const metal = ma.metal === 'silver' ? 'silver' : 'gold';
       const unit = metal === 'gold' ? '/10g' : '/kg';
       if (statShop) statShop.textContent = ma.shopBase ? fmtINR(ma.shopBase, 0) : '—';
       if (statConsensus) statConsensus.textContent = ma.consensus ? fmtINR(ma.consensus, 0) : '—';
@@ -3438,19 +3469,27 @@
 
       let html = '';
       for (const r of ma.feeds) {
-        const dir = r.theirInr > ma.shopBase ? 'up' : (r.theirInr < ma.shopBase ? 'down' : 'zero');
-        const pct = ma.shopBase > 0 ? ((r.theirInr - ma.shopBase) / ma.shopBase) * 100 : 0;
-        const chip = r.type === 'live' ? '<span class="acc-chip acc-chip-live">Live</span>' : (r.valid === false ? '<span class="acc-chip acc-chip-fail">Failed</span>' : '<span class="acc-chip acc-chip-ind">Indicative</span>');
+        const ok = r.valid !== false && Number.isFinite(r.theirInr);
+        const dir = !ok ? 'fail' : (r.theirInr > ma.shopBase ? 'up' : (r.theirInr < ma.shopBase ? 'down' : 'zero'));
+        const pct = ok && ma.shopBase > 0 ? ((r.theirInr - ma.shopBase) / ma.shopBase) * 100 : 0;
+        const chip = !ok
+          ? '<span class="acc-chip acc-chip-fail">Failed</span>'
+          : (r.type === 'live' ? '<span class="acc-chip acc-chip-live">Live</span>' : '<span class="acc-chip acc-chip-ind">Indicative</span>');
         const localSym = r.currency === 'INR' ? '₹' : r.currency + ' ';
-        const localVal = Number.isFinite(r.local) ? r.local.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '–';
-        const cityLabel = r.city + (r.state ? ', ' + r.state : '');
-        html += `<div class="acc-feed ${r.type === 'live' ? 'live' : (r.valid === false ? 'failed' : 'indicative')}" title="${escapeHtml(r.name)} · ${escapeHtml(cityLabel)} · ${escapeHtml(r.country)}">
+        // Live exchange feeds quote per troy ounce; modeled city markets quote in the same
+        // per-unit bracket as this table (gold /g, silver /kg).
+        const localUnit = r.localUnit || unit;
+        const localVal = ok && Number.isFinite(r.local)
+          ? localSym + r.local.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ' + localUnit
+          : '';
+        const cityLabel = (r.city || '') + (r.state ? ', ' + r.state : '');
+        html += `<div class="acc-feed ${!ok ? 'failed' : (r.type === 'live' ? 'live' : 'indicative')}" title="${escapeHtml(r.name)} · ${escapeHtml(cityLabel)} · ${escapeHtml(r.country)}">
           <div class="acc-info">
             <div class="acc-name">${escapeHtml(r.name)}</div>
             <div class="acc-meta">${escapeHtml(cityLabel)} · ${escapeHtml(r.country)} ${chip}</div>
           </div>
-          <div class="acc-price">${fmtINR(r.theirInr, 0)}<span class="acc-price-local"> ${localSym}${localVal} ${unit}</span></div>
-          <div class="acc-variance acc-variance-${dir}">${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%</div>
+          <div class="acc-price">${ok ? fmtINR(r.theirInr, 0) : '—'}<span class="acc-price-local"> ${localVal}</span></div>
+          <div class="acc-variance acc-variance-${dir}">${ok ? `${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%` : '—'}</div>
         </div>`;
       }
       body.innerHTML = html;
@@ -3459,22 +3498,39 @@
     function calibrateToMarket() {
       const ma = state.marketAccuracy;
       if (!ma.consensusUsd || !state.prices) { showToast('No market consensus available yet — refresh first.', 'alert'); return; }
-      const metal = ma.metal || 'gold';
+      const metal = ma.metal === 'silver' ? 'silver' : 'gold';
       const spot = metal === 'gold' ? state.live.spotGold : state.live.spotSilver;
       if (!spot || spot <= 0) { showToast('No live spot price available.', 'alert'); return; }
       let pct = ((ma.consensusUsd - spot) / spot) * 100;
       pct = Math.max(-8, Math.min(8, pct)); // clamp ±8% so duty + local premium stay intact
       if (metal === 'gold') ma.calibPctGold = pct; else ma.calibPctSilver = pct;
-      showToast(`Calibrated ${metal} to market consensus (${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%).`, 'success');
+
+      // Re-price every view with the new calibration right away — computeCityPrices applies it.
+      // Shop base / variance must be recomputed too, otherwise the accuracy panel keeps showing
+      // the pre-calibration price and a 0% variance.
+      const hasRateInputs = Number.isFinite(state.live.spotGold) && Number.isFinite(state.live.spotSilver) && Number.isFinite(state.live.usdInr);
+      if (hasRateInputs) {
+        state.prices = computeCityPrices(state.cityId, state.live.spotGold, state.live.spotSilver, state.live.usdInr);
+        ma.shopBase = metal === 'gold' ? state.prices.gold999ExGst : state.prices.silver999ExGst;
+        ma.variancePct = ma.consensus ? ((ma.shopBase - ma.consensus) / ma.consensus) * 100 : 0;
+        renderPriceCards(null, false);
+        if (state.activeView === 'tools') updateAllTools();
+        if (state.activeView === 'exchanges') renderExchangeComparison();
+      }
       renderMarketAccuracy();
-      if (state.activeView === 'rates') renderPriceCards(null, false);
+      showToast(`Calibrated ${metal} to market consensus (${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%).`, 'success');
     }
 
     function bindAccuracyControls() {
       const sel = document.getElementById('accuracy-metal');
       if (sel && !sel.dataset.accBound) {
         sel.dataset.accBound = '1';
-        sel.addEventListener('change', (e) => { state.marketAccuracy.metal = e.target.value; if (state.activeView === 'accuracy') { fetchMarketAccuracy(false); renderMarketAccuracy(); } });
+        sel.addEventListener('change', (e) => {
+          state.marketAccuracy.metal = e.target.value;
+          if (state.activeView !== 'accuracy') return;
+          renderMarketAccuracy(); // clear the stale metal's rows immediately
+          fetchMarketAccuracy(false).then(renderMarketAccuracy);
+        });
       }
       const calib = document.getElementById('btn-calibrate-market');
       if (calib && !calib.dataset.accBound) {
@@ -3484,7 +3540,7 @@
       const refresh = document.getElementById('btn-refresh-accuracy');
       if (refresh && !refresh.dataset.accBound) {
         refresh.dataset.accBound = '1';
-        refresh.addEventListener('click', () => { fetchMarketAccuracy(true); renderMarketAccuracy(); });
+        refresh.addEventListener('click', () => fetchMarketAccuracy(true).then(renderMarketAccuracy));
       }
     }
 
@@ -3600,8 +3656,15 @@
           if (priceEl) priceEl.textContent = '--';
           if (tenGEl) tenGEl.textContent = '-- / 10g';
         }
-        if (dateEl) dateEl.textContent = 'Awaiting 12 PM';
-        if (captionEl) captionEl.textContent = 'Retail ex-GST per gram · captured between 12:00–1:00 PM';
+        // Nothing captured yet for today: say what actually happens next instead of showing
+        // "Awaiting 12 PM" late in the afternoon, when today's window has already passed.
+        const hour = new Date().getHours();
+        if (dateEl) dateEl.textContent = hour < 12 ? 'Awaiting 12 PM' : (hour === 12 ? 'Capturing now…' : 'Tomorrow · 12 PM');
+        if (captionEl) {
+          captionEl.textContent = hour < 12
+            ? 'Retail ex-GST per gram · captured between 12:00–1:00 PM'
+            : 'Retail ex-GST per gram · today\'s 12:00–1:00 PM window has closed';
+        }
         return;
       }
       const isToday = entry.date === localDateKey();
@@ -5022,7 +5085,8 @@
         btn.addEventListener('click', () => {
           const item = filtered[Number(btn.dataset.newsAskIdx)];
           if (!item) return;
-          switchAppView('agent');
+          switchAppView('tools');
+          switchToolTab('mintu');
           sendUserPrompt(`How does this ${item.category} news affect Indian gold and silver prices today: "${item.title}"`);
         });
       });
@@ -6032,8 +6096,14 @@
       } else if (viewName === 'exchanges') {
         renderExchangeComparison();
       } else if (viewName === 'accuracy') {
-        if (!state.marketAccuracy.feeds.length) fetchMarketAccuracy(false);
+        // Paint immediately (empty state), then repaint once the feeds land — otherwise the panel
+        // stays blank on first open because the fetch resolves after this synchronous render.
         renderMarketAccuracy();
+        if (!state.marketAccuracy.feeds.length && state.prices) {
+          fetchMarketAccuracy(false).then(() => {
+            if (state.activeView === 'accuracy') renderMarketAccuracy();
+          });
+        }
       } else if (viewName === 'tools') {
         if (isAgentAlias) switchToolTab('mintu');
         updateAllTools();
@@ -7018,7 +7088,7 @@
       if (!stage || !m) return;
 
       if (title) title.textContent = ctx.item.name;
-      const parts = [ctx.item.category, ctx.item.purity, Number(ctx.item.weight) > 0 ? `${ctx.item.weight} g` : ''].filter(Boolean);
+      const parts = [ctx.item.category, ctx.item.purity, Number(ctx.item.weight) > 0 ? `${Number(ctx.item.weight).toLocaleString('en-IN')} g` : ''].filter(Boolean);
       if (meta) meta.textContent = parts.join(' · ');
 
       stage.innerHTML = m.type === 'video'
@@ -7545,7 +7615,9 @@
         const q = computeQuote();
         if (!q) return;
         const metalLabel = q.metal === '999' ? '999 silver' : q.metal === '925' ? '925 silver' : q.metal === '750S' ? '750 silver' : `${q.metal} gold`;
-        switchAppView('agent');
+        // 'agent' is only an alias handled inside switchAppView; the Mintu panel needs the raw intent.
+        switchAppView('tools');
+        switchToolTab('mintu');
         sendUserPrompt(`Review quote for ${q.weight}${q.unit} ${metalLabel} with ${q.makingLabel} making charges`);
       });
 
@@ -7553,7 +7625,8 @@
         const og = computeOldGoldExchange();
         if (!og) return;
         const hmTxt = og.isHallmark ? 'Hallmark Gold' : 'Non-Hallmark Gold';
-        switchAppView('agent');
+        switchAppView('tools');
+        switchToolTab('mintu');
         sendUserPrompt(`Review my old gold exchange (${hmTxt}): ${og.netGrams.toFixed(2)}g net weight at ${og.purityPct}% purity with ${og.deductPct}% deduction (estimated ${fmtINR(Math.round(og.netValue))}).`);
       });
 
@@ -7561,7 +7634,8 @@
         const os = computeOldSilverExchange();
         if (!os) return;
         const hmTxt = os.isHallmark ? 'Hallmark Silver' : 'Non-Hallmark Silver';
-        switchAppView('agent');
+        switchAppView('tools');
+        switchToolTab('mintu');
         sendUserPrompt(`Review my old silver exchange (${hmTxt}): ${os.netGrams.toFixed(2)}g net weight at ${os.purityPct}% purity using ${os.basis === 'mcx' ? 'MCX spot' : 'retail 999'} rate with ${os.deductPct}% deduction (estimated ${fmtINR(Math.round(os.netValue))}).`);
       });
 
@@ -7724,7 +7798,7 @@
       const region = document.getElementById('rates-live-region');
       if (!region) return;
       const pr = state.prices;
-      region.textContent = `Gold 999 ${fmtINR(pr.gold999ExGstGram)} per gram ex-GST. Silver 999 ${fmtINR(pr.silver999ExGstGram)} per gram ex-GST.`;
+      region.textContent = `Gold 999 ${fmtINR(pr.gold999ExGstGram, 2)} per gram ex-GST (${fmtINR(pr.gold999ExGst)} per 10 grams). Silver 999 ${fmtINR(pr.silver999ExGstGram, 2)} per gram ex-GST (${fmtINR(pr.silver999ExGst)} per kilogram).`;
     }
 
     async function copyRatesText() {
