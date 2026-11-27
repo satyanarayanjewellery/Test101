@@ -8093,6 +8093,15 @@
       setInterval(renderMarketHoursUI, 30000);
       setInterval(updateRatesUpdatedLabel, 10000);
       if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+        // Reload an already-controlled customer app when a fresh worker takes over, so installed
+        // storefronts do not keep displaying a stale navigation shell after an app update.
+        const hadServiceWorkerController = Boolean(navigator.serviceWorker.controller);
+        let reloadingForServiceWorkerUpdate = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (!hadServiceWorkerController || reloadingForServiceWorkerUpdate) return;
+          reloadingForServiceWorkerUpdate = true;
+          window.location.reload();
+        });
         navigator.serviceWorker.register('sw.js').catch(() => { /* offline shell optional */ });
       }
       // In-app PWA install prompt (enables side-by-side install alongside SJ Owner on Android Chrome)
