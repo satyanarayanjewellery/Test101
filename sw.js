@@ -43,10 +43,9 @@ self.addEventListener('fetch', event => {
     event.respondWith(
       fetch(req)
         .then(res => {
-          if (isCacheable(res)) {
-            const copy = res.clone();
-            caches.open(CACHE).then(cache => cache.put(url.pathname, copy));
-          }
+          if (!isCacheable(res)) return caches.match(url.pathname).then(cached => cached || res);
+          const copy = res.clone();
+          caches.open(CACHE).then(cache => cache.put(url.pathname, copy)).catch(() => {});
           return res;
         })
         .catch(() => caches.match(url.pathname).then(cached => cached || new Response('[]', { headers: { 'content-type': 'application/json' } })))
@@ -62,10 +61,9 @@ self.addEventListener('fetch', event => {
     event.respondWith(
       fetch(req)
         .then(res => {
-          if (isCacheable(res)) {
-            const copy = res.clone();
-            caches.open(CACHE).then(cache => cache.put(url.pathname, copy));
-          }
+          if (!isCacheable(res)) return caches.match(url.pathname).then(cached => cached || res);
+          const copy = res.clone();
+          caches.open(CACHE).then(cache => cache.put(url.pathname, copy)).catch(() => {});
           return res;
         })
         .catch(() => caches.match(url.pathname).then(cached => cached || Response.error()))
@@ -78,10 +76,11 @@ self.addEventListener('fetch', event => {
     event.respondWith(
       fetch(req)
         .then(res => {
-          if (isCacheable(res)) {
-            const copy = res.clone();
-            caches.open(CACHE).then(cache => cache.put('./manifest.webmanifest', copy));
+          if (!isCacheable(res)) {
+            return caches.match('./manifest.webmanifest').then(cached => cached || res);
           }
+          const copy = res.clone();
+          caches.open(CACHE).then(cache => cache.put('./manifest.webmanifest', copy)).catch(() => {});
           return res;
         })
         .catch(() => caches.match('./manifest.webmanifest').then(cached => cached || new Response('Offline', { status: 503 })))
