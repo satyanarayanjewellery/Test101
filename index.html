@@ -242,10 +242,45 @@
       .live-dot,.mintu-hero-avatar{animation:none!important}
     }
     .print-only{display:none}
+    /* --- Owner Suite & Storefront Stock/Featured Styles --- */
+    .shop-card.is-featured{border-color:rgba(212,175,55,0.55);box-shadow:0 12px 26px rgba(0,0,0,0.45),0 0 0 1px rgba(212,175,55,0.22)}
+    .shop-card.is-sold-out .shop-card-media img,.shop-card.is-sold-out .shop-card-media video{opacity:0.55;filter:grayscale(0.35)}
+    .shop-badge-featured{left:auto;right:2.45rem;background:linear-gradient(135deg,#F2DC88,#D4AF37);color:#12080A;border:0;font-weight:800}
+    .shop-stock-pill{font-size:8.5px;font-weight:700;padding:0.1rem 0.34rem;border-radius:0.28rem;white-space:nowrap}
+    .shop-stock-mto{background:rgba(56,189,248,0.14);color:#7DD3FC;border:1px solid rgba(56,189,248,0.35)}
+    .shop-stock-out{background:rgba(244,63,94,0.16);color:#FDA4AF;border:1px solid rgba(244,63,94,0.38)}
+    .owner-suite-tabs{display:flex;flex-wrap:wrap;gap:0.35rem;padding:0.3rem;border-radius:0.75rem;background:rgba(12,7,9,0.75);border:1px solid rgba(58,35,42,0.85);margin-bottom:0.85rem}
+    .owner-suite-tab{padding:0.42rem 0.75rem;border-radius:0.55rem;font-size:11.5px;font-weight:700;color:#C4B8BA;background:transparent;border:1px solid transparent;cursor:pointer;transition:all 150ms ease}
+    .owner-suite-tab:hover{color:#FFF8E6}
+    .owner-suite-tab.is-active{background:rgba(212,175,55,0.18);border-color:rgba(212,175,55,0.42);color:#F9EBB8}
+    .owner-autoprice-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;padding:0.48rem 0.7rem;border-radius:0.65rem;background:rgba(212,175,55,0.08);border:1px dashed rgba(212,175,55,0.35);font-size:11px;color:#F2DC88}
+    .owner-split-grid{display:grid;grid-template-columns:1fr;gap:0.9rem}
+    @media (min-width:768px){.owner-split-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    .owner-subcard{background:rgba(12,7,9,0.65);border:1px solid rgba(58,35,42,0.85);border-radius:0.9rem;padding:0.85rem}
+    .owner-bill-paper{background:#FFFDF7;color:#181214;border:1px solid #D4AF37;border-radius:0.75rem;padding:0.9rem;font-size:11.5px;line-height:1.45}
+    .owner-bill-paper h4{margin:0;font-size:14px;font-weight:800;color:#4A0D16}
+    .owner-bill-paper table{width:100%;border-collapse:collapse;margin:0.5rem 0;font-size:11px}
+    .owner-bill-paper th{text-align:left;padding:0.28rem 0.3rem;border-bottom:1.5px solid #4A0D16;color:#4A0D16;font-size:9.5px;text-transform:uppercase}
+    .owner-bill-paper td{padding:0.32rem 0.3rem;border-bottom:1px solid #E5DEC9;color:#181214}
+    .owner-bill-row{display:flex;justify-content:space-between;gap:0.5rem;padding:0.14rem 0;color:#2D2225}
+    .owner-bill-row.is-grand{font-size:13px;font-weight:800;color:#4A0D16;border-top:1px solid #D4AF37;margin-top:0.25rem;padding-top:0.35rem}
+    .owner-line-item{display:flex;align-items:center;justify-content:space-between;gap:0.5rem;padding:0.45rem 0.6rem;border-radius:0.55rem;background:rgba(20,12,15,0.85);border:1px solid rgba(58,35,42,0.8);margin-bottom:0.4rem}
+    .owner-order-item{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:0.5rem;padding:0.6rem 0.7rem;border-radius:0.65rem;background:rgba(20,12,15,0.85);border:1px solid rgba(58,35,42,0.85);margin-bottom:0.45rem}
+    .owner-order-item.is-overdue{border-color:rgba(244,63,94,0.5)}
+    .owner-order-item.is-delivered{opacity:0.68}
+    .owner-tag-card{background:#FFFDF7;color:#181214;border:1.5px solid #4A0D16;border-radius:0.65rem;padding:0.75rem;display:flex;align-items:center;gap:0.75rem;max-width:20rem;width:100%}
+    .owner-tag-qr{width:92px;height:92px;flex-shrink:0;background:#fff;padding:3px;border:1px solid #DDD}
+    .owner-print-sheet{display:none}
+    .mb-2\.5{margin-bottom:0.625rem}
+    .pt-0\.5{padding-top:0.125rem}
+    .py-4{padding-top:1rem;padding-bottom:1rem}
+    @media (min-width:640px){.sm\:col-span-12{grid-column:span 12/span 12}}
     @media print{
       body{background:#fff!important;color:#111!important}
       #app-header,#desktop-nav-bar,#mobile-nav-bar,#inline-error-banner,#toast-container,.app-nav-mobile,#view-products,#view-news,#view-charts,#view-tools,.no-print{display:none!important}
       #view-rates{display:block!important}
+      body.printing-owner-slip #view-rates,body.printing-owner-slip main,body.printing-owner-slip .jewel-modal-backdrop{display:none!important}
+      body.printing-owner-slip #owner-print-sheet{display:block!important;padding:0.5rem;background:#fff!important;color:#111!important}
       .glass-card,.rate-tile{border:1px solid #ccc!important;background:#fff!important;box-shadow:none!important;break-inside:avoid}
       .price-num{color:#111!important}
       .print-only{display:block!important}
@@ -1003,70 +1038,261 @@
 
       <!-- OWNER-ONLY UPLOAD STUDIO (Hidden for all customers until Owner Mode is unlocked) -->
       <section id="owner-studio" class="hidden glass-card rounded-2xl p-4 sm:p-5 border-amber-500/35">
-        <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-4 border-b border-slate-800">
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-3 border-b border-slate-800">
           <div>
-            <h3 class="text-sm font-semibold text-amber-200">Owner Upload Studio</h3>
+            <h3 class="text-sm font-semibold text-amber-200">Owner Studio &amp; Counter Suite</h3>
             <p id="owner-sync-status" class="text-[11px] text-slate-400 mt-0.5">Verified GitHub token connected · Uploads publish live to all customers.</p>
           </div>
           <div class="flex flex-wrap items-center gap-2">
             <span class="text-[10px] px-2 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 tabular-nums">Live: <strong id="owner-published-count" class="text-emerald-300">0</strong> · Drafts: <strong id="owner-draft-count" class="text-amber-300">0</strong></span>
             <button id="btn-publish-all-drafts" type="button" class="hidden px-2.5 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-200 text-[11px] font-semibold">Publish All Drafts</button>
+            <button id="btn-inline-reprice" type="button" class="px-2.5 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/40 text-amber-200 text-[11px] font-semibold" title="Recalculate prices on weighted items using today's live rate">↻ Live Reprice</button>
+            <button id="btn-inline-export-csv" type="button" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-[11px] font-medium">CSV</button>
+            <button id="btn-inline-export-json" type="button" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-[11px] font-medium">Backup</button>
             <a id="link-owner-pwa" href="owner/" class="px-2.5 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/40 text-amber-200 text-[11px] font-semibold">Open Owner App ↗</a>
             <button id="btn-owner-settings" type="button" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-[11px] font-medium">Token Settings</button>
             <button id="btn-owner-lock" type="button" class="px-2.5 py-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-500/10 border border-rose-500/30 text-rose-200 text-[11px] font-semibold">Lock</button>
           </div>
         </div>
 
-        <form id="product-form" class="space-y-3">
-          <div>
-            <div id="product-dropzone" class="jewel-dropzone cursor-pointer">
-              <input id="product-media-input" type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime" class="hidden" />
-              <div class="flex flex-col items-center gap-1.5">
-                <svg viewBox="0 0 24 24" class="w-7 h-7 text-amber-400" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
-                <p class="text-xs sm:text-sm font-semibold text-white">Tap or drop jewellery photos &amp; videos here</p>
-                <p class="text-[10px] text-slate-400">JPG, PNG, WebP, GIF (up to 12 MB) · MP4, WebM, MOV video (up to 20 MB for website publish, 50 MB local) · Up to 6 files per item</p>
+        <div class="owner-suite-tabs" role="tablist" aria-label="Owner Suite Tools">
+          <button type="button" class="owner-suite-tab is-active" data-owner-tab="upload" role="tab" aria-selected="true">Inventory &amp; Upload</button>
+          <button type="button" class="owner-suite-tab" data-owner-tab="bill" role="tab" aria-selected="false">GST Estimate &amp; Bill Slip</button>
+          <button type="button" class="owner-suite-tab" data-owner-tab="orders" role="tab" aria-selected="false">Customer Orders &amp; Rate-Lock <span id="inline-orders-badge" class="hidden px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-200 text-[10px] font-bold">0</span></button>
+        </div>
+
+        <!-- OWNER TAB 1: UPLOAD & SMART INVENTORY -->
+        <div id="owner-tab-upload">
+          <form id="product-form" class="space-y-3">
+            <div>
+              <div id="product-dropzone" class="jewel-dropzone cursor-pointer">
+                <input id="product-media-input" type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime" class="hidden" />
+                <div class="flex flex-col items-center gap-1.5">
+                  <svg viewBox="0 0 24 24" class="w-7 h-7 text-amber-400" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+                  <p class="text-xs sm:text-sm font-semibold text-white">Tap or drop jewellery photos &amp; videos here</p>
+                  <p class="text-[10px] text-slate-400">JPG, PNG, WebP, GIF (up to 12 MB) · MP4, WebM, MOV video (up to 20 MB for website publish, 50 MB local) · Up to 6 files per item</p>
+                </div>
+              </div>
+              <div id="product-media-previews" class="hidden flex flex-wrap gap-2 mt-2.5"></div>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-12 gap-2.5">
+              <label class="col-span-2 sm:col-span-5 text-[11px] text-slate-400">Jewellery name
+                <input id="product-name" required maxlength="80" placeholder="e.g. 22K Bridal Temple Necklace" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" />
+              </label>
+              <label class="col-span-1 sm:col-span-3 text-[11px] text-slate-400">Category
+                <select id="product-category" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-2 py-2.5 text-sm text-white"><option>Gold</option><option>Silver</option><option>Other</option></select>
+              </label>
+              <label class="col-span-1 sm:col-span-2 text-[11px] text-slate-400">Purity
+                <input id="product-purity" maxlength="20" placeholder="22K HUID" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" />
+              </label>
+              <label class="col-span-1 sm:col-span-2 text-[11px] text-slate-400">Weight (g)
+                <input id="product-weight" type="number" min="0" step="0.001" placeholder="0.000" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" />
+              </label>
+              <label class="col-span-1 sm:col-span-2 text-[11px] text-slate-400">Making (%)
+                <input id="product-making" type="number" min="0" max="100" step="0.1" value="10" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500" />
+              </label>
+              <label class="col-span-1 sm:col-span-3 text-[11px] text-slate-400">Price ₹ (optional)
+                <div class="flex items-center gap-1.5 mt-1">
+                  <input id="product-price" type="number" min="0" step="0.01" placeholder="Blank = On request" class="w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" />
+                  <button id="btn-product-autoprice" type="button" class="shrink-0 px-2.5 py-2.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/40 text-amber-200 text-[11px] font-semibold" title="Fill live rate price">Auto ₹</button>
+                </div>
+              </label>
+              <label class="col-span-1 sm:col-span-2 text-[11px] text-slate-400">Item code / SKU
+                <input id="product-sku" maxlength="40" placeholder="SJ-001" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" />
+              </label>
+              <label class="col-span-1 sm:col-span-2 text-[11px] text-slate-400">Stock status
+                <select id="product-stock" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-2 py-2.5 text-sm text-white">
+                  <option value="in_stock">In Stock</option>
+                  <option value="made_to_order">Made to Order</option>
+                  <option value="sold_out">Sold Out</option>
+                </select>
+              </label>
+              <label class="col-span-2 sm:col-span-3 text-[11px] text-slate-400">Short note (optional)
+                <input id="product-note" maxlength="160" placeholder="e.g. BIS 916 Hallmarked · Ready" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" />
+              </label>
+              <div class="col-span-2 sm:col-span-12 flex items-center justify-between flex-wrap gap-2 pt-0.5">
+                <label class="inline-flex items-center gap-2 text-xs text-amber-200 cursor-pointer">
+                  <input id="product-featured" type="checkbox" class="accent-amber-500" />
+                  ★ Feature as Showroom Pick (pins first in customer gallery)
+                </label>
+                <span id="product-autoprice-hint" class="hidden owner-autoprice-bar"></span>
               </div>
             </div>
-            <div id="product-media-previews" class="hidden flex flex-wrap gap-2 mt-2.5"></div>
-          </div>
 
-          <div class="grid grid-cols-2 sm:grid-cols-12 gap-2.5">
-            <label class="col-span-2 sm:col-span-5 text-[11px] text-slate-400">Jewellery name
-              <input id="product-name" required maxlength="80" placeholder="e.g. 22K Bridal Temple Necklace" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" />
-            </label>
-            <label class="col-span-1 sm:col-span-3 text-[11px] text-slate-400">Category
-              <select id="product-category" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-2 py-2.5 text-sm text-white"><option>Gold</option><option>Silver</option><option>Other</option></select>
-            </label>
-            <label class="col-span-1 sm:col-span-2 text-[11px] text-slate-400">Purity
-              <input id="product-purity" maxlength="20" placeholder="22K HUID" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" />
-            </label>
-            <label class="col-span-1 sm:col-span-2 text-[11px] text-slate-400">Weight (g)
-              <input id="product-weight" type="number" min="0" step="0.001" placeholder="0.000" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" />
-            </label>
-            <label class="col-span-1 sm:col-span-3 text-[11px] text-slate-400">Price ₹ (optional)
-              <input id="product-price" type="number" min="0" step="0.01" placeholder="Blank = On request" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" />
-            </label>
-            <label class="col-span-1 sm:col-span-3 text-[11px] text-slate-400">Item code / SKU
-              <input id="product-sku" maxlength="40" placeholder="Optional" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" />
-            </label>
-            <label class="col-span-2 sm:col-span-6 text-[11px] text-slate-400">Short note (optional)
-              <input id="product-note" maxlength="160" placeholder="e.g. BIS 916 Hallmarked · Ready in showroom" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" />
-            </label>
-          </div>
-
-          <div id="product-upload-progress" class="hidden space-y-1">
-            <div class="flex items-center justify-between text-[11px] text-amber-200">
-              <span id="product-upload-status-text">Uploading...</span>
-              <span id="product-upload-pct" class="tabular-nums">0%</span>
+            <div id="product-upload-progress" class="hidden space-y-1">
+              <div class="flex items-center justify-between text-[11px] text-amber-200">
+                <span id="product-upload-status-text">Uploading...</span>
+                <span id="product-upload-pct" class="tabular-nums">0%</span>
+              </div>
+              <div class="jewel-progress-track"><div id="product-upload-bar" class="jewel-progress-fill" style="width:0%"></div></div>
             </div>
-            <div class="jewel-progress-track"><div id="product-upload-bar" class="jewel-progress-fill" style="width:0%"></div></div>
+
+            <div class="flex flex-wrap items-center justify-end gap-2 pt-1">
+              <button id="btn-save-local-product" type="button" class="px-4 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-100 font-semibold text-xs sm:text-sm">Save Local Draft</button>
+              <button id="btn-publish-product" type="submit" class="px-4 py-2.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs sm:text-sm">Upload &amp; Publish to Website</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- OWNER TAB 2: GST ESTIMATE & COUNTER BILL SLIP MAKER -->
+        <div id="owner-tab-bill" class="hidden owner-split-grid">
+          <div class="owner-subcard space-y-3">
+            <div class="flex items-center justify-between gap-2">
+              <h4 class="text-xs font-semibold text-amber-200">Counter GST Estimate / Invoice Builder</h4>
+              <button id="btn-inline-bill-reset" type="button" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-[11px] text-slate-200">New Slip</button>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <label class="text-[11px] text-slate-400">Slip Type
+                <select id="inline-bill-type" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-2 py-2 text-xs text-white">
+                  <option value="GST Estimate">GST Estimate / Quotation</option>
+                  <option value="Tax Invoice">Counter Tax Invoice</option>
+                  <option value="Approval Memo">Approval Memo</option>
+                </select>
+              </label>
+              <label class="text-[11px] text-slate-400">Slip No.
+                <input id="inline-bill-no" maxlength="32" placeholder="SJ-2026-001" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-2.5 py-2 text-xs text-white font-mono" />
+              </label>
+              <label class="text-[11px] text-slate-400">Customer Name
+                <input id="inline-bill-cust" maxlength="80" placeholder="Walk-in Customer" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-2.5 py-2 text-xs text-white" />
+              </label>
+              <label class="text-[11px] text-slate-400">Customer Mobile
+                <input id="inline-bill-phone" type="tel" maxlength="15" placeholder="98XXXXXXXX" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-2.5 py-2 text-xs text-white tabular-nums" />
+              </label>
+            </div>
+
+            <div class="rounded-xl bg-slate-950/60 border border-slate-800 p-3 space-y-2">
+              <div class="flex items-center justify-between gap-2 flex-wrap">
+                <span class="text-[11px] font-semibold text-amber-200">Add Jewellery Line Item</span>
+                <select id="inline-bill-pick" class="rounded-lg bg-slate-900 border border-slate-700 px-2 py-1 text-[11px] text-slate-200">
+                  <option value="">+ Pick from Catalogue…</option>
+                </select>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <label class="col-span-2 text-[11px] text-slate-400">Item Description
+                  <input id="inline-bill-desc" maxlength="80" placeholder="e.g. 22K Bridal Haram Necklace" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-2.5 py-1.5 text-xs text-white" />
+                </label>
+                <label class="text-[11px] text-slate-400">Metal &amp; Purity
+                  <select id="inline-bill-metal" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-2 py-1.5 text-xs text-white">
+                    <option value="22K">Gold 916 / 22K</option>
+                    <option value="24K">Gold 999 / 24K</option>
+                    <option value="995">Gold 995 Fine</option>
+                    <option value="18K">Gold 750 / 18K</option>
+                    <option value="S999">Silver 999 Fine</option>
+                    <option value="S925">Silver 925 Sterling</option>
+                  </select>
+                </label>
+                <label class="text-[11px] text-slate-400">BIS HUID (optional)
+                  <input id="inline-bill-huid" maxlength="12" placeholder="AB12CD" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-2.5 py-1.5 text-xs text-white font-mono" />
+                </label>
+                <label class="text-[11px] text-slate-400">Net Weight (g)
+                  <input id="inline-bill-wt" type="number" min="0" step="0.001" value="10" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-2.5 py-1.5 text-xs text-white tabular-nums" />
+                </label>
+                <label class="text-[11px] text-slate-400">Making (%)
+                  <input id="inline-bill-mc" type="number" min="0" step="0.1" value="10" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-2.5 py-1.5 text-xs text-white tabular-nums" />
+                </label>
+              </div>
+              <div class="flex justify-end pt-1">
+                <button id="btn-inline-bill-add" type="button" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs">+ Add Item</button>
+              </div>
+            </div>
+
+            <div id="inline-bill-lines"></div>
+
+            <div class="grid grid-cols-3 gap-2">
+              <label class="text-[11px] text-slate-400">Old Metal ₹
+                <input id="inline-bill-old" type="number" min="0" step="1" value="0" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-2 py-1.5 text-xs text-white tabular-nums" />
+              </label>
+              <label class="text-[11px] text-slate-400">Discount ₹
+                <input id="inline-bill-disc" type="number" min="0" step="1" value="0" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-2 py-1.5 text-xs text-white tabular-nums" />
+              </label>
+              <label class="text-[11px] text-slate-400">Advance ₹
+                <input id="inline-bill-adv" type="number" min="0" step="1" value="0" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-2 py-1.5 text-xs text-white tabular-nums" />
+              </label>
+            </div>
+            <label class="inline-flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
+              <input id="inline-bill-gst" type="checkbox" checked class="accent-amber-500" />
+              Include statutory GST (CGST + SGST split)
+            </label>
           </div>
 
-          <div class="flex flex-wrap items-center justify-end gap-2 pt-1">
-            <button id="btn-save-local-product" type="button" class="px-4 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-100 font-semibold text-xs sm:text-sm">Save Local Draft</button>
-            <button id="btn-publish-product" type="submit" class="px-4 py-2.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs sm:text-sm">Upload &amp; Publish to Website</button>
+          <div class="owner-subcard space-y-3">
+            <h4 class="text-xs font-semibold text-amber-200">Printable Counter Slip Preview</h4>
+            <div id="inline-bill-preview" class="owner-bill-paper"></div>
+            <div class="flex flex-wrap gap-2">
+              <button id="btn-inline-bill-print" type="button" class="px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs">Print / Save PDF</button>
+              <button id="btn-inline-bill-wa" type="button" class="px-3.5 py-2 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-200 font-semibold text-xs">Send on WhatsApp</button>
+              <button id="btn-inline-bill-copy" type="button" class="px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-medium text-xs">Copy Summary</button>
+            </div>
           </div>
-        </form>
+        </div>
+
+        <!-- OWNER TAB 3: CUSTOMER ORDERS & ADVANCE RATE-LOCK BOOK -->
+        <div id="owner-tab-orders" class="hidden owner-split-grid">
+          <div class="owner-subcard">
+            <h4 class="text-xs font-semibold text-amber-200 mb-2.5">Book Custom Order / Advance Rate-Lock</h4>
+            <form id="inline-order-form" class="space-y-2.5" novalidate>
+              <div class="grid grid-cols-2 gap-2">
+                <label class="text-[11px] text-slate-400">Customer Name *
+                  <input id="inline-ord-name" required maxlength="80" placeholder="Smt. Ananya Mohanty" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-2.5 py-2 text-xs text-white" />
+                </label>
+                <label class="text-[11px] text-slate-400">WhatsApp / Mobile
+                  <input id="inline-ord-phone" type="tel" maxlength="15" placeholder="98XXXXXXXX" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-2.5 py-2 text-xs text-white tabular-nums" />
+                </label>
+                <label class="col-span-2 text-[11px] text-slate-400">Jewellery Design / Item *
+                  <input id="inline-ord-item" required maxlength="120" placeholder="e.g. 22K Cuttack Filigree Bridal Choker" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-2.5 py-2 text-xs text-white" />
+                </label>
+                <label class="text-[11px] text-slate-400">Metal
+                  <select id="inline-ord-metal" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-2 py-2 text-xs text-white">
+                    <option value="22K">Gold 916 / 22K</option>
+                    <option value="24K">Gold 999 / 24K</option>
+                    <option value="18K">Gold 750 / 18K</option>
+                    <option value="S999">Silver 999 Fine</option>
+                    <option value="S925">Silver 925 Sterling</option>
+                  </select>
+                </label>
+                <label class="text-[11px] text-slate-400">Target Weight (g)
+                  <input id="inline-ord-wt" type="number" min="0" step="0.01" placeholder="25.00" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-2.5 py-2 text-xs text-white tabular-nums" />
+                </label>
+                <label class="text-[11px] text-slate-400">Locked Rate ₹/g
+                  <div class="flex items-center gap-1 mt-1">
+                    <input id="inline-ord-rate" type="number" min="0" step="1" placeholder="Optional" class="w-full rounded-lg bg-slate-950 border border-slate-700 px-2 py-2 text-xs text-white tabular-nums" />
+                    <button id="btn-inline-ord-lock" type="button" class="shrink-0 px-2 py-2 rounded-lg bg-amber-500/15 border border-amber-400/40 text-amber-200 text-[10px] font-semibold">Live</button>
+                  </div>
+                </label>
+                <label class="text-[11px] text-slate-400">Advance Paid (₹)
+                  <input id="inline-ord-adv" type="number" min="0" step="1" value="0" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-2.5 py-2 text-xs text-white tabular-nums" />
+                </label>
+                <label class="text-[11px] text-slate-400">Promised Delivery Date
+                  <input id="inline-ord-due" type="date" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-2.5 py-2 text-xs text-white font-mono" />
+                </label>
+                <label class="text-[11px] text-slate-400">Status
+                  <select id="inline-ord-status" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-2 py-2 text-xs text-white">
+                    <option value="Booked">Booked (Advance)</option>
+                    <option value="Karigar">In Workshop / Karigar</option>
+                    <option value="Ready">Ready for Pickup</option>
+                  </select>
+                </label>
+                <label class="col-span-2 text-[11px] text-slate-400">Notes
+                  <input id="inline-ord-note" maxlength="180" placeholder="Size / length / karigar note" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-2.5 py-2 text-xs text-white" />
+                </label>
+              </div>
+              <div class="flex justify-end pt-1">
+                <button type="submit" class="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs">+ Save Customer Order</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="owner-subcard space-y-2.5">
+            <div class="flex items-center justify-between gap-2">
+              <div>
+                <h4 class="text-xs font-semibold text-amber-200">Order &amp; Advance Register</h4>
+                <p id="inline-ord-summary" class="text-[10px] text-slate-400">0 active orders · ₹0 advance held</p>
+              </div>
+            </div>
+            <div id="inline-ord-list"></div>
+          </div>
+        </div>
       </section>
 
       <!-- CUSTOMER STOREFRONT GRID -->
@@ -1729,6 +1955,88 @@
       </div>
     </div>
   </div>
+
+  <!-- OWNER QUICK-EDIT JEWELLERY MODAL (Top-level under body) -->
+  <div id="owner-edit-item-modal" class="jewel-modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="owner-edit-item-title">
+    <div class="jewel-modal-card">
+      <div class="flex items-center justify-between gap-2 mb-3">
+        <div>
+          <h3 id="owner-edit-item-title" class="text-sm sm:text-base font-semibold text-white">Edit Jewellery Item</h3>
+          <p id="owner-edit-item-sub" class="text-[11px] text-slate-400 mt-0.5">Update details and sync.</p>
+        </div>
+        <button id="btn-close-owner-edit" type="button" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs text-slate-300" aria-label="Close">✕</button>
+      </div>
+      <form id="owner-edit-item-form" class="space-y-2.5" novalidate>
+        <input id="oedit-id" type="hidden" />
+        <input id="oedit-source" type="hidden" />
+        <div class="grid grid-cols-2 gap-2">
+          <label class="col-span-2 text-[11px] text-slate-400">Jewellery Name *
+            <input id="oedit-name" required maxlength="80" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-xs text-white" />
+          </label>
+          <label class="text-[11px] text-slate-400">Category
+            <select id="oedit-cat" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-2 py-2 text-xs text-white"><option value="Gold">Gold</option><option value="Silver">Silver</option><option value="Other">Other</option></select>
+          </label>
+          <label class="text-[11px] text-slate-400">Purity
+            <input id="oedit-purity" maxlength="20" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-xs text-white" />
+          </label>
+          <label class="text-[11px] text-slate-400">Weight (g)
+            <input id="oedit-wt" type="number" min="0" step="0.001" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-xs text-white tabular-nums" />
+          </label>
+          <label class="text-[11px] text-slate-400">Making (%)
+            <input id="oedit-mc" type="number" min="0" max="100" step="0.1" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-xs text-white tabular-nums" />
+          </label>
+          <label class="text-[11px] text-slate-400">Price ₹ (0 = On request)
+            <div class="flex items-center gap-1 mt-1">
+              <input id="oedit-price" type="number" min="0" step="0.01" class="w-full rounded-lg bg-slate-950 border border-slate-700 px-2.5 py-2 text-xs text-white tabular-nums" />
+              <button id="btn-oedit-autoprice" type="button" class="shrink-0 px-2 py-2 rounded-lg bg-amber-500/15 border border-amber-400/40 text-amber-200 text-[10px] font-semibold">Auto ₹</button>
+            </div>
+          </label>
+          <label class="text-[11px] text-slate-400">SKU / Code
+            <input id="oedit-sku" maxlength="40" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-xs text-white" />
+          </label>
+          <label class="text-[11px] text-slate-400">Stock Status
+            <select id="oedit-stock" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-2 py-2 text-xs text-white">
+              <option value="in_stock">In Stock</option>
+              <option value="made_to_order">Made to Order</option>
+              <option value="sold_out">Sold Out</option>
+            </select>
+          </label>
+          <label class="text-[11px] text-slate-400">Short Note
+            <input id="oedit-note" maxlength="160" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-xs text-white" />
+          </label>
+          <label class="col-span-2 inline-flex items-center gap-2 text-xs text-amber-200 cursor-pointer pt-1">
+            <input id="oedit-featured" type="checkbox" class="accent-amber-500" />
+            ★ Feature as Showroom Pick (pins first)
+          </label>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button id="btn-cancel-owner-edit" type="button" class="px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-xs text-slate-200">Cancel</button>
+          <button id="btn-save-owner-edit" type="submit" class="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- OWNER PRINTABLE QR PRICE TAG MODAL (Top-level under body) -->
+  <div id="owner-qr-tag-modal" class="jewel-modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="owner-qr-tag-title">
+    <div class="jewel-modal-card">
+      <div class="flex items-center justify-between gap-2 mb-3">
+        <div>
+          <h3 id="owner-qr-tag-title" class="text-sm font-semibold text-white">Showroom QR Price Tag</h3>
+          <p class="text-[11px] text-slate-400">Scan opens item on Satyanarayan Jewellers Storefront.</p>
+        </div>
+        <button id="btn-close-qr-tag" type="button" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs text-slate-300" aria-label="Close">✕</button>
+      </div>
+      <div id="owner-qr-tag-stage" class="flex justify-center py-2"></div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button id="btn-qr-tag-bill" type="button" class="px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-xs text-slate-200">+ Add to Bill Slip</button>
+        <button id="btn-qr-tag-print" type="button" class="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs">Print Tag</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dedicated Print Slip / Tag Container -->
+  <div id="owner-print-sheet" class="owner-print-sheet" aria-hidden="true"></div>
 
   <script>
     // =========================================================================
@@ -6314,6 +6622,9 @@
     const SHOP_WISHLIST_KEY = 'satyanarayan-shop-wishlist-v1';
     const SHOP_WHATSAPP_NUMBER = ''; // Optional: set a 10-digit showroom number to pre-address bag enquiries
 
+    const OWNER_ORDER_BOOK_KEY = 'satyanarayan_owner_orders_v1';
+    const OWNER_BILL_SEQ_KEY = 'satyanarayan_owner_bill_seq_v1';
+
     const productOwner = {
       unlocked: false,
       accessRevealed: false,
@@ -6321,6 +6632,7 @@
       ghLogin: '',
       ghToken: '',
       busy: false,
+      activeTab: 'upload',
       activeCategory: 'all',
       sortMode: 'new',
       catalogLoaded: false,
@@ -6332,8 +6644,21 @@
       lightboxObjectUrls: [],
       lightboxItem: null,
       lightboxIdx: 0,
+      qrTagItem: null,
       savedIds: new Set(),
-      lastRenderedIds: []
+      lastRenderedIds: [],
+      bill: {
+        docType: 'GST Estimate',
+        billNo: '',
+        customerName: '',
+        customerPhone: '',
+        lines: [],
+        oldExchange: 0,
+        discount: 0,
+        advance: 0,
+        includeGst: true
+      },
+      orders: []
     };
 
     // Restore the per-tab hidden owner-entry reveal (set by the #owner hash / "owner" key sequence)
@@ -6819,8 +7144,11 @@
         category: item.category,
         purity: item.purity || '',
         weight: Number(item.weight) || 0,
+        makingPct: Math.max(0, Number(item.makingPct) || 0),
         price: Number(item.price) || 0,
         sku: item.sku || '',
+        stockStatus: normalizeCatalogStockStatus(item.stockStatus),
+        featured: Boolean(item.featured),
         note: item.note || '',
         media: publishedMedia,
         createdAt: item.createdAt || new Date().toISOString()
@@ -6845,6 +7173,74 @@
         ...productOwner.publishedItems.filter((x) => x.id !== safeId)
       ];
       return publishedRecord;
+    }
+
+    async function updatePublishedItemOnGitHub(updatedFields) {
+      if (!productOwner.ghConnected || !productOwner.ghToken) {
+        throw new Error('Connect your GitHub Owner Token to edit published items.');
+      }
+      const remote = await fetchRemoteCatalogFromGitHub();
+      let found = false;
+      const updatedList = remote.items.map((x) => {
+        if (!x || x.id !== updatedFields.id) return x;
+        found = true;
+        return {
+          ...x,
+          name: updatedFields.name,
+          category: updatedFields.category,
+          purity: updatedFields.purity,
+          weight: updatedFields.weight,
+          makingPct: Math.max(0, Number(updatedFields.makingPct ?? x.makingPct) || 0),
+          price: updatedFields.price,
+          sku: updatedFields.sku,
+          stockStatus: normalizeCatalogStockStatus(updatedFields.stockStatus ?? x.stockStatus),
+          featured: updatedFields.featured !== undefined ? Boolean(updatedFields.featured) : Boolean(x.featured),
+          note: updatedFields.note
+        };
+      });
+      if (!found) throw new Error('Item no longer exists on GitHub.');
+      const putPayload = {
+        message: `Update jewellery item: ${updatedFields.name}`,
+        content: utf8ToBase64(JSON.stringify(updatedList, null, 2) + '\n'),
+        branch: CATALOG_REPO_BRANCH
+      };
+      if (remote.sha) putPayload.sha = remote.sha;
+      await ghContentsRequest('PUT', CATALOG_MANIFEST_PATH, putPayload);
+      productOwner.publishedItems = productOwner.publishedItems.map((x) => (
+        x.id === updatedFields.id ? { ...x, ...updatedFields } : x
+      ));
+    }
+
+    async function repriceAllInlinePublishedOnGitHub() {
+      const prices = getActiveOwnerPrices();
+      if (!prices) throw new Error('Waiting for live bullion rates before repricing.');
+      const remote = await fetchRemoteCatalogFromGitHub();
+      let count = 0;
+      const updatedList = remote.items.map((x) => {
+        if (!x || !(Number(x.weight) > 0)) return x;
+        const est = computeInlineAutoItemPrice({
+          category: x.category || 'Gold',
+          purity: x.purity || '',
+          weight: Number(x.weight),
+          makingPct: Number(x.makingPct) > 0 ? Number(x.makingPct) : 10
+        }, prices);
+        if (!est) return x;
+        count += 1;
+        return { ...x, price: est.grandTotal, makingPct: Number(x.makingPct) > 0 ? Number(x.makingPct) : 10 };
+      });
+      if (!count) throw new Error('No weighted items found in published inventory to reprice.');
+      const putPayload = {
+        message: `Batch live reprice ${count} jewellery item(s)`,
+        content: utf8ToBase64(JSON.stringify(updatedList, null, 2) + '\n'),
+        branch: CATALOG_REPO_BRANCH
+      };
+      if (remote.sha) putPayload.sha = remote.sha;
+      await ghContentsRequest('PUT', CATALOG_MANIFEST_PATH, putPayload);
+      productOwner.publishedItems = productOwner.publishedItems.map((x) => {
+        const match = updatedList.find((u) => u && u.id === x.id);
+        return match ? { ...x, price: match.price, makingPct: match.makingPct } : x;
+      });
+      return count;
     }
 
     async function deletePublishedItemFromGitHub(item) {
@@ -7040,11 +7436,18 @@
       return { allItems, filtered };
     }
 
+    function normalizeCatalogStockStatus(val) {
+      return val === 'made_to_order' || val === 'sold_out' ? val : 'in_stock';
+    }
+
     function sortCatalogItems(items) {
       const mode = productOwner.sortMode || 'new';
       const priceOf = (p) => Number(p.price) || 0;
       const out = items.slice();
+      const byFeatured = (a, b) => (Boolean(b.featured) === Boolean(a.featured) ? 0 : (b.featured ? 1 : -1));
       const byPrice = (a, b, dir) => {
+        const feat = byFeatured(a, b);
+        if (feat) return feat;
         const pa = priceOf(a);
         const pb = priceOf(b);
         if (!pa && !pb) return 0;
@@ -7057,9 +7460,11 @@
       } else if (mode === 'price-desc') {
         out.sort((a, b) => byPrice(a, b, 'desc'));
       } else if (mode === 'name') {
-        out.sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'en'));
+        out.sort((a, b) => byFeatured(a, b) || String(a.name || '').localeCompare(String(b.name || ''), 'en'));
       } else {
         out.sort((a, b) => {
+          const feat = byFeatured(a, b);
+          if (feat) return feat;
           const ta = Date.parse(a.createdAt || '') || 0;
           const tb = Date.parse(b.createdAt || '') || 0;
           return tb - ta;
@@ -7133,6 +7538,9 @@
         const activeMedia = mediaList[activeIdx] || null;
         const isSaved = productOwner.savedIds.has(p.id);
         const priceNum = Number(p.price) || 0;
+        const stock = normalizeCatalogStockStatus(p.stockStatus);
+        const isSoldOut = stock === 'sold_out';
+        const isFeatured = Boolean(p.featured);
 
         let mediaHtml = `<div class="flex flex-col items-center justify-center gap-1.5 text-slate-500 p-4 text-center">
           <svg viewBox="0 0 24 24" class="w-8 h-8 text-amber-500/40" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/></svg>
@@ -7142,6 +7550,7 @@
           mediaHtml = (activeMedia.type === 'video'
             ? `<video src="${escapeHtml(activeMedia.src)}" controls playsinline preload="metadata"></video><span class="shop-badge shop-badge-video">▶ Video</span>`
             : `<img loading="lazy" decoding="async" src="${escapeHtml(activeMedia.src)}" alt="${escapeHtml(p.name)}" class="product-open-lightbox cursor-pointer" data-product-id="${escapeHtml(p.id)}" data-source="${p._source}" data-media-idx="${activeIdx}" /><span class="shop-badge">${escapeHtml(p.purity || p.category || 'Gold')}</span>`)
+            + (isFeatured ? '<span class="shop-badge shop-badge-featured">★ Pick</span>' : '')
             + (mediaList.length > 1
               ? `<div class="shop-dots">${mediaList.map((m, idx) => `<button type="button" class="shop-dot product-thumb-btn ${idx === activeIdx ? 'is-active' : ''}" data-product-id="${escapeHtml(p.id)}" data-media-idx="${idx}" aria-label="Show media ${idx + 1}"></button>`).join('')}</div>`
               : '')
@@ -7152,6 +7561,11 @@
         if (p.purity) specParts.push(p.purity);
         if (Number(p.weight) > 0) specParts.push(`${Number(p.weight).toLocaleString('en-IN')} g`);
         if (p.sku) specParts.push(`#${p.sku}`);
+        const stockBadgeHtml = stock === 'made_to_order'
+          ? '<span class="shop-stock-pill shop-stock-mto">Made to Order</span>'
+          : isSoldOut
+            ? '<span class="shop-stock-pill shop-stock-out">Sold Out</span>'
+            : '';
 
         const priceHtml = priceNum > 0
           ? `<span class="shop-price-now">${formatShopPrice(priceNum)}<span class="shop-price-unit">incl. GST</span></span>
@@ -7162,6 +7576,9 @@
           ? `<div class="shop-admin-row">
               <span class="${p._source === 'published' ? 'shop-admin-live' : 'shop-admin-draft'}">${p._source === 'published' ? 'Live' : 'Draft'}</span>
               <div class="shop-admin-btns">
+                <button type="button" class="product-owner-edit bg-slate-800 border border-slate-700 text-slate-200" data-product-id="${escapeHtml(p.id)}" data-source="${p._source}">Edit</button>
+                <button type="button" class="product-owner-qr bg-slate-800 border border-slate-700 text-amber-200" data-product-id="${escapeHtml(p.id)}" data-source="${p._source}" title="Printable QR Price Tag">QR</button>
+                <button type="button" class="product-owner-bill bg-amber-500/15 border border-amber-400/40 text-amber-200" data-product-id="${escapeHtml(p.id)}" data-source="${p._source}" title="Add to GST Bill Slip">+Bill</button>
                 ${p._source === 'local' && productOwner.ghConnected ? `<button type="button" class="product-publish-draft bg-emerald-500/20 border border-emerald-500/40 text-emerald-200" data-product-id="${escapeHtml(p.id)}">Publish</button>` : ''}
                 <button type="button" class="product-delete bg-rose-500/10 border border-rose-500/30 text-rose-300" data-product-id="${escapeHtml(p.id)}" data-source="${p._source}" aria-label="Delete ${escapeHtml(p.name)}">Delete</button>
               </div>
@@ -7169,7 +7586,7 @@
           : '';
 
         return `
-          <article class="shop-card" data-product-card="${escapeHtml(p.id)}">
+          <article class="shop-card${isFeatured ? ' is-featured' : ''}${isSoldOut ? ' is-sold-out' : ''}" data-product-card="${escapeHtml(p.id)}">
             <div class="shop-card-media">
               ${mediaHtml}
               <button type="button" class="shop-wish product-save-btn ${isSaved ? 'is-saved' : ''}" data-product-id="${escapeHtml(p.id)}" aria-pressed="${isSaved ? 'true' : 'false'}" aria-label="${isSaved ? 'Remove from' : 'Save'} ${escapeHtml(p.name)}">
@@ -7179,12 +7596,12 @@
             <div class="shop-card-body">
               <span class="shop-cat-tag">${escapeHtml(p.category || 'Gold')}</span>
               <h4 class="shop-name">${escapeHtml(p.name)}</h4>
-              ${specParts.length ? `<div class="shop-specs">${specParts.map((s) => `<span class="shop-spec">${escapeHtml(s)}</span>`).join('')}</div>` : ''}
+              ${(specParts.length || stockBadgeHtml) ? `<div class="shop-specs">${specParts.map((s) => `<span class="shop-spec">${escapeHtml(s)}</span>`).join('')}${stockBadgeHtml}</div>` : ''}
               <div class="shop-price">${priceHtml}</div>
               <div class="shop-card-actions">
                 <button type="button" class="shop-quick-btn product-wa-enquire" data-product-id="${escapeHtml(p.id)}" data-source="${p._source}" aria-label="Enquire about ${escapeHtml(p.name)} on WhatsApp" title="Enquire on WhatsApp">
                   <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91C21.95 6.45 17.5 2 12.04 2zm5.82 14.01c-.24.68-1.41 1.3-1.95 1.38-.5.08-1.13.11-1.82-.11-.42-.13-.96-.31-1.65-.61-2.9-1.25-4.79-4.17-4.93-4.36-.14-.19-1.18-1.57-1.18-3 0-1.43.75-2.13 1.01-2.42.27-.29.58-.36.78-.36.19 0 .39 0 .56.01.18.01.42-.07.66.5.24.58.82 2.01.89 2.15.07.15.12.32.02.51-.1.19-.15.32-.29.49-.15.17-.31.38-.44.51-.15.15-.3.31-.13.6.17.29.76 1.25 1.63 2.03 1.12 1 2.06 1.31 2.35 1.46.29.15.46.12.63-.07.17-.19.73-.85.92-1.14.19-.29.39-.24.66-.15.27.1 1.7.8 1.99.95.29.14.49.22.56.34.07.12.07.7-.17 1.38z"/></svg>
-                  Enquire on WhatsApp
+                  ${isSoldOut ? 'Ask to Restock' : 'Enquire on WhatsApp'}
                 </button>
               </div>
               ${p.note ? `<p class="shop-price-note" style="margin:0.3rem 0 0;line-height:1.5">${escapeHtml(p.note)}</p>` : ''}
@@ -7328,11 +7745,505 @@
         category: document.getElementById('product-category')?.value || 'Gold',
         purity: (document.getElementById('product-purity')?.value || '').trim(),
         weight: Math.max(0, Number(document.getElementById('product-weight')?.value) || 0),
+        makingPct: Math.max(0, Number(document.getElementById('product-making')?.value) || 0),
         price,
         sku: (document.getElementById('product-sku')?.value || '').trim(),
+        stockStatus: normalizeCatalogStockStatus(document.getElementById('product-stock')?.value),
+        featured: Boolean(document.getElementById('product-featured')?.checked),
         note: (document.getElementById('product-note')?.value || '').trim(),
         createdAt: new Date().toISOString()
       };
+    }
+
+    // =========================================================================
+    // INLINE OWNER SUITE: AUTO-PRICING, GST BILL SLIP, ORDER BOOK & QR TAGS
+    // =========================================================================
+    function getActiveOwnerPrices() {
+      if (state.live && Number.isFinite(state.live.spotGold) && Number.isFinite(state.live.spotSilver) && Number.isFinite(state.live.usdInr)) {
+        return computeCityPrices(state.cityId || 'cuttack', state.live.spotGold, state.live.spotSilver, state.live.usdInr);
+      }
+      return null;
+    }
+
+    function inferInlineMetalCode(category = 'Gold', purity = '') {
+      const cat = String(category || '').toLowerCase();
+      const pur = String(purity || '').toUpperCase();
+      if (cat === 'silver' || pur.includes('SILVER') || pur.includes('925') || pur.includes('S999') || pur.includes('S925')) {
+        return pur.includes('925') ? 'S925' : 'S999';
+      }
+      if (pur.includes('24K') || pur.includes('999')) return '24K';
+      if (pur.includes('995')) return '995';
+      if (pur.includes('18K') || pur.includes('750')) return '18K';
+      return '22K';
+    }
+
+    function perGramExGstForMetal(metal, prices) {
+      if (!prices) return 0;
+      const map = {
+        '24K': prices.gold999ExGst / 10,
+        '995': prices.gold995ExGst / 10,
+        '22K': prices.gold916ExGst / 10,
+        '18K': prices.gold18ExGst / 10,
+        S999: prices.silver999ExGst / 1000,
+        S925: prices.silver925ExGst / 1000
+      };
+      return map[metal] || (prices.gold916ExGst / 10) || 0;
+    }
+
+    function computeInlineAutoItemPrice({ category = 'Gold', purity = '', weight = 0, makingPct = 10 }, prices = getActiveOwnerPrices()) {
+      const w = Math.max(0, Number(weight) || 0);
+      if (!prices || !(w > 0)) return null;
+      const metal = inferInlineMetalCode(category, purity);
+      const isSilver = metal === 'S999' || metal === 'S925';
+      const rate = perGramExGstForMetal(metal, prices);
+      const baseValue = Math.round(w * rate);
+      const mc = Math.round(baseValue * (Math.max(0, Number(makingPct) || 0) / 100));
+      const gstPct = statutoryRatesFor(isSilver ? 'silver' : 'gold').gstPct;
+      const gstAmount = Math.round((baseValue + mc) * (gstPct / 100));
+      return { metal, baseValue, makingCharges: mc, gstPct, gstAmount, grandTotal: baseValue + mc + gstAmount };
+    }
+
+    function updateInlineAutoPriceHint() {
+      const el = document.getElementById('product-autoprice-hint');
+      if (!el) return;
+      const w = Math.max(0, Number(document.getElementById('product-weight')?.value) || 0);
+      const est = computeInlineAutoItemPrice({
+        category: document.getElementById('product-category')?.value || 'Gold',
+        purity: document.getElementById('product-purity')?.value || '',
+        weight: w,
+        makingPct: document.getElementById('product-making')?.value || 10
+      });
+      if (!est) {
+        el.classList.add('hidden');
+        return;
+      }
+      el.classList.remove('hidden');
+      el.textContent = `Live ${est.metal} (${w}g): Metal ${formatShopPrice(est.baseValue)} + Making ${formatShopPrice(est.makingCharges)} + ${est.gstPct}% GST = ${formatShopPrice(est.grandTotal)}`;
+    }
+
+    function todayIstIsoInline() {
+      try {
+        const s = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+        if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+      } catch { /* fallback */ }
+      return new Date(Date.now() + 5.5 * 3600000).toISOString().slice(0, 10);
+    }
+
+    function nextInlineBillNo(bump = false) {
+      const yr = todayIstIsoInline().slice(0, 4);
+      let seq = 1;
+      try { seq = Math.max(1, Number(localStorage.getItem(OWNER_BILL_SEQ_KEY) || '1') || 1); } catch { /* ignore */ }
+      if (bump) {
+        seq += 1;
+        try { localStorage.setItem(OWNER_BILL_SEQ_KEY, String(seq)); } catch { /* ignore */ }
+      }
+      return `SJ-${yr}-${String(seq).padStart(3, '0')}`;
+    }
+
+    function computeInlineBillTotals(billDraft = productOwner.bill, prices = getActiveOwnerPrices()) {
+      const includeGst = billDraft.includeGst !== false;
+      const lines = (Array.isArray(billDraft.lines) ? billDraft.lines : []).map((ln, idx) => {
+        const metal = ['24K', '995', '22K', '18K', 'S999', 'S925'].includes(ln.metal) ? ln.metal : '22K';
+        const isSilver = metal === 'S999' || metal === 'S925';
+        const weight = Math.max(0, Number(ln.weight) || 0);
+        const ratePerGram = Number(ln.ratePerGram) > 0 ? Number(ln.ratePerGram) : Math.round(perGramExGstForMetal(metal, prices));
+        const metalValue = Math.round(weight * ratePerGram);
+        const mv = Math.max(0, Number(ln.makingVal) || 0);
+        const mt = ln.makingType === 'flat' ? 'flat' : 'pct';
+        const makingCharges = mt === 'flat' ? Math.round(mv) : Math.round(metalValue * (mv / 100));
+        const makingLabel = mt === 'flat' ? `${formatShopPrice(mv)} flat` : `${mv}%`;
+        const taxable = metalValue + makingCharges;
+        const gstPct = statutoryRatesFor(isSilver ? 'silver' : 'gold').gstPct;
+        const gstAmount = includeGst ? Math.round(taxable * (gstPct / 100)) : 0;
+        return {
+          id: ln.id || `ibl-${idx + 1}`,
+          desc: String(ln.desc || 'Jewellery Item').trim().slice(0, 80),
+          metal,
+          huid: String(ln.huid || '').trim().toUpperCase().slice(0, 12),
+          weight,
+          ratePerGram,
+          metalValue,
+          makingLabel,
+          makingCharges,
+          taxable,
+          gstPct,
+          gstAmount,
+          lineTotal: taxable + gstAmount
+        };
+      });
+      const totalWeight = lines.reduce((a, l) => a + l.weight, 0);
+      const metalSubtotal = lines.reduce((a, l) => a + l.metalValue, 0);
+      const makingSubtotal = lines.reduce((a, l) => a + l.makingCharges, 0);
+      const discount = Math.min(metalSubtotal + makingSubtotal, Math.max(0, Math.round(Number(billDraft.discount) || 0)));
+      const taxableValue = Math.max(0, metalSubtotal + makingSubtotal - discount);
+      const rawGst = lines.reduce((a, l) => a + l.gstAmount, 0);
+      const effPct = lines.length ? lines[0].gstPct : statutoryRatesFor('gold').gstPct;
+      const gstTotal = includeGst ? (discount > 0 ? Math.round(taxableValue * (effPct / 100)) : rawGst) : 0;
+      const cgst = Math.floor(gstTotal / 2);
+      const sgst = gstTotal - cgst;
+      const grossTotal = taxableValue + gstTotal;
+      const oldExchange = Math.max(0, Math.round(Number(billDraft.oldExchange) || 0));
+      const advance = Math.max(0, Math.round(Number(billDraft.advance) || 0));
+      return { lines, totalWeight, metalSubtotal, makingSubtotal, discount, taxableValue, gstTotal, cgst, sgst, grossTotal, oldExchange, advance, netPayable: grossTotal - oldExchange - advance };
+    }
+
+    function syncInlineBillInputs() {
+      const b = productOwner.bill;
+      const noInp = document.getElementById('inline-bill-no');
+      if (noInp && !noInp.value.trim()) noInp.value = b.billNo || nextInlineBillNo(false);
+      b.docType = document.getElementById('inline-bill-type')?.value || 'GST Estimate';
+      b.billNo = (noInp?.value || nextInlineBillNo(false)).trim();
+      b.customerName = (document.getElementById('inline-bill-cust')?.value || '').trim();
+      b.customerPhone = (document.getElementById('inline-bill-phone')?.value || '').trim();
+      b.oldExchange = Math.max(0, Number(document.getElementById('inline-bill-old')?.value) || 0);
+      b.discount = Math.max(0, Number(document.getElementById('inline-bill-disc')?.value) || 0);
+      b.advance = Math.max(0, Number(document.getElementById('inline-bill-adv')?.value) || 0);
+      b.includeGst = Boolean(document.getElementById('inline-bill-gst')?.checked);
+    }
+
+    function buildInlineBillHtml(b, t) {
+      const rows = t.lines.length
+        ? t.lines.map((ln, idx) => `
+          <tr>
+            <td>${idx + 1}. <strong>${escapeHtml(ln.desc)}</strong><br/><span style="font-size:9.5px;color:#555">${escapeHtml(ln.metal)}${ln.huid ? ` · HUID:${escapeHtml(ln.huid)}` : ''} · @${formatShopPrice(ln.ratePerGram)}/g</span></td>
+            <td style="text-align:right">${ln.weight.toFixed(3)}g</td>
+            <td style="text-align:right">${formatShopPrice(ln.metalValue)}</td>
+            <td style="text-align:right">${formatShopPrice(ln.makingCharges)}</td>
+            <td style="text-align:right;font-weight:700">${formatShopPrice(ln.taxable)}</td>
+          </tr>`).join('')
+        : '<tr><td colspan="5" style="text-align:center;color:#666;padding:0.75rem">Add jewellery items to generate counter GST slip</td></tr>';
+      return `
+        <div style="display:flex;justify-content:space-between;gap:0.5rem;border-bottom:1.5px solid #4A0D16;padding-bottom:0.45rem;margin-bottom:0.5rem">
+          <div>
+            <h4>SATYANARAYAN JEWELLERS</h4>
+            <div style="font-size:10px;color:#4B3E41">Cuttack Showroom, Odisha · GSTIN: <strong>${SHOP_GSTIN}</strong></div>
+          </div>
+          <div style="text-align:right;font-size:10px;color:#4B3E41">
+            <div><strong>${escapeHtml(b.docType || 'GST Estimate')}</strong></div>
+            <div>#${escapeHtml(b.billNo || 'SJ-EST')} · ${escapeHtml(todayIstIsoInline())}</div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:10.5px;margin-bottom:0.4rem">
+          <span>Customer: <strong>${escapeHtml(b.customerName || 'Walk-in Customer')}</strong>${b.customerPhone ? ` (${escapeHtml(b.customerPhone)})` : ''}</span>
+          <span>Net Wt: <strong>${t.totalWeight.toFixed(3)} g</strong></span>
+        </div>
+        <table>
+          <thead><tr><th>Item</th><th style="text-align:right">Wt</th><th style="text-align:right">Metal</th><th style="text-align:right">Making</th><th style="text-align:right">Taxable</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+        <div>
+          <div class="owner-bill-row"><span>Taxable Value</span><strong>${formatShopPrice(t.taxableValue)}</strong></div>
+          ${t.discount > 0 ? `<div class="owner-bill-row"><span>Special Discount</span><strong>-${formatShopPrice(t.discount)}</strong></div>` : ''}
+          <div class="owner-bill-row"><span>GST (CGST ${formatShopPrice(t.cgst)} + SGST ${formatShopPrice(t.sgst)})</span><strong>+${formatShopPrice(t.gstTotal)}</strong></div>
+          <div class="owner-bill-row"><span>Gross Total</span><strong>${formatShopPrice(t.grossTotal)}</strong></div>
+          ${t.oldExchange > 0 ? `<div class="owner-bill-row"><span>Less Old Metal Exchange</span><strong>-${formatShopPrice(t.oldExchange)}</strong></div>` : ''}
+          ${t.advance > 0 ? `<div class="owner-bill-row"><span>Less Advance Paid</span><strong>-${formatShopPrice(t.advance)}</strong></div>` : ''}
+          <div class="owner-bill-row is-grand"><span>${t.netPayable >= 0 ? 'Net Balance Payable' : 'Net Refund Due'}</span><span>${formatShopPrice(Math.abs(t.netPayable))}</span></div>
+        </div>
+      `;
+    }
+
+    function buildInlineBillShareText(b, t) {
+      const lines = [
+        `*SATYANARAYAN JEWELLERS* — Cuttack`,
+        `GSTIN: ${SHOP_GSTIN} · ${b.docType} #${b.billNo} (${todayIstIsoInline()})`,
+        `Customer: ${b.customerName || 'Walk-in Customer'}`,
+        '--------------------------------'
+      ];
+      t.lines.forEach((ln, i) => {
+        lines.push(`${i + 1}. ${ln.desc} [${ln.metal} · ${ln.weight.toFixed(3)}g${ln.huid ? ` · HUID:${ln.huid}` : ''}] = ${formatShopPrice(ln.taxable)}`);
+      });
+      lines.push('--------------------------------');
+      lines.push(`Taxable: ${formatShopPrice(t.taxableValue)} · GST: +${formatShopPrice(t.gstTotal)} · Gross: ${formatShopPrice(t.grossTotal)}`);
+      if (t.oldExchange > 0) lines.push(`Less Old Exchange: -${formatShopPrice(t.oldExchange)}`);
+      if (t.advance > 0) lines.push(`Less Advance: -${formatShopPrice(t.advance)}`);
+      lines.push(t.netPayable >= 0 ? `*Net Payable: ${formatShopPrice(t.netPayable)}*` : `*Refund Due: ${formatShopPrice(Math.abs(t.netPayable))}*`);
+      return lines.join('\n');
+    }
+
+    function populateInlineBillPicker() {
+      const sel = document.getElementById('inline-bill-pick');
+      if (!sel) return;
+      const all = [...productOwner.publishedItems, ...productOwner.localItems];
+      sel.innerHTML = '<option value="">+ Pick from Catalogue…</option>' + all.map((p) => (
+        `<option value="${escapeHtml(p.id)}">${escapeHtml(p.name)} (${escapeHtml(p.purity || p.category || 'Gold')})</option>`
+      )).join('');
+    }
+
+    function renderInlineBill() {
+      syncInlineBillInputs();
+      const t = computeInlineBillTotals(productOwner.bill);
+      const linesWrap = document.getElementById('inline-bill-lines');
+      if (linesWrap) {
+        linesWrap.innerHTML = t.lines.map((ln) => `
+          <div class="owner-line-item">
+            <div class="min-w-0">
+              <div class="text-xs font-semibold text-white truncate">${escapeHtml(ln.desc)}</div>
+              <div class="text-[10px] text-slate-400 tabular-nums">${escapeHtml(ln.metal)} · ${ln.weight.toFixed(3)}g · Making ${escapeHtml(ln.makingLabel)}</div>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <span class="text-xs font-bold text-amber-200 tabular-nums">${formatShopPrice(ln.lineTotal)}</span>
+              <button type="button" data-del-inline-line="${escapeHtml(ln.id)}" class="px-2 py-0.5 rounded-md bg-rose-500/15 border border-rose-500/30 text-rose-200 text-[10px] font-bold">✕</button>
+            </div>
+          </div>
+        `).join('');
+      }
+      const prev = document.getElementById('inline-bill-preview');
+      if (prev) prev.innerHTML = buildInlineBillHtml(productOwner.bill, t);
+    }
+
+    function switchOwnerSuiteTab(tabName) {
+      const valid = ['upload', 'bill', 'orders'];
+      if (!valid.includes(tabName)) return;
+      productOwner.activeTab = tabName;
+      valid.forEach((t) => document.getElementById(`owner-tab-${t}`)?.classList.toggle('hidden', t !== tabName));
+      document.querySelectorAll('[data-owner-tab]').forEach((btn) => {
+        const on = btn.dataset.ownerTab === tabName;
+        btn.classList.toggle('is-active', on);
+        btn.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      if (tabName === 'bill') {
+        populateInlineBillPicker();
+        renderInlineBill();
+      }
+      if (tabName === 'orders') renderInlineOrders();
+    }
+
+    function loadInlineOrders() {
+      const raw = readShopStorage(OWNER_ORDER_BOOK_KEY, []);
+      productOwner.orders = Array.isArray(raw) ? raw.filter((o) => o && o.customerName && o.item) : [];
+      renderInlineOrders();
+    }
+
+    function saveInlineOrders() {
+      writeShopStorage(OWNER_ORDER_BOOK_KEY, productOwner.orders);
+      renderInlineOrders();
+    }
+
+    function renderInlineOrders() {
+      const active = productOwner.orders.filter((o) => o.status !== 'Delivered');
+      const advSum = active.reduce((a, o) => a + (Number(o.advance) || 0), 0);
+      const badge = document.getElementById('inline-orders-badge');
+      if (badge) {
+        badge.textContent = String(active.length);
+        badge.classList.toggle('hidden', active.length === 0);
+      }
+      const sumEl = document.getElementById('inline-ord-summary');
+      if (sumEl) sumEl.textContent = `${active.length} active order${active.length === 1 ? '' : 's'} · ${formatShopPrice(advSum)} advance held`;
+      const listEl = document.getElementById('inline-ord-list');
+      if (!listEl) return;
+      if (!productOwner.orders.length) {
+        listEl.innerHTML = '<p class="text-xs text-slate-400 py-4 text-center">No custom orders recorded yet.</p>';
+        return;
+      }
+      const today = todayIstIsoInline();
+      listEl.innerHTML = productOwner.orders.map((o) => {
+        const overdue = o.status !== 'Delivered' && o.dueDate && o.dueDate < today;
+        return `
+          <div class="owner-order-item${overdue ? ' is-overdue' : ''}${o.status === 'Delivered' ? ' is-delivered' : ''}">
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <strong class="text-xs text-white">${escapeHtml(o.customerName)}</strong>
+                <span class="px-1.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-[10px] text-amber-200 font-semibold">${escapeHtml(o.status)}</span>
+                ${overdue ? '<span class="px-1.5 py-0.5 rounded-full bg-rose-500/15 border border-rose-500/30 text-[10px] text-rose-200 font-semibold">Overdue</span>' : ''}
+              </div>
+              <div class="text-[11px] text-slate-300 font-medium">${escapeHtml(o.item)}</div>
+              <div class="text-[10px] text-slate-400 tabular-nums">${escapeHtml(o.metal)}${Number(o.weight) > 0 ? ` · ~${Number(o.weight).toFixed(2)}g` : ''}${Number(o.lockedRate) > 0 ? ` · Locked ${formatShopPrice(o.lockedRate)}/g` : ''}${Number(o.advance) > 0 ? ` · Adv ${formatShopPrice(o.advance)}` : ''}${o.dueDate ? ` · Due ${escapeHtml(o.dueDate)}` : ''}</div>
+            </div>
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <select data-inline-ord-status="${escapeHtml(o.id)}" class="rounded-lg bg-slate-950 border border-slate-700 px-2 py-1 text-[10px] text-white" aria-label="Order status">
+                <option value="Booked"${o.status === 'Booked' ? ' selected' : ''}>Booked</option>
+                <option value="Karigar"${o.status === 'Karigar' ? ' selected' : ''}>Karigar</option>
+                <option value="Ready"${o.status === 'Ready' ? ' selected' : ''}>Ready</option>
+                <option value="Delivered"${o.status === 'Delivered' ? ' selected' : ''}>Delivered</option>
+              </select>
+              <button type="button" data-inline-ord-wa="${escapeHtml(o.id)}" class="px-2 py-1 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-200 text-[10px] font-semibold">WA</button>
+              <button type="button" data-inline-ord-bill="${escapeHtml(o.id)}" class="px-2 py-1 rounded-lg bg-slate-800 border border-slate-700 text-amber-200 text-[10px] font-semibold">→Bill</button>
+              <button type="button" data-inline-ord-del="${escapeHtml(o.id)}" class="px-2 py-1 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-200 text-[10px] font-bold">✕</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Compact ISO/IEC 18004 QR SVG generator (Versions 1-6, ECC Level L, Byte mode, zero network calls)
+    function generateInlineQrSvg(text, sizePx = 86) {
+      const gfExp = new Uint8Array(512);
+      const gfLog = new Uint8Array(256);
+      let v = 1;
+      for (let i = 0; i < 255; i++) { gfExp[i] = v; gfLog[v] = i; v <<= 1; if (v & 0x100) v ^= 0x11d; }
+      for (let i = 255; i < 512; i++) gfExp[i] = gfExp[i - 255];
+      const rs = (data, ecLen) => {
+        let g = [1];
+        for (let i = 0; i < ecLen; i++) {
+          const nx = new Array(g.length + 1).fill(0);
+          const rt = gfExp[i];
+          for (let j = 0; j < g.length; j++) { nx[j] ^= g[j]; nx[j + 1] ^= g[j] ? gfExp[gfLog[g[j]] + gfLog[rt]] : 0; }
+          g = nx;
+        }
+        const rem = new Uint8Array(ecLen);
+        for (let i = 0; i < data.length; i++) {
+          const f = data[i] ^ rem[0];
+          rem.copyWithin(0, 1); rem[ecLen - 1] = 0;
+          if (f) { const lf = gfLog[f]; for (let j = 0; j < ecLen; j++) if (g[j + 1]) rem[j] ^= gfExp[gfLog[g[j + 1]] + lf]; }
+        }
+        return rem;
+      };
+      const bytes = new TextEncoder().encode(String(text || '').slice(0, 120));
+      const VERS = [[1, 19, 7, 1, []], [2, 34, 10, 1, [6, 18]], [3, 55, 15, 1, [6, 22]], [4, 80, 20, 1, [6, 26]], [5, 108, 26, 1, [6, 30]], [6, 136, 18, 2, [6, 34]]];
+      const [ver, totalCw, ecLen, blocks, align] = VERS.find((s) => bytes.length + 2 <= s[1]) || VERS[VERS.length - 1];
+      const payload = bytes.slice(0, totalCw - 2);
+      const bits = [];
+      const push = (val, n) => { for (let i = n - 1; i >= 0; i--) bits.push((val >> i) & 1); };
+      push(4, 4); push(payload.length, 8);
+      for (const b of payload) push(b, 8);
+      for (let i = 0; i < 4 && bits.length < totalCw * 8; i++) bits.push(0);
+      while (bits.length % 8) bits.push(0);
+      const cw = new Uint8Array(totalCw);
+      for (let i = 0; i < bits.length / 8; i++) { let c = 0; for (let b = 0; b < 8; b++) c = (c << 1) | bits[i * 8 + b]; cw[i] = c; }
+      for (let i = bits.length / 8, p = 0; i < totalCw; i++, p ^= 1) cw[i] = p ? 0x11 : 0xec;
+      const bLen = Math.floor(totalCw / blocks);
+      const db = []; const eb = [];
+      for (let b = 0; b < blocks; b++) { const sl = cw.subarray(b * bLen, (b + 1) * bLen); db.push(sl); eb.push(rs(sl, ecLen)); }
+      const finalCw = [];
+      for (let i = 0; i < bLen; i++) for (let b = 0; b < blocks; b++) finalCw.push(db[b][i]);
+      for (let i = 0; i < ecLen; i++) for (let b = 0; b < blocks; b++) finalCw.push(eb[b][i]);
+      const dim = ver * 4 + 17;
+      const grid = Array.from({ length: dim }, () => new Uint8Array(dim));
+      const used = Array.from({ length: dim }, () => new Uint8Array(dim));
+      const setM = (r, c, d) => { if (r >= 0 && c >= 0 && r < dim && c < dim) { grid[r][c] = d ? 1 : 0; used[r][c] = 1; } };
+      const finder = (tr, tc) => {
+        for (let r = -1; r <= 7; r++) for (let c = -1; c <= 7; c++) {
+          const inO = r >= 0 && r <= 6 && c >= 0 && c <= 6;
+          setM(tr + r, tc + c, inO && (r === 0 || r === 6 || c === 0 || c === 6 || (r >= 2 && r <= 4 && c >= 2 && c <= 4)));
+        }
+      };
+      finder(0, 0); finder(0, dim - 7); finder(dim - 7, 0);
+      for (let i = 8; i < dim - 8; i++) { if (!used[6][i]) setM(6, i, i % 2 === 0); if (!used[i][6]) setM(i, 6, i % 2 === 0); }
+      for (const r of align) for (const c of align) if (!used[r][c]) {
+        for (let dr = -2; dr <= 2; dr++) for (let dc = -2; dc <= 2; dc++) setM(r + dr, c + dc, Math.max(Math.abs(dr), Math.abs(dc)) !== 1);
+      }
+      for (let i = 0; i < 9; i++) { used[8][i] = 1; used[i][8] = 1; }
+      for (let i = 0; i < 8; i++) { used[8][dim - 1 - i] = 1; used[dim - 1 - i][8] = 1; }
+      setM(dim - 8, 8, true);
+      let bi = 0;
+      for (let right = dim - 1; right >= 1; right -= 2) {
+        if (right === 6) right = 5;
+        const up = ((dim - 1 - right) >> 1) % 2 === 0;
+        for (let s = 0; s < dim; s++) {
+          const r = up ? dim - 1 - s : s;
+          for (let dc = 0; dc < 2; dc++) {
+            const c = right - dc;
+            if (used[r][c]) continue;
+            const d = bi < finalCw.length * 8 ? ((finalCw[bi >> 3] >> (7 - (bi & 7))) & 1) : 0;
+            bi++;
+            grid[r][c] = d ^ ((r + c) % 2 === 0 ? 1 : 0);
+          }
+        }
+      }
+      const fmt = 0x77c4;
+      const fA = [[8, 0], [8, 1], [8, 2], [8, 3], [8, 4], [8, 5], [8, 7], [8, 8], [7, 8], [5, 8], [4, 8], [3, 8], [2, 8], [1, 8], [0, 8]];
+      const fB = [[dim - 1, 8], [dim - 2, 8], [dim - 3, 8], [dim - 4, 8], [dim - 5, 8], [dim - 6, 8], [dim - 7, 8], [8, dim - 8], [8, dim - 7], [8, dim - 6], [8, dim - 5], [8, dim - 4], [8, dim - 3], [8, dim - 2], [8, dim - 1]];
+      for (let i = 0; i < 15; i++) { const b = (fmt >> (14 - i)) & 1; grid[fA[i][0]][fA[i][1]] = b; grid[fB[i][0]][fB[i][1]] = b; }
+      const q = 2; const vb = dim + q * 2; let path = '';
+      for (let r = 0; r < dim; r++) for (let c = 0; c < dim; c++) if (grid[r][c]) path += `M${c + q},${r + q}h1v1h-1z`;
+      return `<svg xmlns="http://www.w3.org/2000/svg" width="${sizePx}" height="${sizePx}" viewBox="0 0 ${vb} ${vb}" shape-rendering="crispEdges"><rect width="${vb}" height="${vb}" fill="#fff"/><path d="${path}" fill="#111"/></svg>`;
+    }
+
+    function buildInlineTagHtml(item) {
+      const url = `https://satyanarayanjewellery.github.io/shop/#products?sku=${encodeURIComponent(item.sku || item.id)}`;
+      return `
+        <div class="owner-tag-card">
+          <div class="owner-tag-qr">${generateInlineQrSvg(url, 84)}</div>
+          <div style="min-width:0;flex:1">
+            <div style="font-size:9px;font-weight:800;letter-spacing:0.08em;color:#4A0D16">SATYANARAYAN JEWELLERS</div>
+            <div style="font-size:12px;font-weight:800;color:#181214;margin:0.12rem 0">${escapeHtml(item.name)}</div>
+            <div style="font-size:10px;color:#4B3E41">${escapeHtml(item.category || 'Gold')}${item.purity ? ` · ${escapeHtml(item.purity)}` : ''}${Number(item.weight) > 0 ? `<br/>Net Wt: <strong>${Number(item.weight).toFixed(3)} g</strong>` : ''}${item.sku ? `<br/>SKU: <strong>${escapeHtml(item.sku)}</strong>` : ''}</div>
+            <div style="font-size:13px;font-weight:800;color:#4A0D16;margin-top:0.2rem">${Number(item.price) > 0 ? formatShopPrice(item.price) : 'Price on Request'}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function printInlineOwnerSheet(htmlContent) {
+      const sheet = document.getElementById('owner-print-sheet');
+      if (!sheet) { window.print(); return; }
+      sheet.innerHTML = htmlContent;
+      document.body.classList.add('printing-owner-slip');
+      const done = () => {
+        document.body.classList.remove('printing-owner-slip');
+        window.removeEventListener('afterprint', done);
+      };
+      window.addEventListener('afterprint', done);
+      window.print();
+      setTimeout(done, 1200);
+    }
+
+    function openInlineEditModal(itemId, source) {
+      const item = findCatalogItem(itemId, source);
+      if (!item) return;
+      document.getElementById('oedit-id').value = item.id;
+      document.getElementById('oedit-source').value = source;
+      document.getElementById('oedit-name').value = item.name || '';
+      document.getElementById('oedit-cat').value = item.category || 'Gold';
+      document.getElementById('oedit-purity').value = item.purity || '';
+      document.getElementById('oedit-wt').value = item.weight || '';
+      document.getElementById('oedit-mc').value = item.makingPct !== undefined ? item.makingPct : 10;
+      document.getElementById('oedit-price').value = item.price || '';
+      document.getElementById('oedit-sku').value = item.sku || '';
+      document.getElementById('oedit-stock').value = normalizeCatalogStockStatus(item.stockStatus);
+      document.getElementById('oedit-featured').checked = Boolean(item.featured);
+      document.getElementById('oedit-note').value = item.note || '';
+      document.getElementById('owner-edit-item-modal')?.classList.remove('hidden');
+    }
+
+    function closeInlineEditModal() {
+      document.getElementById('owner-edit-item-modal')?.classList.add('hidden');
+    }
+
+    function openInlineQrModal(itemId, source) {
+      const item = findCatalogItem(itemId, source);
+      if (!item) return;
+      productOwner.qrTagItem = item;
+      const stage = document.getElementById('owner-qr-tag-stage');
+      if (stage) stage.innerHTML = buildInlineTagHtml(item);
+      document.getElementById('owner-qr-tag-modal')?.classList.remove('hidden');
+    }
+
+    function closeInlineQrModal() {
+      document.getElementById('owner-qr-tag-modal')?.classList.add('hidden');
+      productOwner.qrTagItem = null;
+    }
+
+    function addCatalogItemToInlineBill(item) {
+      if (!item) return;
+      const w = Math.max(0, Number(item.weight) || 0);
+      const useFlat = !(w > 0) && Number(item.price) > 0;
+      productOwner.bill.lines.push({
+        id: `ibl-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`,
+        desc: item.name || 'Jewellery Item',
+        metal: inferInlineMetalCode(item.category, item.purity),
+        huid: item.sku || '',
+        weight: w,
+        ratePerGram: 0,
+        makingVal: useFlat ? Math.round(Number(item.price) / 1.03) : (Number(item.makingPct) > 0 ? Number(item.makingPct) : 10),
+        makingType: useFlat ? 'flat' : 'pct'
+      });
+      switchOwnerSuiteTab('bill');
+      document.getElementById('owner-studio')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      showToast(`Added "${item.name}" to GST Bill Slip.`, 'success');
+    }
+
+    function downloadInlineExport(filename, text, mime) {
+      const blob = new Blob([text], { type: mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
     async function handleSaveLocalProduct() {
@@ -7413,6 +8324,7 @@
           productOwner.ghLogin = verified.login;
           productOwner.ghConnected = true;
           productOwner.unlocked = true;
+          loadInlineOrders();
           renderProducts();
         } catch (err) {
           // Only clear saved token on explicit auth rejection, not temporary offline states
@@ -7432,9 +8344,33 @@
 
       // --- Hidden owner entry: reveal only via the #owner URL hash or typing "owner" ---
       const checkOwnerAccessHash = () => {
-        if ((location.hash || '').toLowerCase() !== '#owner') return;
-        revealOwnerAccess();
-        try { history.replaceState(null, '', `${location.pathname}${location.search}`); } catch { /* ignore */ }
+        const rawHash = location.hash || '';
+        if (rawHash.toLowerCase() === '#owner') {
+          revealOwnerAccess();
+          try { history.replaceState(null, '', `${location.pathname}${location.search}`); } catch { /* ignore */ }
+          return;
+        }
+        // QR Price Tag deep-link support: #products?sku=SJ-... or ?sku=SJ-...
+        const hashQueryIdx = rawHash.indexOf('?');
+        const hashParams = hashQueryIdx >= 0 ? new URLSearchParams(rawHash.slice(hashQueryIdx + 1)) : null;
+        const searchParams = new URLSearchParams(location.search || '');
+        const targetSku = (hashParams?.get('sku') || searchParams.get('sku') || '').trim();
+        if (targetSku) {
+          switchAppView('products');
+          const searchInp = document.getElementById('product-search');
+          if (searchInp) searchInp.value = targetSku;
+          productOwner.activeCategory = 'all';
+          syncCategoryPillStyles();
+          ensureProductsLoaded().then(() => {
+            renderProducts();
+            const match = [...productOwner.publishedItems, ...productOwner.localItems].find(
+              (x) => String(x.sku || '').toLowerCase() === targetSku.toLowerCase() || String(x.id || '') === targetSku
+            );
+            if (match && resolveItemMediaList(match).length) {
+              openProductLightbox(match.id, productOwner.localItems.includes(match) ? 'local' : 'published', 0);
+            }
+          });
+        }
       };
       checkOwnerAccessHash();
       window.addEventListener('hashchange', checkOwnerAccessHash);
@@ -7481,6 +8417,7 @@
           storeGitHubToken(verified.token, remember);
           closeOwnerAuthModal();
           await loadLocalProductsFromDB();
+          loadInlineOrders();
           renderProducts();
           showToast(`Owner verified (@${verified.login}). You can now publish jewellery live!`, 'success');
         } catch (err) {
@@ -7562,6 +8499,332 @@
         }
       });
 
+      // Inline Owner Suite: Tabs, Auto-Pricing, Batch Reprice, CSV/JSON Backup, GST Bill Slip & Order Book
+      document.querySelectorAll('[data-owner-tab]').forEach((btn) => {
+        btn.addEventListener('click', () => switchOwnerSuiteTab(btn.dataset.ownerTab));
+      });
+
+      ['product-category', 'product-purity', 'product-weight', 'product-making'].forEach((id) => {
+        document.getElementById(id)?.addEventListener('input', updateInlineAutoPriceHint);
+        document.getElementById(id)?.addEventListener('change', updateInlineAutoPriceHint);
+      });
+
+      document.getElementById('btn-product-autoprice')?.addEventListener('click', () => {
+        const prices = getActiveOwnerPrices();
+        if (!prices) return showToast('Waiting for live bullion rates…', 'alert');
+        const w = Math.max(0, Number(document.getElementById('product-weight')?.value) || 0);
+        if (!(w > 0)) return showToast('Enter item weight (g) first.', 'alert');
+        const est = computeInlineAutoItemPrice({
+          category: document.getElementById('product-category')?.value || 'Gold',
+          purity: document.getElementById('product-purity')?.value || '',
+          weight: w,
+          makingPct: document.getElementById('product-making')?.value || 10
+        }, prices);
+        if (!est) return;
+        const pInp = document.getElementById('product-price');
+        if (pInp) pInp.value = String(est.grandTotal);
+        updateInlineAutoPriceHint();
+        showToast(`Filled live ${est.metal} price: ${formatShopPrice(est.grandTotal)}`, 'success');
+      });
+
+      document.getElementById('btn-inline-reprice')?.addEventListener('click', async () => {
+        if (!productOwner.unlocked || !productOwner.ghConnected || productOwner.busy) return;
+        productOwner.busy = true;
+        try {
+          const count = await repriceAllInlinePublishedOnGitHub();
+          renderProducts();
+          showToast(`Repriced ${count} weighted item(s) live on GitHub!`, 'success');
+        } catch (err) {
+          showToast(err?.message || 'Batch reprice failed.', 'alert');
+        } finally {
+          productOwner.busy = false;
+        }
+      });
+
+      document.getElementById('btn-inline-export-csv')?.addEventListener('click', () => {
+        const all = [...productOwner.publishedItems, ...productOwner.localItems];
+        if (!all.length) return showToast('No inventory items to export.', 'alert');
+        const cols = ['id', 'name', 'category', 'purity', 'weight_g', 'making_pct', 'price_inr', 'stock_status', 'featured', 'sku', 'note'];
+        const esc = (v) => {
+          let s = String(v == null ? '' : v).replace(/\r?\n/g, ' ');
+          if (/^[=+\-@]/.test(s)) s = `'${s}`;
+          return /[",]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+        };
+        const rows = all.map((p) => [
+          p.id || '', p.name || '', p.category || 'Gold', p.purity || '',
+          Number(p.weight) || 0, Number(p.makingPct) || 0, Number(p.price) || 0,
+          normalizeCatalogStockStatus(p.stockStatus), p.featured ? 'yes' : 'no',
+          p.sku || '', p.note || ''
+        ].map(esc).join(','));
+        downloadInlineExport(`sj-inventory-${todayIstIsoInline()}.csv`, [cols.join(','), ...rows].join('\n'), 'text/csv;charset=utf-8');
+        showToast(`Exported ${all.length} item(s) to CSV.`, 'success');
+      });
+
+      document.getElementById('btn-inline-export-json')?.addEventListener('click', () => {
+        const payload = { exportedAt: new Date().toISOString(), gstin: SHOP_GSTIN, published: productOwner.publishedItems, orders: productOwner.orders };
+        downloadInlineExport(`sj-owner-backup-${todayIstIsoInline()}.json`, `${JSON.stringify(payload, null, 2)}\n`, 'application/json;charset=utf-8');
+        showToast('Downloaded JSON backup (Inventory + Orders).', 'success');
+      });
+
+      // Inline Bill Slip Events
+      ['inline-bill-type', 'inline-bill-no', 'inline-bill-cust', 'inline-bill-phone', 'inline-bill-old', 'inline-bill-disc', 'inline-bill-adv', 'inline-bill-gst']
+        .forEach((id) => {
+          document.getElementById(id)?.addEventListener('input', renderInlineBill);
+          document.getElementById(id)?.addEventListener('change', renderInlineBill);
+        });
+
+      document.getElementById('inline-bill-pick')?.addEventListener('change', (e) => {
+        const id = e.target.value;
+        e.target.value = '';
+        if (!id) return;
+        const item = findCatalogItem(id, 'published') || findCatalogItem(id, 'local');
+        if (!item) return;
+        document.getElementById('inline-bill-desc').value = item.name || '';
+        document.getElementById('inline-bill-metal').value = inferInlineMetalCode(item.category, item.purity);
+        document.getElementById('inline-bill-huid').value = item.sku || '';
+        if (Number(item.weight) > 0) document.getElementById('inline-bill-wt').value = String(item.weight);
+        document.getElementById('inline-bill-mc').value = String(Number(item.makingPct) > 0 ? item.makingPct : 10);
+      });
+
+      document.getElementById('btn-inline-bill-add')?.addEventListener('click', () => {
+        const desc = (document.getElementById('inline-bill-desc')?.value || '').trim();
+        const wt = Math.max(0, Number(document.getElementById('inline-bill-wt')?.value) || 0);
+        if (!desc) return showToast('Enter item description.', 'alert');
+        if (!(wt > 0)) return showToast('Enter net weight in grams.', 'alert');
+        productOwner.bill.lines.push({
+          id: `ibl-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`,
+          desc,
+          metal: document.getElementById('inline-bill-metal')?.value || '22K',
+          huid: (document.getElementById('inline-bill-huid')?.value || '').trim().toUpperCase(),
+          weight: wt,
+          ratePerGram: 0,
+          makingVal: Math.max(0, Number(document.getElementById('inline-bill-mc')?.value) || 0),
+          makingType: 'pct'
+        });
+        document.getElementById('inline-bill-desc').value = '';
+        document.getElementById('inline-bill-huid').value = '';
+        renderInlineBill();
+      });
+
+      document.getElementById('inline-bill-lines')?.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-del-inline-line]');
+        if (!btn) return;
+        productOwner.bill.lines = productOwner.bill.lines.filter((l) => l.id !== btn.dataset.delInlineLine);
+        renderInlineBill();
+      });
+
+      document.getElementById('btn-inline-bill-reset')?.addEventListener('click', () => {
+        productOwner.bill.lines = [];
+        productOwner.bill.billNo = nextInlineBillNo(true);
+        document.getElementById('inline-bill-no').value = productOwner.bill.billNo;
+        document.getElementById('inline-bill-cust').value = '';
+        document.getElementById('inline-bill-phone').value = '';
+        document.getElementById('inline-bill-old').value = '0';
+        document.getElementById('inline-bill-disc').value = '0';
+        document.getElementById('inline-bill-adv').value = '0';
+        renderInlineBill();
+        showToast(`Started new slip ${productOwner.bill.billNo}.`, 'info');
+      });
+
+      document.getElementById('btn-inline-bill-print')?.addEventListener('click', () => {
+        syncInlineBillInputs();
+        const t = computeInlineBillTotals(productOwner.bill);
+        printInlineOwnerSheet(`<div class="owner-bill-paper" style="max-width:42rem;margin:0 auto">${buildInlineBillHtml(productOwner.bill, t)}</div>`);
+      });
+
+      document.getElementById('btn-inline-bill-wa')?.addEventListener('click', () => {
+        syncInlineBillInputs();
+        const t = computeInlineBillTotals(productOwner.bill);
+        const text = buildInlineBillShareText(productOwner.bill, t);
+        const digits = (productOwner.bill.customerPhone || '').replace(/\D/g, '');
+        const ph = digits.length === 10 ? `91${digits}` : digits;
+        const base = ph.length >= 10 ? `https://wa.me/${ph}` : 'https://wa.me/';
+        window.open(`${base}?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
+      });
+
+      document.getElementById('btn-inline-bill-copy')?.addEventListener('click', async () => {
+        syncInlineBillInputs();
+        const t = computeInlineBillTotals(productOwner.bill);
+        try {
+          await navigator.clipboard.writeText(buildInlineBillShareText(productOwner.bill, t));
+          showToast('Bill slip copied to clipboard.', 'success');
+        } catch {
+          showToast('Clipboard unavailable.', 'alert');
+        }
+      });
+
+      // Inline Order Book Events
+      document.getElementById('btn-inline-ord-lock')?.addEventListener('click', () => {
+        const prices = getActiveOwnerPrices();
+        if (!prices) return showToast('Waiting for live bullion rates…', 'alert');
+        const metal = document.getElementById('inline-ord-metal')?.value || '22K';
+        const rate = Math.round(perGramExGstForMetal(metal, prices));
+        document.getElementById('inline-ord-rate').value = String(rate);
+        showToast(`Locked ${metal} rate at ${formatShopPrice(rate)}/g.`, 'success');
+      });
+
+      document.getElementById('inline-order-form')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const customerName = (document.getElementById('inline-ord-name')?.value || '').trim();
+        const item = (document.getElementById('inline-ord-item')?.value || '').trim();
+        if (!customerName || !item) return showToast('Enter customer name and jewellery item.', 'alert');
+        productOwner.orders.unshift({
+          id: `ord-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+          customerName,
+          phone: (document.getElementById('inline-ord-phone')?.value || '').replace(/[^\d+]/g, '').slice(0, 15),
+          item,
+          metal: document.getElementById('inline-ord-metal')?.value || '22K',
+          weight: Math.max(0, Number(document.getElementById('inline-ord-wt')?.value) || 0),
+          lockedRate: Math.max(0, Number(document.getElementById('inline-ord-rate')?.value) || 0),
+          advance: Math.max(0, Math.round(Number(document.getElementById('inline-ord-adv')?.value) || 0)),
+          dueDate: document.getElementById('inline-ord-due')?.value || '',
+          status: document.getElementById('inline-ord-status')?.value || 'Booked',
+          note: (document.getElementById('inline-ord-note')?.value || '').trim(),
+          createdAt: new Date().toISOString()
+        });
+        document.getElementById('inline-order-form')?.reset();
+        saveInlineOrders();
+        showToast(`Saved custom order for ${customerName}.`, 'success');
+      });
+
+      document.getElementById('inline-ord-list')?.addEventListener('change', (e) => {
+        const sel = e.target.closest('[data-inline-ord-status]');
+        if (!sel) return;
+        const ord = productOwner.orders.find((o) => o.id === sel.dataset.inlineOrdStatus);
+        if (!ord) return;
+        ord.status = sel.value;
+        saveInlineOrders();
+        showToast(`Order marked "${ord.status}".`, 'success');
+      });
+
+      document.getElementById('inline-ord-list')?.addEventListener('click', (e) => {
+        const wa = e.target.closest('[data-inline-ord-wa]');
+        if (wa) {
+          const ord = productOwner.orders.find((o) => o.id === wa.dataset.inlineOrdWa);
+          if (!ord) return;
+          const msg = [
+            `Namaskar ${ord.customerName}, Greetings from *Satyanarayan Jewellers (Cuttack)*!`,
+            ord.status === 'Ready' ? 'Your custom jewellery order is *READY FOR PICKUP*.' : `Order status: *${ord.status}*`,
+            `• Item: ${ord.item} (${ord.metal}${ord.weight > 0 ? ` · ~${Number(ord.weight).toFixed(2)}g` : ''})`,
+            ord.lockedRate > 0 ? `• Locked Rate: ${formatShopPrice(ord.lockedRate)}/g` : '',
+            ord.advance > 0 ? `• Advance Paid: ${formatShopPrice(ord.advance)}` : '',
+            ord.dueDate ? `• Promised Date: ${ord.dueDate}` : '',
+            `GSTIN: ${SHOP_GSTIN}`
+          ].filter(Boolean).join('\n');
+          const digits = (ord.phone || '').replace(/\D/g, '');
+          const ph = digits.length === 10 ? `91${digits}` : digits;
+          window.open(`${ph.length >= 10 ? `https://wa.me/${ph}` : 'https://wa.me/'}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
+          return;
+        }
+        const toBill = e.target.closest('[data-inline-ord-bill]');
+        if (toBill) {
+          const ord = productOwner.orders.find((o) => o.id === toBill.dataset.inlineOrdBill);
+          if (!ord) return;
+          document.getElementById('inline-bill-cust').value = ord.customerName;
+          document.getElementById('inline-bill-phone').value = ord.phone || '';
+          document.getElementById('inline-bill-adv').value = String(ord.advance || 0);
+          productOwner.bill.lines.push({
+            id: `ibl-${Date.now()}`,
+            desc: ord.item,
+            metal: ord.metal || '22K',
+            huid: '',
+            weight: Number(ord.weight) || 10,
+            ratePerGram: Number(ord.lockedRate) || 0,
+            makingVal: 10,
+            makingType: 'pct'
+          });
+          switchOwnerSuiteTab('bill');
+          showToast(`Loaded ${ord.customerName}'s order into GST Bill Slip.`, 'success');
+          return;
+        }
+        const del = e.target.closest('[data-inline-ord-del]');
+        if (del) {
+          productOwner.orders = productOwner.orders.filter((o) => o.id !== del.dataset.inlineOrdDel);
+          saveInlineOrders();
+          showToast('Order entry removed.', 'info');
+        }
+      });
+
+      // Inline Owner Edit & QR Modals
+      document.getElementById('btn-close-owner-edit')?.addEventListener('click', closeInlineEditModal);
+      document.getElementById('btn-cancel-owner-edit')?.addEventListener('click', closeInlineEditModal);
+      document.getElementById('owner-edit-item-modal')?.addEventListener('click', (e) => {
+        if (e.target.id === 'owner-edit-item-modal') closeInlineEditModal();
+      });
+      document.getElementById('btn-oedit-autoprice')?.addEventListener('click', () => {
+        const prices = getActiveOwnerPrices();
+        if (!prices) return showToast('Waiting for live bullion rates…', 'alert');
+        const w = Math.max(0, Number(document.getElementById('oedit-wt')?.value) || 0);
+        if (!(w > 0)) return showToast('Enter item weight (g) first.', 'alert');
+        const est = computeInlineAutoItemPrice({
+          category: document.getElementById('oedit-cat')?.value || 'Gold',
+          purity: document.getElementById('oedit-purity')?.value || '',
+          weight: w,
+          makingPct: document.getElementById('oedit-mc')?.value || 10
+        }, prices);
+        if (!est) return;
+        document.getElementById('oedit-price').value = String(est.grandTotal);
+        showToast(`Filled live ${est.metal} price: ${formatShopPrice(est.grandTotal)}`, 'success');
+      });
+      document.getElementById('owner-edit-item-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!productOwner.unlocked || !productOwner.ghConnected || productOwner.busy) return;
+        const id = document.getElementById('oedit-id').value;
+        const src = document.getElementById('oedit-source').value;
+        const name = document.getElementById('oedit-name').value.trim();
+        if (!name) return showToast('Name cannot be empty.', 'alert');
+        const updated = {
+          id,
+          name,
+          category: document.getElementById('oedit-cat').value || 'Gold',
+          purity: document.getElementById('oedit-purity').value.trim(),
+          weight: Math.max(0, Number(document.getElementById('oedit-wt').value) || 0),
+          makingPct: Math.max(0, Number(document.getElementById('oedit-mc').value) || 0),
+          price: Math.max(0, Number(document.getElementById('oedit-price').value) || 0),
+          sku: document.getElementById('oedit-sku').value.trim(),
+          stockStatus: normalizeCatalogStockStatus(document.getElementById('oedit-stock').value),
+          featured: Boolean(document.getElementById('oedit-featured').checked),
+          note: document.getElementById('oedit-note').value.trim()
+        };
+        const btn = document.getElementById('btn-save-owner-edit');
+        productOwner.busy = true;
+        if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+        try {
+          if (src === 'local') {
+            const existing = findCatalogItem(id, 'local');
+            if (!existing) throw new Error('Draft not found.');
+            const merged = { ...existing, ...updated };
+            await saveLocalProductToDB(merged);
+            productOwner.localItems = productOwner.localItems.map((x) => (x.id === id ? merged : x));
+            showToast('Local draft updated.', 'success');
+          } else {
+            await updatePublishedItemOnGitHub(updated);
+            showToast(`Updated "${name}" live on GitHub!`, 'success');
+          }
+          closeInlineEditModal();
+          renderProducts();
+        } catch (err) {
+          showToast(err?.message || 'Could not save changes.', 'alert');
+        } finally {
+          productOwner.busy = false;
+          if (btn) { btn.disabled = false; btn.textContent = 'Save Changes'; }
+        }
+      });
+
+      document.getElementById('btn-close-qr-tag')?.addEventListener('click', closeInlineQrModal);
+      document.getElementById('owner-qr-tag-modal')?.addEventListener('click', (e) => {
+        if (e.target.id === 'owner-qr-tag-modal') closeInlineQrModal();
+      });
+      document.getElementById('btn-qr-tag-bill')?.addEventListener('click', () => {
+        const it = productOwner.qrTagItem;
+        closeInlineQrModal();
+        if (it) addCatalogItemToInlineBill(it);
+      });
+      document.getElementById('btn-qr-tag-print')?.addEventListener('click', () => {
+        if (!productOwner.qrTagItem) return;
+        printInlineOwnerSheet(`<div style="display:flex;justify-content:center;padding:1rem">${buildInlineTagHtml(productOwner.qrTagItem)}</div>`);
+      });
+
       document.getElementById('product-category-pills')?.addEventListener('click', (e) => {
         const btn = e.target.closest('.prod-cat-btn');
         if (!btn) return;
@@ -7589,6 +8852,22 @@
         const waBtn = event.target.closest('.product-wa-enquire');
         if (waBtn) {
           enquireSingleProduct(waBtn.dataset.productId, waBtn.dataset.source || 'published');
+          return;
+        }
+        const editBtn = event.target.closest('.product-owner-edit');
+        if (editBtn && productOwner.unlocked) {
+          openInlineEditModal(editBtn.dataset.productId, editBtn.dataset.source || 'published');
+          return;
+        }
+        const qrBtn = event.target.closest('.product-owner-qr');
+        if (qrBtn && productOwner.unlocked) {
+          openInlineQrModal(qrBtn.dataset.productId, qrBtn.dataset.source || 'published');
+          return;
+        }
+        const addBillBtn = event.target.closest('.product-owner-bill');
+        if (addBillBtn && productOwner.unlocked) {
+          const item = findCatalogItem(addBillBtn.dataset.productId, addBillBtn.dataset.source || 'published');
+          if (item) addCatalogItemToInlineBill(item);
           return;
         }
         const publishBtn = event.target.closest('.product-publish-draft');
@@ -7656,6 +8935,8 @@
         if (e.key === 'Escape') {
           closeProductLightbox();
           closeOwnerAuthModal();
+          closeInlineEditModal();
+          closeInlineQrModal();
         }
       });
       bindShopEvents();

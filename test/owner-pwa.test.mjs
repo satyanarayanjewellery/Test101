@@ -79,7 +79,7 @@ test('2. Owner Service Worker and Customer Service Worker have isolated scopes a
   assert.doesNotThrow(() => new vm.Script(ownerSw, { filename: 'owner/sw.js' }));
   assert.doesNotThrow(() => new vm.Script(rootSw, { filename: 'sw.js' }));
 
-  assert.match(ownerSw, /const CACHE = 'sj-owner-desk-v2'/);
+  assert.match(ownerSw, /const CACHE = 'sj-owner-desk-v\d+'/);
   assert.match(ownerSw, /key\.startsWith\('sj-owner-desk-'\)/, 'Owner SW should only delete its own cache namespace');
   assert.match(ownerSw, /SKIP_WAITING/, 'Owner SW should support controlled update reload');
   assert.match(ownerSw, /catalog\/products\.json/);
@@ -296,3 +296,109 @@ test('10. Customer PWA and Owner PWA have disjoint resolved IDs, non-overlapping
   assert.match(customerHtml, /addEventListener\('beforeinstallprompt'/);
   assert.match(ownerJs, /addEventListener\('beforeinstallprompt'/);
 });
+
+test('11. Owner Suite: Smart Inventory auto-pricing, stock status normalization, CSV formula-injection guard, and QR SVG generator', () => {
+  const api = loadOwnerApi();
+  const prices = api.computeCityPrices('cuttack', 2900, 33.5, 86.5);
+
+  // Metal inference & live auto-pricing math
+  assert.equal(api.inferMetalCode('Gold', '916 Hallmarked'), '22K');
+  assert.equal(api.inferMetalCode('Gold', '18K Rose'), '18K');
+  assert.equal(api.inferMetalCode('Silver', '925 Sterling'), 'S925');
+
+  const est = api.computeAutoItemPrice({ category: 'Gold', purity: '916', weight: 10, makingPct: 12 }, prices);
+  assert.ok(est && est.grandTotal > 0);
+  assert.equal(est.metal, '22K');
+  assert.equal(est.grandTotal, est.baseValue + est.makingCharges + est.gstAmount);
+
+  // Stock status normalization & labels
+  assert.equal(api.normalizeStockStatus('sold_out'), 'sold_out');
+  assert.equal(api.normalizeStockStatus('made_to_order'), 'made_to_order');
+  assert.equal(api.normalizeStockStatus('unexpected'), 'in_stock');
+  assert.equal(api.stockStatusLabel('sold_out'), 'Sold Out');
+
+  // CSV export escapes formula-injection characters (=, +, -, @) and quotes
+  const csv = api.catalogItemsToCsv([
+    { id: 'sj-1', name: '=CMD("bad")', category: 'Gold', purity: '22K', weight: 8.5, makingPct: 10, price: 78000, stockStatus: 'in_stock', featured: true, sku: 'SJ-916', note: 'Bridal, " Antique "' }
+  ]);
+  assert.match(csv, /'=CMD\(""bad""\)/);
+  assert.match(csv, /"Bridal, "" Antique """/);
+
+  // QR SVG generator produces deterministic valid Version-3 SVG with finder squares
+  const svg = api.generateQrSvg('https://satyanarayanjewellery.github.io/shop/#products?sku=SJ-916', 120);
+  assert.match(svg, /^<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg" width="120" height="120"/);
+  assert.match(svg, /<path d="M/);
+});
+
+test('12. Owner Suite: GST Estimate & Bill Slip Maker and Customer Orders & Advance Rate-Lock Book', () => {
+  const api = loadOwnerApi();
+  const prices = api.computeCityPrices('cuttack', 2900, 33.5, 86.5);
+
+  // Multi-line GST Bill Slip calculation with CGST + SGST split, old gold exchange & advance paid
+  const bill = {
+    docType: 'GST Estimate',
+    billNo: 'SJ-2026-007',
+    customerName: 'Smt. Ananya Mohanty',
+    customerPhone: '9861012345',
+    includeGst: true,
+    discount: 1000,
+    oldExchange: 25000,
+    advance: 10000,
+    lines: [
+      { id: 'l1', desc: '22K Bridal Necklace', metal: '22K', huid: 'AB12CD', weight: 15, ratePerGram: 0, makingVal: 12, makingType: 'pct' },
+      { id: 'l2', desc: 'Silver Payal Pair', metal: 'S999', huid: '', weight: 50, ratePerGram: 0, makingVal: 15, makingType: 'per_g' }
+    ]
+  };
+  const totals = api.computeBillTotals(bill, prices);
+  assert.equal(totals.lines.length, 2);
+  assert.equal(totals.cgst + totals.sgst, totals.gstTotal);
+  assert.equal(totals.grossTotal, totals.taxableValue + totals.gstTotal);
+  assert.equal(totals.netPayable, totals.grossTotal - 25000 - 10000);
+
+  const billText = api.buildBillShareText(bill, totals);
+  assert.match(billText, /SJ-2026-007/);
+  assert.match(billText, /21AFNPP7926E1ZC/);
+  assert.match(billText, /HUID:AB12CD/);
+  assert.match(billText, /CGST/);
+  assert.match(billText, /Net Balance Payable/);
+
+  // Order book sanitization & WhatsApp follow-up text
+  const order = api.sanitizeOrderRecord({
+    customerName: 'Sri Rakesh Panda',
+    phone: '+91 94370-11223',
+    item: 'Custom Filigree Haram',
+    metal: '22K',
+    weight: 24.5,
+    lockedRate: 8200,
+    advance: 50000,
+    dueDate: '2026-12-15',
+    status: 'Ready'
+  });
+  assert.ok(order);
+  assert.equal(order.status, 'Ready');
+  assert.equal(order.advance, 50000);
+  const waMsg = api.buildOrderWhatsAppText(order);
+  assert.match(waMsg, /READY FOR PICKUP/);
+  assert.match(waMsg, /Custom Filigree Haram/);
+  assert.match(waMsg, /21AFNPP7926E1ZC/);
+});
+
+test('13. Customer Storefront syncs Featured Showroom Picks, Stock Status badges, and Inline Owner Suite tabs & modals', () => {
+  // Inline Owner Studio exposes Upload, GST Bill Slip, and Order Book sub-tabs + Batch Reprice & Export
+  assert.match(customerHtml, /id="owner-tab-upload"/);
+  assert.match(customerHtml, /id="owner-tab-bill"/);
+  assert.match(customerHtml, /id="owner-tab-orders"/);
+  assert.match(customerHtml, /id="btn-inline-reprice"/);
+  assert.match(customerHtml, /id="btn-inline-export-csv"/);
+  assert.match(customerHtml, /id="btn-inline-export-json"/);
+  assert.match(customerHtml, /id="owner-edit-item-modal"/);
+  assert.match(customerHtml, /id="owner-qr-tag-modal"/);
+  assert.match(customerHtml, /id="owner-print-sheet"/);
+
+  // Shared localStorage keys so inline Owner Mode and standalone /owner/ share orders & bill sequence on same browser
+  assert.match(customerHtml, /satyanarayan_owner_orders_v1/);
+  assert.match(ownerJs, /satyanarayan_owner_orders_v1/);
+  assert.match(customerHtml, /satyanarayan_owner_bill_seq_v1/);
+  assert.match(ownerJs, /satyanarayan_owner_bill_seq_v1/);
+});
+

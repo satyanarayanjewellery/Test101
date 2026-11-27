@@ -19,7 +19,9 @@
   const STORAGE_KEYS = {
     lastRates: 'satyanarayan_last_rates_v1',
     rateOfDay: 'satyanarayan_rate_of_day_v1',
-    statutoryRates: 'satyanarayan_statutory_rates_v1'
+    statutoryRates: 'satyanarayan_statutory_rates_v1',
+    orderBook: 'satyanarayan_owner_orders_v1',
+    billSeq: 'satyanarayan_owner_bill_seq_v1'
   };
 
   const MAX_MEDIA_PER_ITEM = 6;
@@ -323,7 +325,24 @@
       search: '',
       sort: 'new',
       lightboxItem: null,
-      lightboxIdx: 0
+      lightboxIdx: 0,
+      tagItem: null
+    },
+    bill: {
+      docType: 'GST Estimate',
+      billNo: '',
+      customerName: '',
+      customerPhone: '',
+      lines: [],
+      oldExchange: 0,
+      discount: 0,
+      advance: 0,
+      notes: '',
+      includeGst: true
+    },
+    orders: {
+      items: [],
+      filter: 'active'
     },
     live: {
       connected: false,
@@ -785,6 +804,410 @@
   }
 
   // =========================================================================
+  // OWNER SUITE PURE HELPERS: AUTO-PRICING, BILL SLIPS, ORDERS & QR SVG
+  // =========================================================================
+  function inferMetalCode(category = 'Gold', purity = '') {
+    const cat = String(category || '').toLowerCase();
+    const pur = String(purity || '').toUpperCase();
+    if (cat === 'silver' || pur.includes('SILVER') || pur.includes('925') || pur.includes('S999') || pur.includes('S925')) {
+      return pur.includes('925') ? 'S925' : 'S999';
+    }
+    if (pur.includes('24K') || pur.includes('999')) return '24K';
+    if (pur.includes('995')) return '995';
+    if (pur.includes('18K') || pur.includes('750')) return '18K';
+    return '22K';
+  }
+
+  function normalizeStockStatus(val) {
+    return val === 'made_to_order' || val === 'sold_out' ? val : 'in_stock';
+  }
+
+  function stockStatusLabel(val) {
+    const norm = normalizeStockStatus(val);
+    if (norm === 'made_to_order') return 'Made to Order';
+    if (norm === 'sold_out') return 'Sold Out';
+    return 'In Stock';
+  }
+
+  function computeAutoItemPrice({ category = 'Gold', purity = '', weight = 0, makingPct = 10, includeGst = true }, prices = state.prices, overrideStatutory = null) {
+    const w = Math.max(0, Number(weight) || 0);
+    if (!prices || !(w > 0)) return null;
+    const metal = inferMetalCode(category, purity);
+    const quote = computeQuoteMath({
+      metal,
+      weight: w,
+      unit: 'g',
+      makingVal: Math.max(0, Number(makingPct) || 0),
+      makingType: 'pct',
+      includeGst: includeGst !== false
+    }, prices, overrideStatutory);
+    return quote ? { ...quote, metal } : null;
+  }
+
+  function computeBillTotals(billDraft = {}, prices = state.prices, overrideStatutory = null) {
+    const rawLines = Array.isArray(billDraft.lines) ? billDraft.lines : [];
+    const includeGst = billDraft.includeGst !== false;
+    const computedLines = rawLines.map((ln, idx) => {
+      const metal = ['24K', '995', '22K', '18K', 'S999', 'S925'].includes(ln.metal) ? ln.metal : '22K';
+      const isSilver = metal === 'S999' || metal === 'S925';
+      const weight = Math.max(0, Number(ln.weight) || 0);
+      const perGramMap = prices ? {
+        '24K': prices.gold999ExGstGram,
+        '995': prices.gold995ExGstGram,
+        '22K': prices.gold916ExGstGram,
+        '18K': prices.gold18ExGstGram,
+        S999: prices.silver999ExGstGram,
+        S925: prices.silver925ExGstGram
+      } : {};
+      const customRate = Number(ln.ratePerGram);
+      const ratePerGram = Number.isFinite(customRate) && customRate > 0
+        ? customRate
+        : (Number(perGramMap[metal]) || 0);
+      const metalValue = Math.round(weight * ratePerGram);
+      const mv = Math.max(0, Number(ln.makingVal) || 0);
+      const mt = ln.makingType === 'per_g' || ln.makingType === 'flat' ? ln.makingType : 'pct';
+      let makingCharges = 0;
+      let makingLabel = `${mv}%`;
+      if (mt === 'per_g') {
+        makingCharges = Math.round(weight * mv);
+        makingLabel = `${fmtINR(mv)}/g`;
+      } else if (mt === 'flat') {
+        makingCharges = Math.round(mv);
+        makingLabel = `${fmtINR(mv)} flat`;
+      } else {
+        makingCharges = Math.round(metalValue * (mv / 100));
+      }
+      const gstPct = statutoryRatesFor(isSilver ? 'silver' : 'gold', overrideStatutory).gstPct;
+      const taxable = metalValue + makingCharges;
+      const gstAmount = includeGst ? Math.round(taxable * (gstPct / 100)) : 0;
+      return {
+        id: ln.id || `line-${idx + 1}`,
+        desc: String(ln.desc || 'Jewellery Item').trim().slice(0, 80),
+        metal,
+        huid: String(ln.huid || '').trim().toUpperCase().slice(0, 12),
+        weight,
+        ratePerGram,
+        metalValue,
+        makingVal: mv,
+        makingType: mt,
+        makingLabel,
+        makingCharges,
+        taxable,
+        gstPct,
+        gstAmount,
+        lineTotal: taxable + gstAmount
+      };
+    });
+
+    const totalWeight = computedLines.reduce((acc, l) => acc + l.weight, 0);
+    const metalSubtotal = computedLines.reduce((acc, l) => acc + l.metalValue, 0);
+    const makingSubtotal = computedLines.reduce((acc, l) => acc + l.makingCharges, 0);
+    const discount = Math.min(metalSubtotal + makingSubtotal, Math.max(0, Math.round(Number(billDraft.discount) || 0)));
+    const taxableValue = Math.max(0, metalSubtotal + makingSubtotal - discount);
+    const rawGstTotal = computedLines.reduce((acc, l) => acc + l.gstAmount, 0);
+    const effectiveGstPct = computedLines.length ? computedLines[0].gstPct : statutoryRatesFor('gold', overrideStatutory).gstPct;
+    const gstTotal = includeGst
+      ? (discount > 0 ? Math.round(taxableValue * (effectiveGstPct / 100)) : rawGstTotal)
+      : 0;
+    const cgst = Math.floor(gstTotal / 2);
+    const sgst = gstTotal - cgst;
+    const grossTotal = taxableValue + gstTotal;
+    const oldExchange = Math.max(0, Math.round(Number(billDraft.oldExchange) || 0));
+    const advance = Math.max(0, Math.round(Number(billDraft.advance) || 0));
+    const netPayable = grossTotal - oldExchange - advance;
+
+    return {
+      lines: computedLines,
+      totalWeight,
+      metalSubtotal,
+      makingSubtotal,
+      discount,
+      taxableValue,
+      gstTotal,
+      cgst,
+      sgst,
+      grossTotal,
+      oldExchange,
+      advance,
+      netPayable
+    };
+  }
+
+  function buildBillShareText(billDraft = {}, totals = null) {
+    const t = totals || computeBillTotals(billDraft);
+    const docType = String(billDraft.docType || 'GST Estimate').trim();
+    const billNo = String(billDraft.billNo || 'SJ-EST').trim();
+    const cust = String(billDraft.customerName || 'Walk-in Customer').trim();
+    const dateStr = todayIstIso();
+    const out = [
+      `*SATYANARAYAN JEWELLERS* — Cuttack, Odisha`,
+      `GSTIN: ${SHOP_GSTIN} · BIS Hallmarked Showroom`,
+      `${docType} #${billNo} · Date: ${dateStr}`,
+      `Customer: ${cust}${billDraft.customerPhone ? ` (${billDraft.customerPhone})` : ''}`,
+      '--------------------------------'
+    ];
+    if (!t.lines.length) {
+      out.push('(No jewellery items added yet)');
+    } else {
+      t.lines.forEach((ln, idx) => {
+        const huidStr = ln.huid ? ` · HUID:${ln.huid}` : '';
+        out.push(`${idx + 1}. ${ln.desc} [${ln.metal} · ${ln.weight.toFixed(3)}g${huidStr}]`);
+        out.push(`   Metal ${fmtINR(ln.metalValue)} + Making (${ln.makingLabel}) ${fmtINR(ln.makingCharges)} = ${fmtINR(ln.taxable)}`);
+      });
+    }
+    out.push('--------------------------------');
+    out.push(`Taxable Subtotal: ${fmtINR(t.taxableValue)}`);
+    if (t.discount > 0) out.push(`Special Discount: -${fmtINR(t.discount)}`);
+    if (t.gstTotal > 0) out.push(`GST (CGST ${fmtINR(t.cgst)} + SGST ${fmtINR(t.sgst)}): +${fmtINR(t.gstTotal)}`);
+    out.push(`Gross Bill Value: ${fmtINR(t.grossTotal)}`);
+    if (t.oldExchange > 0) out.push(`Less Old Metal Exchange: -${fmtINR(t.oldExchange)}`);
+    if (t.advance > 0) out.push(`Less Advance Received: -${fmtINR(t.advance)}`);
+    out.push(t.netPayable >= 0 ? `*Net Balance Payable: ${fmtINR(t.netPayable)}*` : `*Net Refund Due: ${fmtINR(Math.abs(t.netPayable))}*`);
+    if (billDraft.notes) out.push(`Note: ${String(billDraft.notes).trim()}`);
+    return out.join('\n');
+  }
+
+  function sanitizeOrderRecord(raw = {}) {
+    const name = String(raw.customerName || raw.name || '').trim().slice(0, 80);
+    const item = String(raw.item || '').trim().slice(0, 120);
+    if (!name || !item) return null;
+    const statusAllowed = ['Booked', 'Karigar', 'Ready', 'Delivered'];
+    const status = statusAllowed.includes(raw.status) ? raw.status : 'Booked';
+    return {
+      id: String(raw.id || `ord-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`).replace(/[^a-zA-Z0-9_-]/g, ''),
+      customerName: name,
+      phone: String(raw.phone || '').replace(/[^\d+]/g, '').slice(0, 15),
+      item,
+      metal: ['24K', '22K', '18K', 'S999', 'S925'].includes(raw.metal) ? raw.metal : '22K',
+      weight: Math.max(0, Number(raw.weight) || 0),
+      lockedRate: Math.max(0, Number(raw.lockedRate) || 0),
+      advance: Math.max(0, Math.round(Number(raw.advance) || 0)),
+      dueDate: /^\d{4}-\d{2}-\d{2}$/.test(String(raw.dueDate || '')) ? String(raw.dueDate) : '',
+      status,
+      note: String(raw.note || '').trim().slice(0, 180),
+      createdAt: raw.createdAt || new Date().toISOString()
+    };
+  }
+
+  function buildOrderWhatsAppText(order) {
+    if (!order) return '';
+    const statusLine = order.status === 'Ready'
+      ? 'Your custom jewellery order is *READY FOR PICKUP* at our Cuttack showroom.'
+      : order.status === 'Delivered'
+        ? 'Thank you for collecting your jewellery order from Satyanarayan Jewellers!'
+        : `Order status update: *${order.status}*.`;
+    const parts = [
+      `Namaskar ${order.customerName},`,
+      `Greetings from *Satyanarayan Jewellers (Cuttack)*!`,
+      statusLine,
+      '',
+      `• Order Ref: ${order.id}`,
+      `• Item: ${order.item} (${order.metal}${order.weight > 0 ? ` · ~${Number(order.weight).toFixed(2)}g` : ''})`,
+      order.lockedRate > 0 ? `• Rate Locked: ${fmtINR(order.lockedRate)}/g` : '',
+      order.advance > 0 ? `• Advance Received: ${fmtINR(order.advance)}` : '',
+      order.dueDate ? `• Promised Date: ${order.dueDate}` : '',
+      order.note ? `• Note: ${order.note}` : '',
+      '',
+      `GSTIN: ${SHOP_GSTIN} · Please visit or reply for any assistance.`
+    ].filter(Boolean);
+    return parts.join('\n');
+  }
+
+  function catalogItemsToCsv(items = []) {
+    const cols = ['id', 'name', 'category', 'purity', 'weight_g', 'making_pct', 'price_inr', 'stock_status', 'featured', 'sku', 'note', 'created_at'];
+    const escCsv = (val) => {
+      let s = String(val == null ? '' : val).replace(/\r?\n/g, ' ');
+      if (/^[=+\-@]/.test(s)) s = `'${s}`;
+      if (/[",]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+      return s;
+    };
+    const rows = items.map((p) => [
+      p.id || '',
+      p.name || '',
+      p.category || 'Gold',
+      p.purity || '',
+      Number(p.weight) || 0,
+      Number(p.makingPct) || 0,
+      Number(p.price) || 0,
+      normalizeStockStatus(p.stockStatus),
+      p.featured ? 'yes' : 'no',
+      p.sku || '',
+      p.note || '',
+      p.createdAt || ''
+    ].map(escCsv).join(','));
+    return [cols.join(','), ...rows].join('\n');
+  }
+
+  // Self-contained ISO/IEC 18004 QR Code SVG generator (Versions 1-6, ECC Level L, Byte mode).
+  // Zero external CDN or network requests — renders crisp scannable vector QR tags offline.
+  const QR_GF_EXP = new Uint8Array(512);
+  const QR_GF_LOG = new Uint8Array(256);
+  (() => {
+    let x = 1;
+    for (let i = 0; i < 255; i++) {
+      QR_GF_EXP[i] = x;
+      QR_GF_LOG[x] = i;
+      x <<= 1;
+      if (x & 0x100) x ^= 0x11d;
+    }
+    for (let i = 255; i < 512; i++) QR_GF_EXP[i] = QR_GF_EXP[i - 255];
+  })();
+
+  function qrReedSolomon(data, ecLen) {
+    let gen = [1];
+    for (let i = 0; i < ecLen; i++) {
+      const next = new Array(gen.length + 1).fill(0);
+      const root = QR_GF_EXP[i];
+      for (let j = 0; j < gen.length; j++) {
+        next[j] ^= gen[j];
+        next[j + 1] ^= gen[j] ? QR_GF_EXP[QR_GF_LOG[gen[j]] + QR_GF_LOG[root]] : 0;
+      }
+      gen = next;
+    }
+    const rem = new Uint8Array(ecLen);
+    for (let i = 0; i < data.length; i++) {
+      const factor = data[i] ^ rem[0];
+      rem.copyWithin(0, 1);
+      rem[ecLen - 1] = 0;
+      if (factor) {
+        const logF = QR_GF_LOG[factor];
+        for (let j = 0; j < ecLen; j++) {
+          if (gen[j + 1]) rem[j] ^= QR_GF_EXP[QR_GF_LOG[gen[j + 1]] + logF];
+        }
+      }
+    }
+    return rem;
+  }
+
+  function generateQrSvg(text, sizePx = 104) {
+    const bytes = new TextEncoder().encode(String(text || '').slice(0, 130));
+    // Version table (Level L): [version, dataCodewords, ecPerBlock, numBlocks, alignCenters]
+    const VERSIONS = [
+      [1, 19, 7, 1, []],
+      [2, 34, 10, 1, [6, 18]],
+      [3, 55, 15, 1, [6, 22]],
+      [4, 80, 20, 1, [6, 26]],
+      [5, 108, 26, 1, [6, 30]],
+      [6, 136, 18, 2, [6, 34]]
+    ];
+    const spec = VERSIONS.find((v) => bytes.length + 2 <= v[1]) || VERSIONS[VERSIONS.length - 1];
+    const [ver, totalDataCw, ecLen, blocks, align] = spec;
+    const payload = bytes.slice(0, totalDataCw - 2);
+    const bits = [];
+    const pushBits = (val, n) => { for (let i = n - 1; i >= 0; i--) bits.push((val >> i) & 1); };
+    pushBits(0b0100, 4);
+    pushBits(payload.length, 8);
+    for (const b of payload) pushBits(b, 8);
+    const maxBits = totalDataCw * 8;
+    for (let i = 0; i < 4 && bits.length < maxBits; i++) bits.push(0);
+    while (bits.length % 8 !== 0) bits.push(0);
+    const dataCw = new Uint8Array(totalDataCw);
+    for (let i = 0; i < bits.length / 8; i++) {
+      let v = 0;
+      for (let b = 0; b < 8; b++) v = (v << 1) | bits[i * 8 + b];
+      dataCw[i] = v;
+    }
+    for (let i = bits.length / 8, pad = 0; i < totalDataCw; i++, pad ^= 1) {
+      dataCw[i] = pad ? 0x11 : 0xec;
+    }
+
+    const blockDataLen = Math.floor(totalDataCw / blocks);
+    const dataBlocks = [];
+    const ecBlocks = [];
+    for (let b = 0; b < blocks; b++) {
+      const slice = dataCw.subarray(b * blockDataLen, (b + 1) * blockDataLen);
+      dataBlocks.push(slice);
+      ecBlocks.push(qrReedSolomon(slice, ecLen));
+    }
+    const finalCw = [];
+    for (let i = 0; i < blockDataLen; i++) for (let b = 0; b < blocks; b++) finalCw.push(dataBlocks[b][i]);
+    for (let i = 0; i < ecLen; i++) for (let b = 0; b < blocks; b++) finalCw.push(ecBlocks[b][i]);
+
+    const dim = ver * 4 + 17;
+    const grid = Array.from({ length: dim }, () => new Uint8Array(dim));
+    const used = Array.from({ length: dim }, () => new Uint8Array(dim));
+    const setMod = (r, c, dark) => {
+      if (r < 0 || c < 0 || r >= dim || c >= dim) return;
+      grid[r][c] = dark ? 1 : 0;
+      used[r][c] = 1;
+    };
+    const placeFinder = (tr, tc) => {
+      for (let r = -1; r <= 7; r++) {
+        for (let c = -1; c <= 7; c++) {
+          const inOuter = r >= 0 && r <= 6 && c >= 0 && c <= 6;
+          const onRing = r === 0 || r === 6 || c === 0 || c === 6;
+          const inCore = r >= 2 && r <= 4 && c >= 2 && c <= 4;
+          setMod(tr + r, tc + c, inOuter && (onRing || inCore));
+        }
+      }
+    };
+    placeFinder(0, 0);
+    placeFinder(0, dim - 7);
+    placeFinder(dim - 7, 0);
+
+    for (let i = 8; i < dim - 8; i++) {
+      if (!used[6][i]) setMod(6, i, i % 2 === 0);
+      if (!used[i][6]) setMod(i, 6, i % 2 === 0);
+    }
+    for (const r of align) {
+      for (const c of align) {
+        if (used[r][c]) continue;
+        for (let dr = -2; dr <= 2; dr++) {
+          for (let dc = -2; dc <= 2; dc++) {
+            setMod(r + dr, c + dc, Math.max(Math.abs(dr), Math.abs(dc)) !== 1);
+          }
+        }
+      }
+    }
+    // Reserve format areas + dark module
+    for (let i = 0; i < 9; i++) {
+      if (!used[8][i]) used[8][i] = 1;
+      if (!used[i][8]) used[i][8] = 1;
+    }
+    for (let i = 0; i < 8; i++) {
+      used[8][dim - 1 - i] = 1;
+      used[dim - 1 - i][8] = 1;
+    }
+    setMod(dim - 8, 8, true);
+
+    let bitIdx = 0;
+    const totalBits = finalCw.length * 8;
+    for (let right = dim - 1; right >= 1; right -= 2) {
+      if (right === 6) right = 5;
+      const upward = ((dim - 1 - right) >> 1) % 2 === 0;
+      for (let step = 0; step < dim; step++) {
+        const r = upward ? dim - 1 - step : step;
+        for (let dc = 0; dc < 2; dc++) {
+          const c = right - dc;
+          if (used[r][c]) continue;
+          const dark = bitIdx < totalBits ? ((finalCw[bitIdx >> 3] >> (7 - (bitIdx & 7))) & 1) : 0;
+          bitIdx++;
+          grid[r][c] = dark ^ ((r + c) % 2 === 0 ? 1 : 0);
+        }
+      }
+    }
+    // Format string for Level L (01) + Mask 0 (000): 0x77c4
+    const fmt = 0x77c4;
+    const fmtCoordsA = [[8, 0], [8, 1], [8, 2], [8, 3], [8, 4], [8, 5], [8, 7], [8, 8], [7, 8], [5, 8], [4, 8], [3, 8], [2, 8], [1, 8], [0, 8]];
+    const fmtCoordsB = [[dim - 1, 8], [dim - 2, 8], [dim - 3, 8], [dim - 4, 8], [dim - 5, 8], [dim - 6, 8], [dim - 7, 8], [8, dim - 8], [8, dim - 7], [8, dim - 6], [8, dim - 5], [8, dim - 4], [8, dim - 3], [8, dim - 2], [8, dim - 1]];
+    for (let i = 0; i < 15; i++) {
+      const bit = (fmt >> (14 - i)) & 1;
+      grid[fmtCoordsA[i][0]][fmtCoordsA[i][1]] = bit;
+      grid[fmtCoordsB[i][0]][fmtCoordsB[i][1]] = bit;
+    }
+
+    const quiet = 2;
+    const vb = dim + quiet * 2;
+    let pathD = '';
+    for (let r = 0; r < dim; r++) {
+      for (let c = 0; c < dim; c++) {
+        if (grid[r][c]) pathD += `M${c + quiet},${r + quiet}h1v1h-1z`;
+      }
+    }
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${Number(sizePx) || 104}" height="${Number(sizePx) || 104}" viewBox="0 0 ${vb} ${vb}" shape-rendering="crispEdges" role="img" aria-label="QR Code"><rect width="${vb}" height="${vb}" fill="#ffffff"/><path d="${pathD}" fill="#111111"/></svg>`;
+  }
+
+  // =========================================================================
   // STORAGE, TOKEN HASHING & GITHUB API
   // =========================================================================
   function lsGet(key, fallback = '') {
@@ -1059,9 +1482,15 @@
         fetchMarketAccuracy(false).then(renderMarketAccuracy);
       }
     }
-    if (viewName === 'catalog') renderCatalog();
+    if (viewName === 'catalog') {
+      renderCatalog();
+      updateAutoPriceHint();
+    }
     if (viewName === 'settings') {
       updateCalculators();
+      populateBillCatalogPicker();
+      renderBillSlip();
+      renderOrderBook();
       renderStatutoryPreview();
       updateDiagnostics();
     }
@@ -1069,7 +1498,7 @@
   }
 
   function switchSubtab(subtab) {
-    const valid = ['calc', 'statutory', 'app'];
+    const valid = ['calc', 'bill', 'orders', 'statutory', 'app'];
     if (!valid.includes(subtab)) return;
     state.activeSubtab = subtab;
     valid.forEach((s) => {
@@ -1081,6 +1510,11 @@
       btn.setAttribute('aria-selected', on ? 'true' : 'false');
     });
     if (subtab === 'calc') updateCalculators();
+    if (subtab === 'bill') {
+      populateBillCatalogPicker();
+      renderBillSlip();
+    }
+    if (subtab === 'orders') renderOrderBook();
     if (subtab === 'statutory') renderStatutoryPreview();
     if (subtab === 'app') updateDiagnostics();
   }
@@ -1380,8 +1814,10 @@
     captureRateOfDay(state.prices);
     if (saveCache && state.live.connected) persistCachedRates();
     renderDeskRates(prev);
+    if (state.activeView === 'catalog') updateAutoPriceHint();
     if (state.activeView === 'exchanges') renderExchangeComparison();
     if (state.activeView === 'settings' && state.activeSubtab === 'calc') updateCalculators();
+    if (state.activeView === 'settings' && state.activeSubtab === 'bill') renderBillSlip();
     if (state.activeView === 'settings' && state.activeSubtab === 'statutory') renderStatutoryPreview();
   }
 
@@ -1924,8 +2360,11 @@
       category: item.category,
       purity: item.purity || '',
       weight: Number(item.weight) || 0,
+      makingPct: Math.max(0, Number(item.makingPct) || 0),
       price: Number(item.price) || 0,
       sku: item.sku || '',
+      stockStatus: normalizeStockStatus(item.stockStatus),
+      featured: Boolean(item.featured),
       note: item.note || '',
       media: publishedMedia,
       createdAt: item.createdAt || new Date().toISOString()
@@ -1960,8 +2399,11 @@
         category: updatedFields.category,
         purity: updatedFields.purity,
         weight: updatedFields.weight,
+        makingPct: Math.max(0, Number(updatedFields.makingPct ?? x.makingPct) || 0),
         price: updatedFields.price,
         sku: updatedFields.sku,
+        stockStatus: normalizeStockStatus(updatedFields.stockStatus ?? x.stockStatus),
+        featured: updatedFields.featured !== undefined ? Boolean(updatedFields.featured) : Boolean(x.featured),
         note: updatedFields.note
       };
     });
@@ -1977,6 +2419,38 @@
     state.owner.publishedItems = state.owner.publishedItems.map((x) => (
       x.id === updatedFields.id ? { ...x, ...updatedFields } : x
     ));
+  }
+
+  async function repriceAllPublishedOnGitHub() {
+    if (!state.prices) throw new Error('Waiting for live bullion rates before repricing.');
+    const remote = await fetchRemoteCatalogFromGitHub();
+    let count = 0;
+    const updatedList = remote.items.map((x) => {
+      if (!x || !(Number(x.weight) > 0)) return x;
+      const est = computeAutoItemPrice({
+        category: x.category || 'Gold',
+        purity: x.purity || '',
+        weight: Number(x.weight),
+        makingPct: Number(x.makingPct) > 0 ? Number(x.makingPct) : 10,
+        includeGst: true
+      });
+      if (!est) return x;
+      count += 1;
+      return { ...x, price: est.grandTotal, makingPct: Number(x.makingPct) > 0 ? Number(x.makingPct) : 10 };
+    });
+    if (!count) throw new Error('No weighted items found in published inventory to reprice.');
+    const putPayload = {
+      message: `Batch live reprice ${count} jewellery item(s)`,
+      content: utf8ToBase64(`${JSON.stringify(updatedList, null, 2)}\n`),
+      branch: CATALOG_REPO_BRANCH
+    };
+    if (remote.sha) putPayload.sha = remote.sha;
+    await ghContentsRequest('PUT', CATALOG_MANIFEST_REPO_PATH, putPayload);
+    state.owner.publishedItems = state.owner.publishedItems.map((x) => {
+      const match = updatedList.find((u) => u && u.id === x.id);
+      return match ? { ...x, price: match.price, makingPct: match.makingPct } : x;
+    });
+    return count;
   }
 
   async function deletePublishedItemFromGitHub(item) {
@@ -2022,11 +2496,38 @@
       category: $('f-category')?.value || 'Gold',
       purity: ($('f-purity')?.value || '').trim(),
       weight: Math.max(0, Number($('f-weight')?.value) || 0),
+      makingPct: Math.max(0, Number($('f-making')?.value) || 0),
       price,
       sku: ($('f-sku')?.value || '').trim(),
+      stockStatus: normalizeStockStatus($('f-stock')?.value),
+      featured: Boolean($('f-featured')?.checked),
       note: ($('f-note')?.value || '').trim(),
       createdAt: new Date().toISOString()
     };
+  }
+
+  function updateAutoPriceHint() {
+    const bar = $('f-autoprice-hint');
+    const txt = $('f-autoprice-text');
+    if (!bar || !txt) return;
+    const w = Math.max(0, Number($('f-weight')?.value) || 0);
+    if (!(w > 0) || !state.prices) {
+      bar.classList.add('hidden');
+      return;
+    }
+    const est = computeAutoItemPrice({
+      category: $('f-category')?.value || 'Gold',
+      purity: ($('f-purity')?.value || '').trim(),
+      weight: w,
+      makingPct: Math.max(0, Number($('f-making')?.value) || 0),
+      includeGst: true
+    });
+    if (!est) {
+      bar.classList.add('hidden');
+      return;
+    }
+    bar.classList.remove('hidden');
+    txt.textContent = `Live ${est.metal} estimate (${w}g): Metal ${fmtINR(est.baseValue)} + Making ${fmtINR(est.makingCharges)} + ${est.gstPct}% GST = ${fmtINR(est.grandTotal)} (tap "Auto ₹" to fill)`;
   }
 
   function revokeItemObjectUrls() {
@@ -2071,6 +2572,8 @@
     const filtered = all.filter((p) => {
       if (f === 'live' && p._source !== 'published') return false;
       if (f === 'draft' && p._source !== 'local') return false;
+      if (f === 'featured' && !p.featured) return false;
+      if (f === 'sold_out' && normalizeStockStatus(p.stockStatus) !== 'sold_out') return false;
       if ((f === 'Gold' || f === 'Silver' || f === 'Other') && String(p.category || 'Other') !== f) return false;
       if (!q) return true;
       return [p.name, p.category, p.purity, p.sku, p.note].some((v) => String(v || '').toLowerCase().includes(q));
@@ -2078,6 +2581,7 @@
 
     const sortMode = state.owner.sort;
     filtered.sort((a, b) => {
+      if (Boolean(b.featured) !== Boolean(a.featured)) return b.featured ? 1 : -1;
       if (sortMode === 'name') return String(a.name || '').localeCompare(String(b.name || ''), 'en');
       if (sortMode === 'price-asc' || sortMode === 'price-desc') {
         const pa = Number(a.price) || 0;
@@ -2102,6 +2606,9 @@
       const media = resolveDisplayMedia(item);
       const first = media[0];
       const isDraft = item._source === 'local';
+      const stock = normalizeStockStatus(item.stockStatus);
+      const isSoldOut = stock === 'sold_out';
+      const isFeatured = Boolean(item.featured);
       const mediaHtml = first
         ? (first.type === 'video'
             ? `<video src="${escapeHtml(first.src)}" muted playsinline preload="metadata"></video>`
@@ -2111,15 +2618,19 @@
       const specs = [];
       if (item.purity) specs.push(`<span class="spec-tag">${escapeHtml(item.purity)}</span>`);
       if (Number(item.weight) > 0) specs.push(`<span class="spec-tag tabular">${Number(item.weight).toFixed(3)} g</span>`);
+      if (Number(item.makingPct) > 0) specs.push(`<span class="spec-tag tabular">MC ${Number(item.makingPct)}%</span>`);
       if (item.sku) specs.push(`<span class="spec-tag mono">${escapeHtml(item.sku)}</span>`);
+      if (stock === 'made_to_order') specs.push('<span class="pill pill-blue" style="padding:0.1rem 0.42rem;font-size:0.62rem;">Made to Order</span>');
+      else if (isSoldOut) specs.push('<span class="pill pill-red" style="padding:0.1rem 0.42rem;font-size:0.62rem;">Sold Out</span>');
+
       const priceHtml = Number(item.price) > 0 ? fmtINR(Number(item.price)) : 'Price on request';
 
       return `
-        <article class="item-card">
+        <article class="item-card${isSoldOut ? ' is-sold-out' : ''}${isFeatured ? ' is-featured' : ''}">
           <div class="item-media" data-open-lb="${escapeHtml(item.id)}" data-src-type="${item._source}">
             ${mediaHtml}
             <span class="item-badge-tl pill ${isDraft ? 'pill-gold' : 'pill-green'}">${isDraft ? 'Local Draft' : 'Live'}</span>
-            ${media.length > 1 ? `<span class="item-badge-tr pill">${media.length} files</span>` : ''}
+            ${isFeatured ? '<span class="item-badge-tr pill pill-featured">★ Pick</span>' : (media.length > 1 ? `<span class="item-badge-tr pill">${media.length} files</span>` : '')}
           </div>
           <div class="item-body">
             <div class="item-cat">${escapeHtml(item.category || 'Gold')}</div>
@@ -2129,6 +2640,8 @@
             ${item.note ? `<div class="item-note">${escapeHtml(item.note)}</div>` : ''}
             <div class="item-actions">
               <button type="button" class="btn btn-ghost btn-xs" data-edit-item="${escapeHtml(item.id)}" data-src-type="${item._source}">Edit</button>
+              <button type="button" class="btn btn-ghost btn-xs" data-tag-item="${escapeHtml(item.id)}" data-src-type="${item._source}" title="Printable QR Price Tag">QR Tag</button>
+              <button type="button" class="btn btn-ghost btn-xs" data-bill-item="${escapeHtml(item.id)}" data-src-type="${item._source}" title="Add to GST Bill Slip">+ Bill</button>
               ${isDraft ? `<button type="button" class="btn btn-green btn-xs" data-pub-draft="${escapeHtml(item.id)}">Publish Live</button>` : ''}
               <button type="button" class="btn btn-ghost btn-xs" data-wa-item="${escapeHtml(item.id)}" data-src-type="${item._source}">WhatsApp</button>
               <button type="button" class="btn btn-red btn-xs" style="margin-left:auto;" data-del-item="${escapeHtml(item.id)}" data-src-type="${item._source}">Delete</button>
@@ -2153,8 +2666,11 @@
     $('edit-category').value = item.category || 'Gold';
     $('edit-purity').value = item.purity || '';
     $('edit-weight').value = item.weight || '';
+    $('edit-making').value = item.makingPct !== undefined ? item.makingPct : 10;
     $('edit-price').value = item.price || '';
     $('edit-sku').value = item.sku || '';
+    $('edit-stock').value = normalizeStockStatus(item.stockStatus);
+    $('edit-featured').checked = Boolean(item.featured);
     $('edit-note').value = item.note || '';
     $('edit-modal-sub').textContent = src === 'local' ? 'Updates this local draft in IndexedDB.' : 'Publishes updated details straight to catalog/products.json on GitHub.';
     $('edit-modal').classList.remove('hidden');
@@ -2421,6 +2937,309 @@
   }
 
   // =========================================================================
+  // OWNER SUITE: GST BILL SLIP, ORDER BOOK, QR PRICE TAG & EXPORTS
+  // =========================================================================
+  function nextBillNumber(bump = false) {
+    const year = todayIstIso().slice(0, 4);
+    let seq = Math.max(1, Number(lsGet(STORAGE_KEYS.billSeq, '1')) || 1);
+    if (bump) {
+      seq += 1;
+      lsSet(STORAGE_KEYS.billSeq, String(seq));
+    }
+    return `SJ-${year}-${String(seq).padStart(3, '0')}`;
+  }
+
+  function populateBillCatalogPicker() {
+    const sel = $('bill-pick-catalog');
+    if (!sel) return;
+    const all = [
+      ...state.owner.publishedItems.map((x) => ({ ...x, _src: 'Live' })),
+      ...state.owner.localItems.map((x) => ({ ...x, _src: 'Draft' }))
+    ];
+    sel.innerHTML = '<option value="">+ Pick from Catalogue…</option>' + all.map((p) => (
+      `<option value="${escapeHtml(p.id)}">${escapeHtml(p.name)} (${escapeHtml(p.purity || p.category || 'Gold')}${Number(p.weight) > 0 ? ` · ${Number(p.weight).toFixed(2)}g` : ''})</option>`
+    )).join('');
+  }
+
+  function syncBillMetaFromInputs() {
+    if ($('bill-doc-type')) state.bill.docType = $('bill-doc-type').value || 'GST Estimate';
+    if ($('bill-number')) {
+      if (!$('bill-number').value.trim()) $('bill-number').value = state.bill.billNo || nextBillNumber(false);
+      state.bill.billNo = $('bill-number').value.trim();
+    }
+    if ($('bill-cust-name')) state.bill.customerName = $('bill-cust-name').value.trim();
+    if ($('bill-cust-phone')) state.bill.customerPhone = $('bill-cust-phone').value.trim();
+    if ($('bill-old-exchange')) state.bill.oldExchange = Math.max(0, Number($('bill-old-exchange').value) || 0);
+    if ($('bill-discount')) state.bill.discount = Math.max(0, Number($('bill-discount').value) || 0);
+    if ($('bill-advance')) state.bill.advance = Math.max(0, Number($('bill-advance').value) || 0);
+    if ($('bill-notes')) state.bill.notes = $('bill-notes').value.trim();
+    if ($('bill-include-gst')) state.bill.includeGst = Boolean($('bill-include-gst').checked);
+  }
+
+  function renderBillSlipHtml(billDraft, totals) {
+    const docType = escapeHtml(billDraft.docType || 'GST Estimate');
+    const billNo = escapeHtml(billDraft.billNo || nextBillNumber(false));
+    const cust = escapeHtml(billDraft.customerName || 'Walk-in Customer');
+    const phone = escapeHtml(billDraft.customerPhone || '');
+    const dateStr = escapeHtml(todayIstIso());
+
+    const rowsHtml = totals.lines.length
+      ? totals.lines.map((ln, idx) => `
+          <tr>
+            <td>${idx + 1}. <strong>${escapeHtml(ln.desc)}</strong><br/><span style="font-size:0.68rem;color:#555;">${escapeHtml(ln.metal)}${ln.huid ? ` · HUID: ${escapeHtml(ln.huid)}` : ''} · @${fmtINR(ln.ratePerGram)}/g</span></td>
+            <td style="text-align:right;">${ln.weight.toFixed(3)}g</td>
+            <td style="text-align:right;">${fmtINR(ln.metalValue)}</td>
+            <td style="text-align:right;">${fmtINR(ln.makingCharges)}<br/><span style="font-size:0.64rem;color:#666;">(${escapeHtml(ln.makingLabel)})</span></td>
+            <td style="text-align:right;font-weight:700;">${fmtINR(ln.taxable)}</td>
+          </tr>
+        `).join('')
+      : '<tr><td colspan="5" style="text-align:center;color:#666;padding:0.9rem;">Add a jewellery item on the left to preview itemised slip</td></tr>';
+
+    return `
+      <div class="bill-head">
+        <div>
+          <h4>SATYANARAYAN JEWELLERS</h4>
+          <div class="bill-meta">Naya Sarak / Cuttack Showroom, Odisha · BIS Hallmarked</div>
+          <div class="bill-meta">GSTIN: <strong>${SHOP_GSTIN}</strong></div>
+        </div>
+        <div class="bill-meta" style="text-align:right;">
+          <div><strong>${docType}</strong></div>
+          <div>No: <strong>${billNo}</strong></div>
+          <div>Date: ${dateStr}</div>
+        </div>
+      </div>
+      <div style="font-size:0.75rem;margin-bottom:0.55rem;display:flex;justify-content:space-between;gap:0.5rem;flex-wrap:wrap;">
+        <span>Customer: <strong>${cust}</strong>${phone ? ` · ${phone}` : ''}</span>
+        <span>Total Net Wt: <strong>${totals.totalWeight.toFixed(3)} g</strong></span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Item &amp; Purity</th>
+            <th style="text-align:right;">Net Wt</th>
+            <th style="text-align:right;">Metal ₹</th>
+            <th style="text-align:right;">Making</th>
+            <th style="text-align:right;">Taxable</th>
+          </tr>
+        </thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>
+      <div class="bill-totals">
+        <div class="bill-row"><span>Metal + Making Subtotal</span><strong>${fmtINR(totals.metalSubtotal + totals.makingSubtotal)}</strong></div>
+        ${totals.discount > 0 ? `<div class="bill-row"><span>Less Special Discount</span><strong>-${fmtINR(totals.discount)}</strong></div>` : ''}
+        <div class="bill-row"><span>Taxable Value</span><strong>${fmtINR(totals.taxableValue)}</strong></div>
+        ${totals.gstTotal > 0 ? `<div class="bill-row"><span>CGST + SGST (${fmtINR(totals.cgst)} + ${fmtINR(totals.sgst)})</span><strong>+${fmtINR(totals.gstTotal)}</strong></div>` : '<div class="bill-row"><span>GST</span><strong>Excluded (Estimate)</strong></div>'}
+        <div class="bill-row"><span><strong>Gross Total</strong></span><strong>${fmtINR(totals.grossTotal)}</strong></div>
+        ${totals.oldExchange > 0 ? `<div class="bill-row"><span>Less Old Gold/Silver Exchange</span><strong>-${fmtINR(totals.oldExchange)}</strong></div>` : ''}
+        ${totals.advance > 0 ? `<div class="bill-row"><span>Less Advance Paid</span><strong>-${fmtINR(totals.advance)}</strong></div>` : ''}
+        <div class="bill-row is-grand"><span>${totals.netPayable >= 0 ? 'Net Balance Payable' : 'Net Refund Due'}</span><span>${fmtINR(Math.abs(totals.netPayable))}</span></div>
+      </div>
+      ${billDraft.notes ? `<div style="margin-top:0.55rem;font-size:0.7rem;color:#444;">Remark: ${escapeHtml(billDraft.notes)}</div>` : ''}
+      <div style="margin-top:0.65rem;padding-top:0.45rem;border-top:1px dashed #ccc;font-size:0.65rem;color:#666;display:flex;justify-content:space-between;">
+        <span>Subject to Cuttack jurisdiction · E.&amp;O.E.</span>
+        <span>Authorised Signatory</span>
+      </div>
+    `;
+  }
+
+  function renderBillSlip() {
+    syncBillMetaFromInputs();
+    const totals = computeBillTotals(state.bill);
+    const listEl = $('bill-lines-list');
+    if (listEl) {
+      if (!totals.lines.length) {
+        listEl.innerHTML = '<div class="empty-state" style="padding:0.85rem;font-size:0.75rem;">No items added yet. Fill item details above or pick from Catalogue.</div>';
+      } else {
+        listEl.innerHTML = totals.lines.map((ln) => `
+          <div class="bill-line-card">
+            <div style="min-width:0;">
+              <div style="font-size:0.8rem;font-weight:700;color:var(--text);">${escapeHtml(ln.desc)}</div>
+              <div class="bill-line-meta tabular">${escapeHtml(ln.metal)} · ${ln.weight.toFixed(3)}g @ ${fmtINR(ln.ratePerGram)}/g · Making ${escapeHtml(ln.makingLabel)}${ln.huid ? ` · HUID ${escapeHtml(ln.huid)}` : ''}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.45rem;flex-shrink:0;">
+              <strong class="tabular" style="font-size:0.82rem;color:var(--gold-light);">${fmtINR(ln.lineTotal)}</strong>
+              <button type="button" class="btn btn-red btn-xs" data-del-bill-line="${escapeHtml(ln.id)}" aria-label="Remove line">✕</button>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+    const paper = $('bill-preview-paper');
+    if (paper) paper.innerHTML = renderBillSlipHtml(state.bill, totals);
+  }
+
+  function addCatalogItemToBill(item) {
+    if (!item) return;
+    const metal = inferMetalCode(item.category, item.purity);
+    const w = Math.max(0, Number(item.weight) || 0);
+    const useFlatPrice = !(w > 0) && Number(item.price) > 0;
+    state.bill.lines.push({
+      id: `bl-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`,
+      desc: item.name || 'Jewellery Item',
+      metal,
+      huid: item.sku || '',
+      weight: w,
+      ratePerGram: 0,
+      makingVal: useFlatPrice ? Math.round(Number(item.price) / 1.03) : (Number(item.makingPct) > 0 ? Number(item.makingPct) : 10),
+      makingType: useFlatPrice ? 'flat' : 'pct'
+    });
+    switchView('settings');
+    switchSubtab('bill');
+    showToast(`Added "${item.name}" to GST Bill Slip.`, 'success');
+  }
+
+  function printHtmlInSlipSheet(innerHtml) {
+    const sheet = $('owner-print-sheet');
+    if (!sheet) { window.print(); return; }
+    sheet.innerHTML = innerHtml;
+    document.body.classList.add('printing-slip');
+    const cleanup = () => {
+      document.body.classList.remove('printing-slip');
+      window.removeEventListener('afterprint', cleanup);
+    };
+    window.addEventListener('afterprint', cleanup);
+    window.print();
+    setTimeout(cleanup, 1200);
+  }
+
+  function loadOrderBook() {
+    try {
+      const parsed = JSON.parse(lsGet(STORAGE_KEYS.orderBook, '[]'));
+      if (Array.isArray(parsed)) {
+        state.orders.items = parsed.map(sanitizeOrderRecord).filter(Boolean);
+      }
+    } catch {
+      state.orders.items = [];
+    }
+    updateOrderBadges();
+  }
+
+  function persistOrderBook() {
+    lsSet(STORAGE_KEYS.orderBook, JSON.stringify(state.orders.items));
+    updateOrderBadges();
+  }
+
+  function updateOrderBadges() {
+    const activeCount = state.orders.items.filter((o) => o.status !== 'Delivered').length;
+    ['desk-orders-badge', 'subtab-orders-badge'].forEach((id) => {
+      const el = $(id);
+      if (!el) return;
+      el.textContent = String(activeCount);
+      el.classList.toggle('hidden', activeCount === 0);
+    });
+  }
+
+  function renderOrderBook() {
+    updateOrderBadges();
+    const listEl = $('ord-list');
+    const subEl = $('ord-summary-sub');
+    const activeOrders = state.orders.items.filter((o) => o.status !== 'Delivered');
+    const totalAdvance = activeOrders.reduce((acc, o) => acc + (Number(o.advance) || 0), 0);
+    if (subEl) {
+      subEl.textContent = `${activeOrders.length} active order${activeOrders.length === 1 ? '' : 's'} · ${fmtINR(totalAdvance)} advance held`;
+    }
+    if (!listEl) return;
+
+    const today = todayIstIso();
+    const f = state.orders.filter;
+    const filtered = state.orders.items.filter((o) => {
+      if (f === 'active') return o.status !== 'Delivered';
+      if (f === 'Ready') return o.status === 'Ready';
+      if (f === 'Delivered') return o.status === 'Delivered';
+      return true;
+    });
+
+    if (!filtered.length) {
+      listEl.innerHTML = '<div class="empty-state" style="padding:1.25rem;">No customer orders in this view. Record custom orders &amp; advance rate-locks on the left.</div>';
+      return;
+    }
+
+    listEl.innerHTML = filtered.map((o) => {
+      const isDelivered = o.status === 'Delivered';
+      const isOverdue = !isDelivered && o.dueDate && o.dueDate < today;
+      const statusPill = o.status === 'Ready'
+        ? 'pill-green'
+        : o.status === 'Karigar'
+          ? 'pill-blue'
+          : o.status === 'Delivered'
+            ? ''
+            : 'pill-gold';
+      return `
+        <div class="order-card${isOverdue ? ' is-overdue' : ''}${isDelivered ? ' is-delivered' : ''}">
+          <div style="min-width:0;flex:1;">
+            <div style="display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.2rem;">
+              <strong style="font-size:0.84rem;">${escapeHtml(o.customerName)}</strong>
+              <span class="pill ${statusPill}" style="padding:0.08rem 0.45rem;font-size:0.62rem;">${escapeHtml(o.status)}</span>
+              ${isOverdue ? '<span class="pill pill-red" style="padding:0.08rem 0.42rem;font-size:0.6rem;">Overdue</span>' : ''}
+            </div>
+            <div style="font-size:0.78rem;color:var(--text-2);font-weight:600;">${escapeHtml(o.item)}</div>
+            <div class="bill-line-meta tabular">
+              ${escapeHtml(o.metal)}${o.weight > 0 ? ` · ~${Number(o.weight).toFixed(2)}g` : ''}
+              ${o.lockedRate > 0 ? ` · Locked @ ${fmtINR(o.lockedRate)}/g` : ''}
+              ${o.advance > 0 ? ` · Adv: ${fmtINR(o.advance)}` : ''}
+              ${o.dueDate ? ` · Due: ${escapeHtml(o.dueDate)}` : ''}
+            </div>
+            ${o.note ? `<div style="font-size:0.7rem;color:var(--text-dim);margin-top:0.2rem;">${escapeHtml(o.note)}</div>` : ''}
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:0.35rem;align-items:center;">
+            <select class="select" data-ord-status="${escapeHtml(o.id)}" style="width:auto;padding:0.25rem 0.45rem;font-size:0.7rem;" aria-label="Order status">
+              <option value="Booked"${o.status === 'Booked' ? ' selected' : ''}>Booked</option>
+              <option value="Karigar"${o.status === 'Karigar' ? ' selected' : ''}>Karigar</option>
+              <option value="Ready"${o.status === 'Ready' ? ' selected' : ''}>Ready</option>
+              <option value="Delivered"${o.status === 'Delivered' ? ' selected' : ''}>Delivered</option>
+            </select>
+            <button type="button" class="btn btn-green btn-xs" data-ord-wa="${escapeHtml(o.id)}">WhatsApp</button>
+            <button type="button" class="btn btn-ghost btn-xs" data-ord-to-bill="${escapeHtml(o.id)}" title="Convert order to GST Bill Slip">→ Bill</button>
+            <button type="button" class="btn btn-red btn-xs" data-ord-del="${escapeHtml(o.id)}" aria-label="Delete order">✕</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function buildTagCardHtml(item) {
+    const qrTarget = `https://satyanarayanjewellery.github.io/shop/#products?sku=${encodeURIComponent(item.sku || item.id)}`;
+    const qrSvg = generateQrSvg(qrTarget, 96);
+    const priceLine = Number(item.price) > 0 ? fmtINR(Number(item.price)) : 'Price on Request';
+    return `
+      <div class="tag-preview-card">
+        <div class="tag-qr">${qrSvg}</div>
+        <div class="tag-info">
+          <div class="tag-brand">SATYANARAYAN JEWELLERS</div>
+          <div class="tag-title">${escapeHtml(item.name)}</div>
+          <div class="tag-meta">
+            ${escapeHtml(item.category || 'Gold')}${item.purity ? ` · ${escapeHtml(item.purity)}` : ''}<br/>
+            ${Number(item.weight) > 0 ? `Net Wt: <strong>${Number(item.weight).toFixed(3)} g</strong>` : 'BIS Hallmarked'}
+            ${item.sku ? `<br/>SKU: <strong>${escapeHtml(item.sku)}</strong>` : ''}
+          </div>
+          <div class="tag-price">${priceLine}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  function openTagModal(id, src) {
+    const item = findItem(id, src);
+    if (!item) return;
+    state.owner.tagItem = item;
+    const stage = $('tag-preview-stage');
+    if (stage) stage.innerHTML = buildTagCardHtml(item);
+    $('tag-modal')?.classList.remove('hidden');
+  }
+
+  function downloadTextFile(filename, content, mime = 'text/plain;charset=utf-8') {
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  // =========================================================================
   // PWA LIFECYCLE (INSTALL PROMPT, SW UPDATE & DIAGNOSTICS)
   // =========================================================================
   function isStandaloneMode() {
@@ -2528,12 +3347,15 @@
       liveStarted = true;
       loadStatutoryRates(true);
       hydrateCachedRates();
+      loadOrderBook();
       connectLiveWebSockets();
       syncMetalsRest(false);
       scheduleFxHeartbeat();
       renderClockAndMarket();
       setInterval(renderClockAndMarket, 1000);
       setInterval(renderLiveStatusBadge, 10000);
+    } else {
+      loadOrderBook();
     }
     refreshAllCatalog();
 
@@ -2750,7 +3572,72 @@
         } else if ($('f-category')) {
           $('f-category').value = 'Gold';
         }
+        updateAutoPriceHint();
       });
+    });
+
+    ['f-category', 'f-purity', 'f-weight', 'f-making'].forEach((id) => {
+      $(id)?.addEventListener('input', updateAutoPriceHint);
+      $(id)?.addEventListener('change', updateAutoPriceHint);
+    });
+
+    $('btn-f-autoprice')?.addEventListener('click', () => {
+      if (!state.prices) return showToast('Waiting for live bullion rates…', 'alert');
+      const w = Math.max(0, Number($('f-weight')?.value) || 0);
+      if (!(w > 0)) return showToast('Enter item weight (g) first to auto-calculate price.', 'alert');
+      const est = computeAutoItemPrice({
+        category: $('f-category')?.value || 'Gold',
+        purity: ($('f-purity')?.value || '').trim(),
+        weight: w,
+        makingPct: Math.max(0, Number($('f-making')?.value) || 0),
+        includeGst: true
+      });
+      if (!est) return showToast('Could not calculate live estimate.', 'alert');
+      if ($('f-price')) $('f-price').value = String(est.grandTotal);
+      updateAutoPriceHint();
+      showToast(`Filled live ${est.metal} price: ${fmtINR(est.grandTotal)}`, 'success');
+    });
+
+    $('btn-reprice-inventory')?.addEventListener('click', () => {
+      if (!state.prices) return showToast('Waiting for live bullion rates…', 'alert');
+      openConfirm(
+        'Live Reprice All Weighted Items?',
+        'Updates the published price of every catalogue item with Weight > 0 using today\'s live Cuttack bullion rate + its Making % + statutory GST.',
+        'Reprice Live',
+        async () => {
+          closeConfirm();
+          if (state.owner.busy) return;
+          state.owner.busy = true;
+          try {
+            const count = await repriceAllPublishedOnGitHub();
+            renderCatalog();
+            showToast(`Repriced ${count} item${count === 1 ? '' : 's'} live on GitHub!`, 'success');
+          } catch (err) {
+            showToast(err?.message || 'Batch reprice failed.', 'error');
+          } finally {
+            state.owner.busy = false;
+          }
+        }
+      );
+    });
+
+    $('btn-export-csv')?.addEventListener('click', () => {
+      const all = [...state.owner.publishedItems, ...state.owner.localItems];
+      if (!all.length) return showToast('No inventory items to export.', 'alert');
+      const csv = catalogItemsToCsv(all);
+      downloadTextFile(`sj-inventory-${todayIstIso()}.csv`, csv, 'text/csv;charset=utf-8');
+      showToast(`Exported ${all.length} item(s) to CSV.`, 'success');
+    });
+
+    $('btn-export-json')?.addEventListener('click', () => {
+      const payload = {
+        exportedAt: new Date().toISOString(),
+        gstin: SHOP_GSTIN,
+        published: state.owner.publishedItems,
+        orders: state.orders.items
+      };
+      downloadTextFile(`sj-owner-backup-${todayIstIso()}.json`, `${JSON.stringify(payload, null, 2)}\n`, 'application/json;charset=utf-8');
+      showToast('Downloaded JSON backup (Inventory + Orders).', 'success');
     });
 
     $('btn-save-draft')?.addEventListener('click', async () => {
@@ -2840,6 +3727,16 @@
       const edit = e.target.closest('[data-edit-item]');
       if (edit) return openEditModal(edit.dataset.editItem, edit.dataset.srcType);
 
+      const tagBtn = e.target.closest('[data-tag-item]');
+      if (tagBtn) return openTagModal(tagBtn.dataset.tagItem, tagBtn.dataset.srcType);
+
+      const billBtn = e.target.closest('[data-bill-item]');
+      if (billBtn) {
+        const item = findItem(billBtn.dataset.billItem, billBtn.dataset.srcType);
+        if (item) addCatalogItemToBill(item);
+        return;
+      }
+
       const wa = e.target.closest('[data-wa-item]');
       if (wa) {
         const item = findItem(wa.dataset.waItem, wa.dataset.srcType);
@@ -2915,6 +3812,21 @@
     $('btn-close-edit')?.addEventListener('click', closeEdit);
     $('btn-cancel-edit')?.addEventListener('click', closeEdit);
     $('edit-modal')?.addEventListener('click', (e) => { if (e.target.id === 'edit-modal') closeEdit(); });
+    $('btn-edit-autoprice')?.addEventListener('click', () => {
+      if (!state.prices) return showToast('Waiting for live bullion rates…', 'alert');
+      const w = Math.max(0, Number($('edit-weight')?.value) || 0);
+      if (!(w > 0)) return showToast('Enter item weight (g) first.', 'alert');
+      const est = computeAutoItemPrice({
+        category: $('edit-category')?.value || 'Gold',
+        purity: ($('edit-purity')?.value || '').trim(),
+        weight: w,
+        makingPct: Math.max(0, Number($('edit-making')?.value) || 0),
+        includeGst: true
+      });
+      if (!est) return;
+      $('edit-price').value = String(est.grandTotal);
+      showToast(`Filled live ${est.metal} price: ${fmtINR(est.grandTotal)}`, 'success');
+    });
     $('edit-form')?.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (state.owner.busy) return;
@@ -2928,8 +3840,11 @@
         category: $('edit-category').value || 'Gold',
         purity: $('edit-purity').value.trim(),
         weight: Math.max(0, Number($('edit-weight').value) || 0),
+        makingPct: Math.max(0, Number($('edit-making').value) || 0),
         price: Math.max(0, Number($('edit-price').value) || 0),
         sku: $('edit-sku').value.trim(),
+        stockStatus: normalizeStockStatus($('edit-stock').value),
+        featured: Boolean($('edit-featured').checked),
         note: $('edit-note').value.trim()
       };
       const btn = $('btn-save-edit');
@@ -2980,11 +3895,27 @@
       state.owner.lightboxIdx = (state.owner.lightboxIdx + 1) % n;
       renderLightbox();
     });
+    const closeTag = () => {
+      $('tag-modal')?.classList.add('hidden');
+      state.owner.tagItem = null;
+    };
+    $('btn-close-tag')?.addEventListener('click', closeTag);
+    $('tag-modal')?.addEventListener('click', (e) => { if (e.target.id === 'tag-modal') closeTag(); });
+    $('btn-tag-bill')?.addEventListener('click', () => {
+      const it = state.owner.tagItem;
+      closeTag();
+      if (it) addCatalogItemToBill(it);
+    });
+    $('btn-tag-print')?.addEventListener('click', () => {
+      if (!state.owner.tagItem) return;
+      printHtmlInSlipSheet(`<div style="display:flex;justify-content:center;padding:1rem;">${buildTagCardHtml(state.owner.tagItem)}</div>`);
+    });
+
     $('btn-confirm-cancel')?.addEventListener('click', closeConfirm);
     $('confirm-modal')?.addEventListener('click', (e) => { if (e.target.id === 'confirm-modal') closeConfirm(); });
     $('btn-confirm-ok')?.addEventListener('click', () => { if (typeof confirmCallback === 'function') confirmCallback(); });
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') { closeEdit(); closeLb(); closeConfirm(); }
+      if (e.key === 'Escape') { closeEdit(); closeLb(); closeConfirm(); closeTag(); }
     });
 
     // Exchanges
@@ -3072,6 +4003,229 @@
       const t = buildQuoteText();
       if (!t) return;
       window.open(`https://wa.me/?text=${encodeURIComponent(t)}`, '_blank', 'noopener,noreferrer');
+    });
+
+    // GST Estimate & Bill Slip Maker
+    ['bill-doc-type', 'bill-number', 'bill-cust-name', 'bill-cust-phone',
+      'bill-old-exchange', 'bill-discount', 'bill-advance', 'bill-notes', 'bill-include-gst']
+      .forEach((id) => {
+        $(id)?.addEventListener('input', renderBillSlip);
+        $(id)?.addEventListener('change', renderBillSlip);
+      });
+
+    $('bill-pick-catalog')?.addEventListener('change', (e) => {
+      const id = e.target.value;
+      if (!id) return;
+      const item = findItem(id, 'published') || findItem(id, 'local');
+      e.target.value = '';
+      if (!item) return;
+      if ($('bill-item-desc')) $('bill-item-desc').value = item.name || '';
+      if ($('bill-item-metal')) $('bill-item-metal').value = inferMetalCode(item.category, item.purity);
+      if ($('bill-item-huid')) $('bill-item-huid').value = item.sku || '';
+      if ($('bill-item-weight') && Number(item.weight) > 0) $('bill-item-weight').value = String(item.weight);
+      if ($('bill-item-making')) $('bill-item-making').value = String(Number(item.makingPct) > 0 ? item.makingPct : 10);
+      if ($('bill-item-making-type')) $('bill-item-making-type').value = 'pct';
+      showToast(`Loaded "${item.name}" into item builder.`, 'info');
+    });
+
+    $('btn-bill-add-line')?.addEventListener('click', () => {
+      const desc = ($('bill-item-desc')?.value || '').trim();
+      const w = Math.max(0, Number($('bill-item-weight')?.value) || 0);
+      const mt = $('bill-item-making-type')?.value || 'pct';
+      if (!desc) return showToast('Enter an item description.', 'alert');
+      if (!(w > 0) && mt !== 'flat') return showToast('Enter net weight in grams (or choose Flat ₹ making).', 'alert');
+      state.bill.lines.push({
+        id: `bl-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`,
+        desc,
+        metal: $('bill-item-metal')?.value || '22K',
+        huid: ($('bill-item-huid')?.value || '').trim().toUpperCase(),
+        weight: w,
+        ratePerGram: Math.max(0, Number($('bill-item-rate')?.value) || 0),
+        makingVal: Math.max(0, Number($('bill-item-making')?.value) || 0),
+        makingType: mt
+      });
+      if ($('bill-item-desc')) $('bill-item-desc').value = '';
+      if ($('bill-item-huid')) $('bill-item-huid').value = '';
+      if ($('bill-item-rate')) $('bill-item-rate').value = '';
+      renderBillSlip();
+    });
+
+    $('bill-lines-list')?.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-del-bill-line]');
+      if (!btn) return;
+      state.bill.lines = state.bill.lines.filter((l) => l.id !== btn.dataset.delBillLine);
+      renderBillSlip();
+    });
+
+    $('btn-bill-pull-ex')?.addEventListener('click', () => {
+      const ex = computeOldExchangeMath({
+        metal: state.exCalcMetal,
+        purity: $('excalc-purity')?.value,
+        weight: $('excalc-weight')?.value,
+        stone: $('excalc-stone')?.value,
+        hallmarked: Boolean($('excalc-hallmark')?.checked),
+        newBill: 0
+      });
+      if (!ex || !(ex.netValue > 0)) return showToast('Calculate Old Gold/Silver value first in Counter Calculators.', 'alert');
+      const credit = Math.round(ex.netValue);
+      if ($('bill-old-exchange')) $('bill-old-exchange').value = String(credit);
+      renderBillSlip();
+      showToast(`Pulled old metal credit: ${fmtINR(credit)}`, 'success');
+    });
+
+    $('btn-bill-reset')?.addEventListener('click', () => {
+      state.bill.lines = [];
+      state.bill.billNo = nextBillNumber(true);
+      if ($('bill-number')) $('bill-number').value = state.bill.billNo;
+      if ($('bill-cust-name')) $('bill-cust-name').value = '';
+      if ($('bill-cust-phone')) $('bill-cust-phone').value = '';
+      if ($('bill-old-exchange')) $('bill-old-exchange').value = '0';
+      if ($('bill-discount')) $('bill-discount').value = '0';
+      if ($('bill-advance')) $('bill-advance').value = '0';
+      if ($('bill-notes')) $('bill-notes').value = '';
+      renderBillSlip();
+      showToast(`Started fresh slip ${state.bill.billNo}.`, 'info');
+    });
+
+    $('btn-bill-print')?.addEventListener('click', () => {
+      syncBillMetaFromInputs();
+      const totals = computeBillTotals(state.bill);
+      printHtmlInSlipSheet(`<div class="bill-preview-paper" style="max-width:44rem;margin:0 auto;">${renderBillSlipHtml(state.bill, totals)}</div>`);
+    });
+
+    $('btn-bill-wa')?.addEventListener('click', () => {
+      syncBillMetaFromInputs();
+      const text = buildBillShareText(state.bill);
+      const rawDigits = (state.bill.customerPhone || '').replace(/\D/g, '');
+      const waPhone = rawDigits.length === 10 ? `91${rawDigits}` : rawDigits;
+      const base = waPhone.length >= 10 ? `https://wa.me/${waPhone}` : 'https://wa.me/';
+      window.open(`${base}?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
+    });
+
+    $('btn-bill-copy')?.addEventListener('click', async () => {
+      syncBillMetaFromInputs();
+      const text = buildBillShareText(state.bill);
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast('Bill slip summary copied to clipboard.', 'success');
+      } catch {
+        showToast('Clipboard unavailable on this browser.', 'alert');
+      }
+    });
+
+    // Customer Orders & Advance Rate-Lock Book
+    $('btn-ord-lock-live')?.addEventListener('click', () => {
+      if (!state.prices) return showToast('Waiting for live bullion rates…', 'alert');
+      const metal = $('ord-metal')?.value || '22K';
+      const map = {
+        '24K': state.prices.gold999ExGstGram,
+        '22K': state.prices.gold916ExGstGram,
+        '18K': state.prices.gold18ExGstGram,
+        S999: state.prices.silver999ExGstGram,
+        S925: state.prices.silver925ExGstGram
+      };
+      const rate = Math.round(map[metal] || state.prices.gold916ExGstGram || 0);
+      if ($('ord-locked-rate')) $('ord-locked-rate').value = String(rate);
+      showToast(`Locked ${metal} rate at ${fmtINR(rate)}/g.`, 'success');
+    });
+
+    $('order-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const rec = sanitizeOrderRecord({
+        customerName: $('ord-name')?.value,
+        phone: $('ord-phone')?.value,
+        item: $('ord-item')?.value,
+        metal: $('ord-metal')?.value,
+        weight: $('ord-weight')?.value,
+        lockedRate: $('ord-locked-rate')?.value,
+        advance: $('ord-advance')?.value,
+        dueDate: $('ord-due')?.value,
+        status: $('ord-status')?.value,
+        note: $('ord-note')?.value
+      });
+      if (!rec) return showToast('Enter customer name and jewellery item.', 'alert');
+      state.orders.items.unshift(rec);
+      persistOrderBook();
+      $('order-form').reset();
+      renderOrderBook();
+      showToast(`Saved order for ${rec.customerName}.`, 'success');
+    });
+
+    $('ord-filters')?.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-ord-filter]');
+      if (!btn) return;
+      state.orders.filter = btn.dataset.ordFilter;
+      document.querySelectorAll('[data-ord-filter]').forEach((b) => b.classList.toggle('is-active', b === btn));
+      renderOrderBook();
+    });
+
+    $('ord-list')?.addEventListener('change', (e) => {
+      const sel = e.target.closest('[data-ord-status]');
+      if (!sel) return;
+      const target = state.orders.items.find((o) => o.id === sel.dataset.ordStatus);
+      if (!target) return;
+      target.status = sel.value;
+      persistOrderBook();
+      renderOrderBook();
+      showToast(`Order marked "${target.status}".`, 'success');
+    });
+
+    $('ord-list')?.addEventListener('click', (e) => {
+      const waBtn = e.target.closest('[data-ord-wa]');
+      if (waBtn) {
+        const ord = state.orders.items.find((o) => o.id === waBtn.dataset.ordWa);
+        if (!ord) return;
+        const txt = buildOrderWhatsAppText(ord);
+        const digits = (ord.phone || '').replace(/\D/g, '');
+        const waPhone = digits.length === 10 ? `91${digits}` : digits;
+        const base = waPhone.length >= 10 ? `https://wa.me/${waPhone}` : 'https://wa.me/';
+        window.open(`${base}?text=${encodeURIComponent(txt)}`, '_blank', 'noopener,noreferrer');
+        return;
+      }
+
+      const billBtn = e.target.closest('[data-ord-to-bill]');
+      if (billBtn) {
+        const ord = state.orders.items.find((o) => o.id === billBtn.dataset.ordToBill);
+        if (!ord) return;
+        state.bill.customerName = ord.customerName;
+        state.bill.customerPhone = ord.phone || '';
+        state.bill.advance = Number(ord.advance) || 0;
+        if ($('bill-cust-name')) $('bill-cust-name').value = ord.customerName;
+        if ($('bill-cust-phone')) $('bill-cust-phone').value = ord.phone || '';
+        if ($('bill-advance')) $('bill-advance').value = String(ord.advance || 0);
+        state.bill.lines.push({
+          id: `bl-${Date.now()}`,
+          desc: ord.item,
+          metal: ord.metal,
+          huid: '',
+          weight: Number(ord.weight) || 10,
+          ratePerGram: Number(ord.lockedRate) || 0,
+          makingVal: 10,
+          makingType: 'pct'
+        });
+        switchSubtab('bill');
+        showToast(`Loaded ${ord.customerName}'s order & advance into GST Bill Slip.`, 'success');
+        return;
+      }
+
+      const delBtn = e.target.closest('[data-ord-del]');
+      if (delBtn) {
+        const ord = state.orders.items.find((o) => o.id === delBtn.dataset.ordDel);
+        if (!ord) return;
+        openConfirm('Delete Order Entry?', `Remove order "${ord.item}" for ${ord.customerName} from this device?`, 'Delete', () => {
+          closeConfirm();
+          state.orders.items = state.orders.items.filter((o) => o.id !== ord.id);
+          persistOrderBook();
+          renderOrderBook();
+          showToast('Order removed.', 'info');
+        });
+      }
+    });
+
+    $('btn-ord-export')?.addEventListener('click', () => {
+      if (!state.orders.items.length) return showToast('No orders recorded yet.', 'alert');
+      downloadTextFile(`sj-customer-orders-${todayIstIso()}.json`, `${JSON.stringify(state.orders.items, null, 2)}\n`, 'application/json;charset=utf-8');
+      showToast('Exported customer orders JSON.', 'success');
     });
 
     // Statutory Publisher
@@ -3181,6 +4335,16 @@
       tokenFingerprint,
       todayIstIso,
       refreshLiveFx,
+      inferMetalCode,
+      normalizeStockStatus,
+      stockStatusLabel,
+      computeAutoItemPrice,
+      computeBillTotals,
+      buildBillShareText,
+      sanitizeOrderRecord,
+      buildOrderWhatsAppText,
+      catalogItemsToCsv,
+      generateQrSvg,
       state
     };
   }

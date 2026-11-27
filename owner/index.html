@@ -364,6 +364,8 @@
           <div class="actions-row" style="margin-top:0.65rem;padding-top:0.65rem;border-top:1px solid var(--border);">
             <button type="button" class="btn btn-gold btn-sm" data-jump-view="catalog">+ Upload Jewellery</button>
             <button id="btn-desk-publish-drafts" type="button" class="btn btn-green btn-sm hidden">Publish All Drafts</button>
+            <button type="button" class="btn btn-gold-outline btn-sm" data-jump-subtab="bill">GST Bill / Estimate</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-jump-subtab="orders">Order Book <span id="desk-orders-badge" class="pill pill-gold hidden" style="padding:0.05rem 0.4rem;font-size:0.62rem;">0</span></button>
             <button type="button" class="btn btn-ghost btn-sm" data-jump-view="accuracy">Audit Accuracy</button>
             <button type="button" class="btn btn-ghost btn-sm" data-jump-subtab="statutory">Edit Duty &amp; GST</button>
             <button type="button" class="btn btn-ghost btn-sm" data-jump-subtab="calc">Counter Quote Calc</button>
@@ -432,18 +434,43 @@
                 <span class="field-label">Weight (g)</span>
                 <input id="f-weight" class="input tabular" type="number" min="0" step="0.001" placeholder="0.000" />
               </label>
+              <label class="field md-span-1">
+                <span class="field-label">Making (%)</span>
+                <input id="f-making" class="input tabular" type="number" min="0" max="100" step="0.1" value="10" />
+              </label>
               <label class="field md-span-2">
                 <span class="field-label">Price ₹ (blank = On request)</span>
-                <input id="f-price" class="input tabular" type="number" min="0" step="0.01" placeholder="Optional" />
+                <div class="input-row">
+                  <input id="f-price" class="input tabular" type="number" min="0" step="0.01" placeholder="Optional" />
+                  <button id="btn-f-autoprice" type="button" class="btn btn-gold-outline btn-xs" title="Auto-fill price from live rate + weight + making % + GST">Auto ₹</button>
+                </div>
               </label>
               <label class="field md-span-1">
                 <span class="field-label">SKU / Code</span>
                 <input id="f-sku" class="input" maxlength="40" placeholder="SJ-001" />
               </label>
-              <label class="field span-2 md-span-2">
-                <span class="field-label">Short Note</span>
-                <input id="f-note" class="input" maxlength="160" placeholder="Ready in Cuttack showroom" />
+              <label class="field md-span-1">
+                <span class="field-label">Stock Status</span>
+                <select id="f-stock" class="select">
+                  <option value="in_stock">In Stock</option>
+                  <option value="made_to_order">Made to Order</option>
+                  <option value="sold_out">Sold Out</option>
+                </select>
               </label>
+              <label class="field span-2 md-span-4">
+                <span class="field-label">Short Note</span>
+                <input id="f-note" class="input" maxlength="160" placeholder="Ready in Cuttack showroom · BIS HUID" />
+              </label>
+              <div class="field span-2 md-span-2" style="justify-content:flex-end;">
+                <label class="checkbox-row" style="padding:0.45rem 0;">
+                  <input id="f-featured" type="checkbox" />
+                  ★ Feature as Showroom Pick (pins first)
+                </label>
+              </div>
+            </div>
+
+            <div id="f-autoprice-hint" class="autoprice-bar hidden">
+              <span id="f-autoprice-text">Live estimate ready</span>
             </div>
 
             <div id="upload-progress" class="progress-wrap hidden">
@@ -468,6 +495,11 @@
               <h3 class="section-title">Shop Inventory</h3>
               <p id="catalog-count-label" class="section-sub">Loading catalogue…</p>
             </div>
+            <div style="display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;" class="no-print">
+              <button id="btn-reprice-inventory" type="button" class="btn btn-gold-outline btn-xs" title="Recalculate prices on weighted items using today's live bullion rate">↻ Live Reprice All</button>
+              <button id="btn-export-csv" type="button" class="btn btn-ghost btn-xs">Export CSV</button>
+              <button id="btn-export-json" type="button" class="btn btn-ghost btn-xs">Backup JSON</button>
+            </div>
           </div>
 
           <div class="filter-bar">
@@ -475,6 +507,8 @@
               <button type="button" class="filter-pill is-active" data-cat-filter="all">All</button>
               <button type="button" class="filter-pill" data-cat-filter="live">Live</button>
               <button type="button" class="filter-pill" data-cat-filter="draft">Drafts</button>
+              <button type="button" class="filter-pill" data-cat-filter="featured">★ Featured</button>
+              <button type="button" class="filter-pill" data-cat-filter="sold_out">Sold Out</button>
               <button type="button" class="filter-pill" data-cat-filter="Gold">Gold</button>
               <button type="button" class="filter-pill" data-cat-filter="Silver">Silver</button>
               <button type="button" class="filter-pill" data-cat-filter="Other">Other</button>
@@ -605,6 +639,8 @@
       <section id="view-settings" class="view hidden" aria-label="Counter Tools, Statutory Rules and App Settings">
         <div class="subtabs" role="tablist" aria-label="Tools and settings sections">
           <button type="button" class="subtab-btn is-active" data-subtab="calc" role="tab" aria-selected="true">Counter Calculators</button>
+          <button type="button" class="subtab-btn" data-subtab="bill" role="tab" aria-selected="false">GST Estimate &amp; Bill Slip</button>
+          <button type="button" class="subtab-btn" data-subtab="orders" role="tab" aria-selected="false">Customer Orders <span id="subtab-orders-badge" class="pill pill-gold hidden" style="padding:0.04rem 0.38rem;font-size:0.62rem;margin-left:0.25rem;">0</span></button>
           <button type="button" class="subtab-btn" data-subtab="statutory" role="tab" aria-selected="false">Duty &amp; GST Publisher</button>
           <button type="button" class="subtab-btn" data-subtab="app" role="tab" aria-selected="false">PWA &amp; Security</button>
         </div>
@@ -707,6 +743,240 @@
                 <div class="quote-total"><span>Exchange Credit</span><span id="exq-net" class="tabular">₹--</span></div>
                 <div id="exq-balance-row" class="quote-line hidden" style="padding-top:0.35rem;border-top:1px dashed var(--border);"><span>Customer Pays / Receives</span><strong id="exq-balance" class="tabular">₹--</strong></div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUBTAB B1: GST ESTIMATE & COUNTER BILL SLIP MAKER -->
+        <div id="subpanel-bill" class="view hidden">
+          <div class="metals-grid">
+            <div class="card">
+              <div class="section-head" style="margin-bottom:0.75rem;">
+                <div>
+                  <h3 class="section-title">GST Estimate &amp; Counter Bill Slip</h3>
+                  <p class="section-sub">Itemised counter slip with BIS HUID, making charges, CGST + SGST split, old gold/silver deduction &amp; showroom GSTIN.</p>
+                </div>
+                <button id="btn-bill-reset" type="button" class="btn btn-ghost btn-xs">New Slip</button>
+              </div>
+
+              <div class="form-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:0.8rem;">
+                <label class="field">
+                  <span class="field-label">Slip Type</span>
+                  <select id="bill-doc-type" class="select">
+                    <option value="GST Estimate">GST Estimate / Quotation</option>
+                    <option value="Tax Invoice">Counter Tax Invoice</option>
+                    <option value="Approval Memo">Approval / Selection Memo</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span class="field-label">Slip No.</span>
+                  <input id="bill-number" class="input mono" maxlength="32" placeholder="SJ-2026-001" />
+                </label>
+                <label class="field">
+                  <span class="field-label">Customer Name</span>
+                  <input id="bill-cust-name" class="input" maxlength="80" placeholder="Walk-in Customer" />
+                </label>
+                <label class="field">
+                  <span class="field-label">Customer Mobile (10-digit)</span>
+                  <input id="bill-cust-phone" class="input tabular" type="tel" maxlength="15" placeholder="98XXXXXXXX" />
+                </label>
+              </div>
+
+              <!-- Add Line Item Box -->
+              <div class="info-box" style="margin-bottom:0.8rem;">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.55rem;">
+                  <strong>Add Jewellery Line Item</strong>
+                  <select id="bill-pick-catalog" class="select" style="width:auto;max-width:13rem;padding:0.28rem 0.55rem;font-size:0.7rem;">
+                    <option value="">+ Pick from Catalogue…</option>
+                  </select>
+                </div>
+                <div class="form-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));">
+                  <label class="field span-2">
+                    <span class="field-label">Description *</span>
+                    <input id="bill-item-desc" class="input" maxlength="80" placeholder="e.g. 22K Bridal Haram Necklace" />
+                  </label>
+                  <label class="field">
+                    <span class="field-label">Metal &amp; Purity</span>
+                    <select id="bill-item-metal" class="select">
+                      <option value="22K">Gold 916 / 22K</option>
+                      <option value="24K">Gold 999 / 24K</option>
+                      <option value="995">Gold 995 Fine</option>
+                      <option value="18K">Gold 750 / 18K</option>
+                      <option value="S999">Silver 999 Fine</option>
+                      <option value="S925">Silver 925 Sterling</option>
+                    </select>
+                  </label>
+                  <label class="field">
+                    <span class="field-label">BIS HUID (optional)</span>
+                    <input id="bill-item-huid" class="input mono" maxlength="12" placeholder="AB12CD" />
+                  </label>
+                  <label class="field">
+                    <span class="field-label">Net Weight (g) *</span>
+                    <input id="bill-item-weight" class="input tabular" type="number" min="0" step="0.001" value="10" />
+                  </label>
+                  <label class="field">
+                    <span class="field-label">Rate ₹/g (blank = Live)</span>
+                    <input id="bill-item-rate" class="input tabular" type="number" min="0" step="0.01" placeholder="Auto live rate" />
+                  </label>
+                  <label class="field">
+                    <span class="field-label">Making Charge</span>
+                    <input id="bill-item-making" class="input tabular" type="number" min="0" step="0.1" value="10" />
+                  </label>
+                  <label class="field">
+                    <span class="field-label">Making Mode</span>
+                    <select id="bill-item-making-type" class="select">
+                      <option value="pct">% of Metal</option>
+                      <option value="per_g">₹ per gram</option>
+                      <option value="flat">Flat ₹</option>
+                    </select>
+                  </label>
+                </div>
+                <div style="display:flex;justify-content:flex-end;margin-top:0.6rem;">
+                  <button id="btn-bill-add-line" type="button" class="btn btn-gold btn-sm">+ Add Item to Slip</button>
+                </div>
+              </div>
+
+              <div id="bill-lines-list" class="bill-line-list" style="margin-bottom:0.8rem;"></div>
+
+              <div class="form-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));">
+                <label class="field">
+                  <span class="field-label">Old Gold/Silver Deduction (₹)</span>
+                  <div class="input-row">
+                    <input id="bill-old-exchange" class="input tabular" type="number" min="0" step="1" value="0" />
+                    <button id="btn-bill-pull-ex" type="button" class="btn btn-ghost btn-xs" title="Pull credit from Old Gold/Silver Calculator">Pull</button>
+                  </div>
+                </label>
+                <label class="field">
+                  <span class="field-label">Special Discount (₹)</span>
+                  <input id="bill-discount" class="input tabular" type="number" min="0" step="1" value="0" />
+                </label>
+                <label class="field">
+                  <span class="field-label">Advance Paid (₹)</span>
+                  <input id="bill-advance" class="input tabular" type="number" min="0" step="1" value="0" />
+                </label>
+                <label class="field">
+                  <span class="field-label">Payment Mode / Remark</span>
+                  <input id="bill-notes" class="input" maxlength="120" placeholder="UPI / Cash / Bank RTGS" />
+                </label>
+              </div>
+              <label class="checkbox-row" style="margin-top:0.65rem;">
+                <input id="bill-include-gst" type="checkbox" checked />
+                Include statutory GST (split equally as CGST + SGST)
+              </label>
+            </div>
+
+            <!-- Live Bill Preview & Print/Share Card -->
+            <div class="card">
+              <div class="section-head" style="margin-bottom:0.65rem;">
+                <div>
+                  <h3 class="section-title">Printable Slip Preview</h3>
+                  <p class="section-sub">A4 / thermal counter ready · Share directly with customer on WhatsApp.</p>
+                </div>
+              </div>
+              <div id="bill-preview-paper" class="bill-preview-paper"></div>
+              <div class="actions-row" style="margin-top:0.8rem;">
+                <button id="btn-bill-print" type="button" class="btn btn-gold btn-sm">Print / Save PDF</button>
+                <button id="btn-bill-wa" type="button" class="btn btn-green btn-sm">Send on WhatsApp</button>
+                <button id="btn-bill-copy" type="button" class="btn btn-ghost btn-sm">Copy Text</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUBTAB B2: CUSTOMER ORDERS & ADVANCE RATE-LOCK BOOK -->
+        <div id="subpanel-orders" class="view hidden">
+          <div class="metals-grid">
+            <div class="card">
+              <div class="section-head" style="margin-bottom:0.75rem;">
+                <div>
+                  <h3 class="section-title">Book Custom Order / Rate-Lock</h3>
+                  <p class="section-sub">Record custom jewellery orders, advance receipts &amp; locked bullion rates privately on this device.</p>
+                </div>
+              </div>
+
+              <form id="order-form" style="display:flex;flex-direction:column;gap:0.75rem;" novalidate>
+                <div class="form-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));">
+                  <label class="field">
+                    <span class="field-label">Customer Name *</span>
+                    <input id="ord-name" class="input" required maxlength="80" placeholder="e.g. Smt. Ananya Mohanty" />
+                  </label>
+                  <label class="field">
+                    <span class="field-label">WhatsApp / Mobile</span>
+                    <input id="ord-phone" class="input tabular" type="tel" maxlength="15" placeholder="98XXXXXXXX" />
+                  </label>
+                  <label class="field span-2">
+                    <span class="field-label">Jewellery Item / Custom Design *</span>
+                    <input id="ord-item" class="input" required maxlength="120" placeholder="e.g. 22K Cuttack Filigree Bridal Choker" />
+                  </label>
+                  <label class="field">
+                    <span class="field-label">Metal &amp; Purity</span>
+                    <select id="ord-metal" class="select">
+                      <option value="22K">Gold 916 / 22K</option>
+                      <option value="24K">Gold 999 / 24K</option>
+                      <option value="18K">Gold 750 / 18K</option>
+                      <option value="S999">Silver 999 Fine</option>
+                      <option value="S925">Silver 925 Sterling</option>
+                    </select>
+                  </label>
+                  <label class="field">
+                    <span class="field-label">Target Weight (g)</span>
+                    <input id="ord-weight" class="input tabular" type="number" min="0" step="0.01" placeholder="25.00" />
+                  </label>
+                  <label class="field">
+                    <span class="field-label">Locked Rate ₹/g</span>
+                    <div class="input-row">
+                      <input id="ord-locked-rate" class="input tabular" type="number" min="0" step="1" placeholder="Optional" />
+                      <button id="btn-ord-lock-live" type="button" class="btn btn-gold-outline btn-xs">Lock Live</button>
+                    </div>
+                  </label>
+                  <label class="field">
+                    <span class="field-label">Advance Received (₹)</span>
+                    <input id="ord-advance" class="input tabular" type="number" min="0" step="1" value="0" />
+                  </label>
+                  <label class="field">
+                    <span class="field-label">Promised Delivery Date</span>
+                    <input id="ord-due" class="input mono" type="date" />
+                  </label>
+                  <label class="field">
+                    <span class="field-label">Initial Status</span>
+                    <select id="ord-status" class="select">
+                      <option value="Booked">Booked (Advance)</option>
+                      <option value="Karigar">In Workshop / Karigar</option>
+                      <option value="Ready">Ready for Pickup</option>
+                    </select>
+                  </label>
+                  <label class="field span-2">
+                    <span class="field-label">Design / Size / Karigar Notes</span>
+                    <input id="ord-note" class="input" maxlength="180" placeholder="Length 16 in · Matching jhumka pair" />
+                  </label>
+                </div>
+                <div style="display:flex;justify-content:flex-end;gap:0.5rem;">
+                  <button id="btn-ord-save" type="submit" class="btn btn-gold">+ Save Customer Order</button>
+                </div>
+              </form>
+            </div>
+
+            <div class="card">
+              <div class="section-head" style="margin-bottom:0.65rem;">
+                <div>
+                  <h3 class="section-title">Active Order &amp; Rate-Lock Register</h3>
+                  <p id="ord-summary-sub" class="section-sub">0 active orders · ₹0 advance held</p>
+                </div>
+                <div style="display:flex;gap:0.35rem;flex-wrap:wrap;">
+                  <button id="btn-ord-export" type="button" class="btn btn-ghost btn-xs">Export JSON</button>
+                </div>
+              </div>
+
+              <div class="filter-bar" style="margin-bottom:0.65rem;">
+                <div id="ord-filters" class="filter-pills" role="group" aria-label="Filter customer orders">
+                  <button type="button" class="filter-pill is-active" data-ord-filter="active">Active</button>
+                  <button type="button" class="filter-pill" data-ord-filter="Ready">Ready</button>
+                  <button type="button" class="filter-pill" data-ord-filter="Delivered">Delivered</button>
+                  <button type="button" class="filter-pill" data-ord-filter="all">All</button>
+                </div>
+              </div>
+
+              <div id="ord-list" class="orders-list"></div>
             </div>
           </div>
         </div>
@@ -914,16 +1184,35 @@
             <input id="edit-weight" class="input tabular" type="number" min="0" step="0.001" />
           </label>
           <label class="field">
+            <span class="field-label">Making (%)</span>
+            <input id="edit-making" class="input tabular" type="number" min="0" max="100" step="0.1" />
+          </label>
+          <label class="field">
             <span class="field-label">Price ₹ (0 = On request)</span>
-            <input id="edit-price" class="input tabular" type="number" min="0" step="0.01" />
+            <div class="input-row">
+              <input id="edit-price" class="input tabular" type="number" min="0" step="0.01" />
+              <button id="btn-edit-autoprice" type="button" class="btn btn-gold-outline btn-xs" title="Auto-fill price from live rate">Auto ₹</button>
+            </div>
           </label>
           <label class="field">
             <span class="field-label">SKU / Code</span>
             <input id="edit-sku" class="input" maxlength="40" />
           </label>
           <label class="field">
+            <span class="field-label">Stock Status</span>
+            <select id="edit-stock" class="select">
+              <option value="in_stock">In Stock</option>
+              <option value="made_to_order">Made to Order</option>
+              <option value="sold_out">Sold Out</option>
+            </select>
+          </label>
+          <label class="field">
             <span class="field-label">Short Note</span>
             <input id="edit-note" class="input" maxlength="160" />
+          </label>
+          <label class="checkbox-row span-2" style="padding:0.2rem 0;">
+            <input id="edit-featured" type="checkbox" />
+            ★ Feature as Showroom Pick (pins first)
           </label>
         </div>
         <div style="display:flex;justify-content:flex-end;gap:0.5rem;margin-top:0.25rem;">
@@ -968,6 +1257,29 @@
       </div>
     </div>
   </div>
+
+  <!-- ===================================================================== -->
+  <!-- PRINTABLE QR PRICE TAG MODAL                                          -->
+  <!-- ===================================================================== -->
+  <div id="tag-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="tag-modal-title">
+    <div class="modal-card" style="max-width:26rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;margin-bottom:0.75rem;">
+        <div>
+          <h3 id="tag-modal-title" class="section-title">Showroom QR Price Tag</h3>
+          <p class="section-sub">Scan opens item enquiry on Customer Storefront.</p>
+        </div>
+        <button id="btn-close-tag" type="button" class="btn btn-ghost btn-xs" aria-label="Close">✕</button>
+      </div>
+      <div id="tag-preview-stage" style="display:flex;justify-content:center;padding:0.4rem 0 0.85rem;"></div>
+      <div style="display:flex;justify-content:flex-end;gap:0.5rem;flex-wrap:wrap;">
+        <button id="btn-tag-bill" type="button" class="btn btn-ghost btn-sm">+ Add to Bill Slip</button>
+        <button id="btn-tag-print" type="button" class="btn btn-gold btn-sm">Print Tag</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dedicated Print Slip / Tag Container -->
+  <div id="owner-print-sheet" class="print-slip-sheet" aria-hidden="true"></div>
 
   <script src="app.js" defer></script>
 </body>
