@@ -1,7 +1,7 @@
 // Offline-ready Service Worker for the Satyanarayan Jewellers Owner PWA (/owner/).
 // Scoped independently to ./ so the Owner PWA installs side-by-side with the customer
 // Price Desk PWA without interfering with customer caching or live GitHub API calls.
-const CACHE = 'sj-owner-desk-v1';
+const CACHE = 'sj-owner-desk-v2';
 const SHELL = [
   './index.html',
   './styles.css',
@@ -78,6 +78,22 @@ self.addEventListener('fetch', (event) => {
           return res;
         })
         .catch(() => caches.match(url.pathname).then((cached) => cached || Response.error()))
+    );
+    return;
+  }
+
+  // Keep Owner manifest.webmanifest network-first so updated PWA id/scope/icons reach phones immediately.
+  if (url.pathname.endsWith('/manifest.webmanifest') || url.pathname === '/manifest.webmanifest') {
+    event.respondWith(
+      fetch(req)
+        .then((res) => {
+          if (isCacheable(res)) {
+            const copy = res.clone();
+            caches.open(CACHE).then((cache) => cache.put('./manifest.webmanifest', copy));
+          }
+          return res;
+        })
+        .catch(() => caches.match('./manifest.webmanifest'))
     );
     return;
   }
