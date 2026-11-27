@@ -1,0 +1,26 @@
+{
+  "_comment": "Statutory landing costs used to price gold & silver in INR. Update this file when the Government of India changes customs duty or GST — the desk picks it up on the next load, no code change needed. Verify each change against a primary source before publishing.",
+  "updatedAt": "2026-11-27",
+  "gold": {
+    "importDutyPct": 15,
+    "gstPct": 3,
+    "effectiveFrom": "2026-05-13",
+    "note": "10% Basic Customs Duty + 5% AIDC (Customs Notification 16/2026, effective 13 May 2026); 3% GST unchanged after GST 2.0",
+    "sources": [
+      "https://www.cbic.gov.in/entities/view-sticky/38",
+      "https://www.indiabudget.gov.in/"
+    ],
+    "verifiedOn": "2026-11-27"
+  },
+  "silver": {
+    "importDutyPct": 15,
+    "gstPct": 3,
+    "effectiveFrom": "2026-05-13",
+    "note": "10% Basic Customs Duty + 5% AIDC (Customs Notification 16/2026, effective 13 May 2026); 3% GST unchanged after GST 2.0",
+    "sources": [
+      "https://www.cbic.gov.in/entities/view-sticky/38",
+      "https://www.indiabudget.gov.in/"
+    ],
+    "verifiedOn": "2026-11-27"
+  }
+}

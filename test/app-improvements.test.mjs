@@ -148,7 +148,7 @@ test('manifest and service worker are valid, referenced, and prevent cache poiso
   assert.ok(manifest.icons.some(i => i.sizes === '192x192'));
   assert.ok(manifest.icons.some(i => i.sizes === '512x512'));
   const sw = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
-  assert.match(sw, /sj-price-desk-v10/);
+  assert.match(sw, /sj-price-desk-v11/);
   assert.match(sw, /index\.html/);
   assert.match(sw, /skipWaiting/);
   const html = await loadHtml();
@@ -199,6 +199,17 @@ test('manifest and service worker are valid, referenced, and prevent cache poiso
   const freshRes = await responded;
   assert.equal(freshRes.body, 'fresh-shell');
   assert.equal(cacheStore.get('./index.html').body, 'fresh-shell');
+
+  // 3. Statutory duty/GST is policy data: it must bypass stale-while-revalidate so a changed
+  //    duty is never masked by a cached copy (which would misprice every rupee figure).
+  nextFetchRes = { ok: true, status: 200, type: 'basic', body: '{"gold":{"importDutyPct":15}}', clone() { return { ...this }; } };
+  let statutoryResponded;
+  listeners.fetch({
+    request: { method: 'GET', mode: 'cors', url: 'https://example.com/catalog/statutory-rates.json' },
+    respondWith: (p) => { statutoryResponded = p; }
+  });
+  const statutoryRes = await statutoryResponded;
+  assert.equal(statutoryRes.body, '{"gold":{"importDutyPct":15}}', 'statutory rates must come from the network');
 });
 
 test('relative-age helper formats ages correctly', async () => {
@@ -226,13 +237,17 @@ test('share-text builder includes GST and spot lines without tola', async () => 
     state: { prices: samplePrices, live: { lastSync: new Date('2026-11-25T03:30:00Z') } },
     getCurrentCity: () => ({ name: 'Cuttack', state: 'Odisha' }),
     fmtINR: (n) => '₹' + Math.round(n).toLocaleString('en-IN'),
-    fmtUSD: (n) => '$' + Number(n).toFixed(2)
+    fmtUSD: (n) => '$' + Number(n).toFixed(2),
+    // The share card states the duty/GST it was priced with, so this must come from the model.
+    statutoryRatesFor: () => ({ importDutyPct: 15, gstPct: 3 }),
+    statutoryLabel: () => '15% duty + 3% GST'
   };
   const build = vm.runInNewContext(`${source}\nbuildRatesShareText`, context);
   const text = build();
-  for (const part of ['Satyanarayan Jewellers', 'Cuttack', 'Gold (per 10g', '999:', '916 (22K):', 'Silver (per kg', 'MCX estimate', 'Spot:', 'Indicative estimates']) {
+  for (const part of ['Satyanarayan Jewellers', 'Cuttack', 'Gold (per 10g', '999:', '916 (22K):', 'Silver (per kg', 'MCX estimate', 'Spot:', 'Indicative estimates', '15% duty + 3% GST']) {
     assert.ok(text.includes(part), part);
   }
+  assert.ok(text.includes('incl. 3% GST'), 'the GST percentage must come from the statutory model');
   assert.match(text, /₹1,31,000/); // 999 gold per 10g, ex-GST
   assert.ok(!text.toLowerCase().includes('tola'));
 });
@@ -665,7 +680,7 @@ test('shop drops the shopping bag and Gemstone/Platinum/Diamond; rates gain a Ra
 
 test('exchange comparison loads India import duty on foreign markets and never mislabels units', async () => {
   const html = await loadHtml();
-  const constStart = html.indexOf('    const INDIA_IMPORT_DUTY_MULTIPLIER =');
+  const constStart = html.indexOf('    const DEFAULT_STATUTORY_RATES =');
   const constEnd = html.indexOf('    const BASIS_SYNC_MS', constStart);
   const marketsStart = html.indexOf('    const EXCHANGE_MARKETS = [');
   const marketsEnd = html.indexOf('    // =========================================================================\n    // MARKET FEEDS', marketsStart);
@@ -674,13 +689,19 @@ test('exchange comparison loads India import duty on foreign markets and never m
   assert.ok(constStart >= 0 && constEnd > constStart, 'duty constants must be locatable');
   assert.ok(marketsStart >= 0 && marketsEnd > marketsStart, 'exchange markets must be locatable');
   assert.ok(rowsStart >= 0 && rowsEnd > rowsStart, 'computeExchangeRows must be locatable');
+  // The statutory model (constants + per-metal helpers) must be locatable as one block and must
+  // have no hidden dependency on the rest of the app, or pricing could not be audited in isolation.
+  const statutoryStart = html.indexOf('    function spotInBand(');
+  const statutoryEnd = html.indexOf('    function statutoryLabel(', statutoryStart);
+  assert.ok(statutoryStart > constStart && statutoryEnd > statutoryStart, 'statutory helpers must be locatable');
 
-  const { computeExchangeRows, EXCHANGE_MARKETS, INDIA_IMPORT_DUTY_MULTIPLIER } = vm.runInNewContext(
+  const { computeExchangeRows, EXCHANGE_MARKETS, INDIA_IMPORT_DUTY_MULTIPLIER, DEFAULT_STATUTORY_RATES, importDutyMultiplier } = vm.runInNewContext(
     [
       html.slice(constStart, constEnd),
+      html.slice(statutoryStart, statutoryEnd),
       html.slice(marketsStart, marketsEnd),
       html.slice(rowsStart, rowsEnd),
-      '({ computeExchangeRows, EXCHANGE_MARKETS, INDIA_IMPORT_DUTY_MULTIPLIER })'
+      '({ computeExchangeRows, EXCHANGE_MARKETS, INDIA_IMPORT_DUTY_MULTIPLIER, DEFAULT_STATUTORY_RATES, importDutyMultiplier })'
     ].join('\n'),
     {
       TROY_OZ_TO_GRAMS: 31.1034768,
@@ -703,15 +724,17 @@ test('exchange comparison loads India import duty on foreign markets and never m
       exchanges: { metal: 'gold', sortBy: 'diff' }
     }
   };
-  const run = vm.runInNewContext(`(${computeExchangeRows.toString()})`, {
-    ...context,
+  const rowContext = {
     EXCHANGE_MARKETS,
     TROY_OZ_TO_GRAMS: 31.1034768,
     CURRENCY_PER_USD: { USD: 1, AED: 3.6725, EUR: 0.92, GBP: 0.79, LBP: 89500, INR: 1 },
     INDIA_IMPORT_DUTY_MULTIPLIER,
+    DEFAULT_STATUTORY_RATES,
+    importDutyMultiplier,
     Infinity,
     Math
-  });
+  };
+  const run = vm.runInNewContext(`(${computeExchangeRows.toString()})`, { ...context, ...rowContext });
 
   const goldRows = run();
   assert.ok(Array.isArray(goldRows) && goldRows.length > 10);
@@ -752,6 +775,29 @@ test('exchange comparison loads India import duty on foreign markets and never m
   // "Both" is not a quote bracket: every row still carries gold or silver.
   assert.ok(goldRows.every((r) => r.quoteMetal === 'gold' || r.quoteMetal === 'silver'));
 
+  // Silver duty is read from the same statutory model and can differ from gold's: the exchange
+  // view must never quote silver at gold's duty. Flip only the silver rate and re-check.
+  const silverDutyRows = vm.runInNewContext(`(${computeExchangeRows.toString()})`, {
+    state: { prices: context.state.prices, exchanges: { metal: 'silver', sortBy: 'diff' } },
+    EXCHANGE_MARKETS,
+    TROY_OZ_TO_GRAMS: 31.1034768,
+    CURRENCY_PER_USD: { USD: 1, AED: 3.6725, EUR: 0.92, GBP: 0.79, LBP: 89500, INR: 1 },
+    INDIA_IMPORT_DUTY_MULTIPLIER,
+    Infinity,
+    Math,
+    DEFAULT_STATUTORY_RATES: { gold: { importDutyPct: 15 }, silver: { importDutyPct: 10 } },
+    importDutyMultiplier: (metal) => (metal === 'silver' ? 1.10 : 1.15)
+  })();
+  const silverForeign = silverDutyRows.find((r) => !r.isShop && r.currency === 'USD');
+  assert.ok(silverForeign, 'a USD silver market must exist');
+  const expectedSilverUsd = (spotSilver / 31.1034768)
+    * (1 + silverForeign.basisPct / 100)
+    * usdInr
+    * 1000
+    * 1.10;
+  assert.ok(Math.abs(silverForeign.theirInr - expectedSilverUsd) < 1,
+    `silver must use the silver duty, got ${Math.round(silverForeign.theirInr)} vs ${Math.round(expectedSilverUsd)}`);
+
   // Silver filter compares against the silver base and quotes per kg.
   const silverRows = vm.runInNewContext(`(${computeExchangeRows.toString()})`, {
     state: { prices: context.state.prices, exchanges: { metal: 'silver', sortBy: 'diff' } },
@@ -759,6 +805,8 @@ test('exchange comparison loads India import duty on foreign markets and never m
     TROY_OZ_TO_GRAMS: 31.1034768,
     CURRENCY_PER_USD: { USD: 1, AED: 3.6725, EUR: 0.92, GBP: 0.79, LBP: 89500, INR: 1 },
     INDIA_IMPORT_DUTY_MULTIPLIER,
+    DEFAULT_STATUTORY_RATES,
+    importDutyMultiplier,
     Infinity,
     Math
   })();
@@ -780,6 +828,8 @@ test('exchange comparison loads India import duty on foreign markets and never m
     TROY_OZ_TO_GRAMS: 31.1034768,
     CURRENCY_PER_USD: { USD: 1, AED: 3.6725, EUR: 0.92, GBP: 0.79, LBP: 89500, INR: 1 },
     INDIA_IMPORT_DUTY_MULTIPLIER,
+    DEFAULT_STATUTORY_RATES,
+    importDutyMultiplier,
     Infinity,
     Math
   })();
@@ -799,9 +849,13 @@ test('market accuracy loads import duty, reports variance with a sign, and repai
   assert.ok(start >= 0 && end > start);
   const src = html.slice(start, end);
 
-  // Global quotes are landed at India's duty before comparing with the shop.
-  assert.ok(/results\.push\(\{ \.\.\.f, type: 'live'[^\n]*\n?[^\n]*INDIA_IMPORT_DUTY_MULTIPLIER/.test(src)
-    || src.includes('* INDIA_IMPORT_DUTY_MULTIPLIER'), 'live feeds must add import duty');
+  // Global quotes are landed at India's duty (for the selected metal) before comparing with the shop.
+  assert.ok(src.includes('importDutyMultiplier(metal)'), 'live feeds must add the selected metal\'s import duty');
+  assert.ok(!src.includes('INDIA_IMPORT_DUTY_MULTIPLIER'), 'no hardcoded gold duty may leak into the silver comparison');
+  // An out-of-domain quote is rejected rather than priced into the consensus.
+  assert.ok(src.includes('const band = SPOT_BANDS[metal];'), 'accuracy feeds must be domain-guarded');
+  // The accuracy view must not disagree with the visible board rate.
+  assert.ok(src.includes('state.live.usdInr'), 'accuracy must prefer the engine-owned FX rate');
   assert.ok(src.includes('const consensusUsd = median(liveVals)'), 'consensus must be the median of live USD quotes');
   assert.ok(src.includes('const consensusInr = consensusUsd'), 'consensus must be converted to INR per unit');
   // Failed feeds are sorted last rather than treated as zero price.
@@ -1352,4 +1406,254 @@ test('each metal paints on its own feed and FX hedges instead of blocking the bo
   assert.match(html, /const FX_DAILY_HEDGE_MS = \d+;/, 'the hedge delay must be a named constant');
   // Paint may borrow the cached snapshot for the metal that has not arrived yet.
   assert.ok(html.includes('function readCachedRates('), 'cached rates must be readable by the paint path');
+});
+
+// ---------------------------------------------------------------------------
+// PRICE ACCURACY — every ₹ figure must be traceable to a live quote, the current
+// statutory duty/GST, and a value that passed a sanity guard. These tests pin the
+// guarantees that make the board's numbers exact rather than merely plausible.
+// ---------------------------------------------------------------------------
+async function loadStatutoryEngine({ statutory = null } = {}) {
+  const html = await loadHtml();
+  const start = html.indexOf('    const TROY_OZ_TO_GRAMS =');
+  const end = html.indexOf('    const GOLD_RETAIL_PREMIUM =');
+  assert.ok(start >= 0 && end > start, 'statutory block must be locatable');
+  const helpersStart = html.indexOf('    function spotInBand(');
+  const helpersEnd = html.indexOf('    function statutoryLabel(', helpersStart);
+  assert.ok(helpersStart > start && helpersEnd > helpersStart, 'statutory helpers must be locatable');
+  const sandbox = { Number, Math, Date, JSON, Infinity, state: { statutory } };
+  vm.runInNewContext([
+    html.slice(start, end),
+    html.slice(helpersStart, helpersEnd),
+    'globalThis.api = { DEFAULT_STATUTORY_RATES, INDIA_IMPORT_DUTY_MULTIPLIER, INDIA_GST_MULTIPLIER, statutoryRatesFor, importDutyMultiplier, gstMultiplier, spotInBand, acceptSpot, roundSpot, roundFxRate, statutoryIsStale, SPOT_BANDS };'
+  ].join('\n'), sandbox);
+  return sandbox.api;
+}
+
+test('statutory duty & GST match the current Indian law and are data-overridable', async () => {
+  const api = await loadStatutoryEngine();
+  // 15% effective import duty = 10% BCD + 5% AIDC (Customs Notification 16/2026, 13 May 2026),
+  // and 3% GST (unchanged by the Sept-2025 GST 2.0 rationalisation) for BOTH bullion metals.
+  assert.equal(api.DEFAULT_STATUTORY_RATES.gold.importDutyPct, 15);
+  assert.equal(api.DEFAULT_STATUTORY_RATES.gold.gstPct, 3);
+  assert.equal(api.DEFAULT_STATUTORY_RATES.silver.importDutyPct, 15);
+  assert.equal(api.DEFAULT_STATUTORY_RATES.silver.gstPct, 3);
+  assert.equal(api.INDIA_IMPORT_DUTY_MULTIPLIER, 1.15);
+  assert.equal(api.INDIA_GST_MULTIPLIER, 1.03);
+  assert.equal(api.importDutyMultiplier('gold'), 1.15);
+  assert.equal(api.importDutyMultiplier('silver'), 1.15);
+  assert.equal(api.gstMultiplier('gold'), 1.03);
+
+  // The published data file must exist, parse, and agree with the compiled defaults.
+  const policy = JSON.parse(await readFile(new URL('../catalog/statutory-rates.json', import.meta.url), 'utf8'));
+  for (const metal of ['gold', 'silver']) {
+    assert.equal(policy[metal].importDutyPct, api.DEFAULT_STATUTORY_RATES[metal].importDutyPct, metal);
+    assert.equal(policy[metal].gstPct, api.DEFAULT_STATUTORY_RATES[metal].gstPct, metal);
+    assert.match(policy[metal].effectiveFrom, /^\d{4}-\d{2}-\d{2}$/);
+    assert.match(policy[metal].verifiedOn, /^\d{4}-\d{2}-\d{2}$/);
+  }
+
+  // A duty change is a data edit: an override replaces the compiled default for THAT metal only…
+  const overridden = await loadStatutoryEngine({ statutory: { silver: { importDutyPct: 10, gstPct: 3 } } });
+  assert.equal(overridden.importDutyMultiplier('silver'), 1.10);
+  assert.equal(overridden.importDutyMultiplier('gold'), 1.15, 'gold must keep its own duty');
+  // …and an out-of-range override is ignored rather than mispricing the shop.
+  const garbage = await loadStatutoryEngine({ statutory: { gold: { importDutyPct: 0, gstPct: 3 } } });
+  assert.equal(garbage.importDutyMultiplier('gold'), 1.15, 'a 0% duty is not a real Indian rate');
+  const nonsense = await loadStatutoryEngine({ statutory: { gold: { importDutyPct: 900, gstPct: 3 } } });
+  assert.equal(nonsense.importDutyMultiplier('gold'), 1.15);
+  // A missing override must not be coerced to 0 (Number(null) === 0 regression guard).
+  const empty = await loadStatutoryEngine({ statutory: {} });
+  assert.equal(empty.importDutyMultiplier('gold'), 1.15);
+  assert.equal(empty.statutoryRatesFor('gold').importDutyPct, 15);
+  assert.equal(empty.statutoryRatesFor('silver').gstPct, 3);
+});
+
+test('price math applies duty then GST so GST is charged on the landed (duty-paid) value', async () => {
+  const html = await loadHtml();
+  const constStart = html.indexOf('    const TROY_OZ_TO_GRAMS =');
+  const constEnd = html.indexOf('    const CITIES = {');
+  const citiesStart = html.indexOf('    const CITIES = {');
+  const citiesEnd = html.indexOf('    };', citiesStart) + '    };'.length;
+  const helpersStart = html.indexOf('    function spotInBand(');
+  const helpersEnd = html.indexOf('    function statutoryLabel(', helpersStart);
+  const fnStart = html.indexOf('    function computeCityPrices(');
+  const fnEnd = html.indexOf('    function formatIndianInt(', fnStart);
+  const computeCityPrices = vm.runInNewContext([
+    html.slice(constStart, constEnd),
+    html.slice(citiesStart, citiesEnd),
+    html.slice(helpersStart, helpersEnd),
+    html.slice(fnStart, fnEnd),
+    'computeCityPrices'
+  ].join('\n'), {});
+
+  const spotGold = 4100, spotSilver = 48, usdInr = 88;
+  const p = computeCityPrices('cuttack', spotGold, spotSilver, usdInr);
+  const landedGold = (spotGold * usdInr / 31.1034768) * 1.15;
+  const landedSilver = (spotSilver * usdInr / 31.1034768) * 1.15;
+  // ex-GST is the duty-paid landed value; GST is exactly 3% ON TOP of it (not on the raw spot).
+  assert.equal(p.gold999ExGst, Math.round(landedGold * 10));
+  assert.equal(p.gold999, Math.round(landedGold * 10 * 1.03));
+  assert.equal(p.silver999ExGst, Math.round(landedSilver * 1000));
+  assert.equal(p.silver999, Math.round(landedSilver * 1000 * 1.03));
+  assert.ok(Math.abs(p.gold999 / p.gold999ExGst - 1.03) < 0.0001, 'incl-GST must be 3% above ex-GST');
+  assert.ok(Math.abs(p.silver999 / p.silver999ExGst - 1.03) < 0.0001);
+  // Per-gram tiles are the per-10g / per-kg prices divided consistently (no rounding drift).
+  assert.ok(Math.abs(p.gold999ExGstGram * 10 - landedGold * 10) < 0.01);
+  assert.ok(Math.abs(p.silver999ExGstGram * 1000 - landedSilver * 1000) < 0.01);
+  // Alloy purities are exact fractions of the 999 base.
+  assert.equal(p.gold916ExGst, Math.round(landedGold * 10 * 916 / 999));
+  assert.equal(p.silver925ExGst, Math.round(landedSilver * 1000 * 925 / 999));
+
+  // A silently wrong duty (the Number(null) → 0 bug) would make a ₹1.2 lakh board ~15% cheaper;
+  // assert the magnitude so a regression cannot hide behind "close enough".
+  assert.ok(p.gold999ExGst > 100000, `gold 999 per 10g looks unlanded: ${p.gold999ExGst}`);
+});
+
+test('out-of-domain and wild-jump quotes are rejected instead of repricing the board', async () => {
+  const api = await loadStatutoryEngine();
+  // Domain: gold USD/oz, silver USD/oz.
+  assert.equal(api.acceptSpot(4100, 'gold', null).ok, true);
+  assert.equal(api.acceptSpot(48, 'silver', null).ok, true);
+  assert.equal(api.acceptSpot(4.1, 'gold', null).reason, 'band', 'a 100x-low gold print must be dropped');
+  assert.equal(api.acceptSpot(41000, 'gold', null).reason, 'band');
+  assert.equal(api.acceptSpot(0.48, 'silver', null).reason, 'band');
+  assert.equal(api.acceptSpot(NaN, 'gold', null).reason, 'band');
+  // Jump guard: no real session moves >12% in one print.
+  assert.equal(api.acceptSpot(4500, 'gold', 4100).ok, true, 'a normal move must pass');
+  assert.equal(api.acceptSpot(4100 * 1.2, 'gold', 4100).reason, 'move');
+  assert.equal(api.acceptSpot(4100 * 0.7, 'gold', 4100).reason, 'move');
+  // A missing previous value (cold start / offline restore) must not block a genuine quote.
+  assert.equal(api.acceptSpot(4800, 'gold', null).ok, true);
+  // Accepted values are normalized so a persisted snapshot restores exactly equal.
+  assert.equal(api.acceptSpot(4100.123456789, 'gold', null).value, api.roundSpot(4100.123456789));
+  assert.equal(api.roundSpot(4100.1) + 0, 4100.1);
+  assert.equal(api.roundFxRate(92.1234567891), 92.123457);
+
+  const html = await loadHtml();
+  // The guard must be wired into BOTH live paths and must be per-metal (concurrent ladders).
+  assert.ok(html.includes('acceptSpot(midPrice, \'gold\''), 'WS gold ticks must be guarded');
+  assert.ok(html.includes('acceptSpot(midPrice, \'silver\''), 'WS silver ticks must be guarded');
+  assert.ok(html.includes("const goldGuard = (val) => acceptSpot(val, 'gold'"), 'REST gold must be guarded');
+  assert.ok(html.includes("const silverGuard = (val) => acceptSpot(val, 'silver'"), 'REST silver must be guarded');
+  assert.ok(!html.includes('let spotGuard'), 'the guard must be a parameter, never shared module state');
+  assert.match(html, /function raceTier\(tier, timeoutMs, guard = null\)/);
+  assert.match(html, /function fetchFromTiers\(tiers, forceAll = false, onUpgrade = null, guard = null\)/);
+  // The cached snapshot is validated before it can paint.
+  const readStart = html.indexOf('    function readCachedRates(');
+  const readEnd = html.indexOf('    function hydrateCachedRates(', readStart);
+  const read = html.slice(readStart, readEnd);
+  assert.ok(read.includes("spotInBand(cached.spotGold, 'gold')"), 'cached gold must be domain-checked');
+  assert.ok(read.includes("validateUsdInr(cached.usdInr, null).ok"), 'cached FX must be validated');
+});
+
+test('a restored snapshot is never presented as a live price', async () => {
+  const html = await loadHtml();
+  const start = html.indexOf('    function hydrateCachedRates(');
+  const end = html.indexOf('    async function fetchWithTimeout(', start);
+  assert.ok(start >= 0 && end > start);
+  const hydrate = html.slice(start, end);
+  // Hydration restores the snapshot's OWN timestamp and provenance…
+  assert.ok(hydrate.includes('state.live.cachedTs = Number.isFinite(cached.ts) ? cached.ts : null'));
+  assert.ok(hydrate.includes('state.live.hydratedFromCache = true'));
+  // …must not claim a live connection…
+  assert.ok(!/connected\s*=\s*true/.test(hydrate), 'hydration must not mark the desk live');
+  assert.ok(!/lastSync\s*=\s*new Date\(\)/.test(hydrate), 'hydration must not stamp "now" on old data');
+
+  // …and the freshness label reports the age of the DATA, with a "not live" badge.
+  const labelStart = html.indexOf('    function updateRatesUpdatedLabel()');
+  const labelEnd = html.indexOf('    function buildRatesShareText(', labelStart);
+  const label = html.slice(labelStart, labelEnd);
+  assert.ok(label.includes('const liveTs = state.live && state.live.lastSync'), 'live time must be tracked separately');
+  assert.ok(label.includes('const cacheTs = Number(state.live && state.live.cachedTs) || 0'), 'cache time must be used');
+  assert.ok(label.includes('const fromCache = !liveTs'));
+  assert.ok(label.includes('not live'), 'a restored board must say it is not live');
+  assert.ok(label.includes('LIVE_TICK_FRESH_MS'), 'staleness must follow tick freshness');
+  assert.match(html, /const LIVE_TICK_FRESH_MS = \d+ \* 1000;/);
+
+  // Persisted snapshots are normalized and carry FX provenance + as-of.
+  const persistStart = html.indexOf('    function persistCachedRates(');
+  const persistEnd = html.indexOf('    // A restored snapshot is authoritative', persistStart);
+  const persist = html.slice(persistStart, persistEnd);
+  assert.ok(persist.includes('spotGold: roundSpot(spotGold)'), 'persist must normalize spot');
+  assert.ok(persist.includes('usdInr: roundFxRate(usdInr)'), 'persist must normalize FX');
+  assert.ok(persist.includes('fxSource: state.live.fxSource'), 'persist must keep FX provenance');
+  assert.ok(persist.includes('usdInrAsOf: state.live.usdInrAsOf'), 'persist must keep the FX as-of');
+
+  // A restored snapshot is also surfaced in the UI, not just internally.
+  for (const id of ['cache-notice', 'cache-notice-text']) assert.ok(html.includes(`id="${id}"`), id);
+});
+
+test('the desk states the duty/GST it prices with and flags a stale regime', async () => {
+  const api = await loadStatutoryEngine();
+  // The compiled regime was verified on 13 May 2026, so it is not stale today…
+  assert.equal(api.statutoryIsStale(Date.parse('2026-11-27T00:00:00Z')), false);
+  // …but a year on it must ask for re-verification instead of trusting it silently.
+  assert.equal(api.statutoryIsStale(Date.parse('2027-06-01T00:00:00Z')), true);
+
+  const html = await loadHtml();
+  for (const id of ['statutory-badge', 'statutory-notice', 'statutory-notice-text', 'ex-duty-pct', 'acc-duty-pct', 'footer-gst-pct']) {
+    assert.ok(html.includes(`id="${id}"`), `statutory UI: ${id}`);
+  }
+  // The prose must be driven by the data, and both duty figures must be wired to the renderer.
+  const renderStart = html.indexOf('    function renderStatutoryNotice()');
+  const renderEnd = html.indexOf('    // =========================================================================\n    // HEADER & KPI LIVE STATUS UI', renderStart);
+  const render = html.slice(renderStart, renderEnd);
+  assert.ok(render.includes("const exDuty = document.getElementById('ex-duty-pct')"));
+  assert.ok(render.includes("const accDuty = document.getElementById('acc-duty-pct')"));
+  assert.ok(render.includes("const footerGst = document.getElementById('footer-gst-pct')"));
+  assert.ok(render.includes('statutoryIsStale()'), 'a stale regime must raise a notice');
+  // Loaded at boot and revalidated on a slow cadence.
+  assert.ok(html.includes('loadStatutoryRates().then('), 'boot must load the statutory data');
+  assert.ok(html.includes('STATUTORY_RATES_PATH = \'catalog/statutory-rates.json\''));
+  // The loader refuses a corrupt/out-of-range policy file rather than pricing off it.
+  const sanitizeStart = html.indexOf('    function sanitizeStatutoryPayload(');
+  const sanitizeEnd = html.indexOf('    function readCachedStatutory(', sanitizeStart);
+  const sanitize = html.slice(sanitizeStart, sanitizeEnd);
+  assert.ok(sanitize.includes('duty > 60'), 'duty must be range-checked');
+  assert.ok(sanitize.includes('gst > 30'), 'GST must be range-checked');
+  assert.ok(sanitize.includes('return null'), 'an invalid payload must be rejected wholesale');
+});
+
+test('price accuracy surfaces stay consistent with the priced board', async () => {
+  const html = await loadHtml();
+  // The accuracy view compares against the same live FX the board shows…
+  const accStart = html.indexOf('    async function fetchMarketAccuracy(');
+  const accEnd = html.indexOf('    function renderMarketAccuracy(', accStart);
+  const acc = html.slice(accStart, accEnd);
+  assert.ok(acc.includes('state.live.usdInr'), 'accuracy must use the board FX rate');
+  assert.ok(!/resolvedUsdInr = v;\s*break;/.test(acc), 'a raw accuracy-feed rate must not override the board');
+  assert.ok(acc.includes('if (!Number.isFinite(resolvedUsdInr) || resolvedUsdInr <= 0)'), 'feeds are only a fallback');
+  // …and it records the FX + duty it used so a variance can be reconstructed later.
+  assert.ok(acc.includes('ma.fxUsed = resolvedUsdInr'));
+  assert.ok(acc.includes('ma.dutyPct = statutoryRatesFor(metal).importDutyPct'));
+  // Indicative city rows are derived from the shop base (never from an unpriced spot).
+  assert.ok(acc.includes('const theirInr = shopBase * premium;'));
+  // Calibrating re-prices through the same statutory model (duty/GST stay intact).
+  const calibStart = html.indexOf('    function calibrateToMarket(');
+  const calibEnd = html.indexOf('    function bindAccuracyControls(', calibStart);
+  const calib = html.slice(calibStart, calibEnd);
+  assert.ok(calib.includes('state.prices = computeCityPrices('));
+  assert.ok(!calib.includes('INDIA_IMPORT_DUTY_MULTIPLIER'), 'calibration must not bypass the statutory model');
+});
+
+test('the price board cannot sit on stale numbers when the frame clock stalls', async () => {
+  const html = await loadHtml();
+  const start = html.indexOf('    function renderPriceCards(');
+  const end = html.indexOf('    // Live USD/INR chip on the India (INR) board', start);
+  assert.ok(start >= 0 && end > start);
+  const paint = html.slice(start, end);
+  // A queued frame must always have a timer backstop, otherwise a backgrounded tab / powersave
+  // browser keeps the old prices on screen while the desk already holds newer ones.
+  assert.ok(paint.includes('queuePriceFrame()'), 'paints must go through the single queue helper');
+  assert.match(paint, /priceRenderRaf\s*=\s*requestAnimationFrame\(flushPriceRender\);/);
+  assert.ok(paint.includes('PRICE_PAINT_STALL_MS'), 'the stall fallback must be a named constant');
+  assert.match(paint, /if \(priceRenderRaf\) flushPriceRender\(\)/, 'a stalled frame must fall back to a timer paint');
+
+  const flushStart = html.indexOf('    function flushPriceRender()');
+  const flushEnd = html.indexOf('    // --- RATE OF THE DAY', flushStart);
+  const flush = html.slice(flushStart, flushEnd);
+  // Flushing must clear the backstop timer so ordinary paints do not double-render.
+  assert.ok(flush.includes('clearTimeout(priceThrottleTimer)'), 'flush must clear the stall timer');
+  assert.match(html, /const PRICE_PAINT_STALL_MS = \d+;/);
 });
