@@ -1930,6 +1930,7 @@
     const SILVER_RETAIL_PREMIUM = 1.0000; // Official landed parity (no arbitrary retail markup)
     const FX_REFRESH_MS = 15 * 60 * 1000; // Daily-reference FX: refresh at most every 15 minutes
     const FX_LIVE_REFRESH_MS = 60 * 1000; // Live mid-market FX: refresh every minute (it ticks intraday)
+    const FX_DAILY_HEDGE_MS = 700; // On a cold load, start the daily FX backstop this soon if live FX is silent
     const WS_PROVIDERS = [
       {
         name: 'Binance',
@@ -2289,6 +2290,7 @@
         lastFxAttempt: 0,
         isFxFetching: false,
         fxTimerId: null,
+        retryAttempt: 0,
         fxSource: '',
         fxLive: false,
         usdInrAsOf: null,
@@ -2697,6 +2699,17 @@
     const PROVIDER_FAIL_STREAK = {};
     const PROVIDER_COOLDOWN_MS = 30000; // Short 30s cooldown only after 2 consecutive failures
 
+    // Read the last good rates snapshot written by persistCachedRates (null when absent/corrupt).
+    function readCachedRates() {
+      try {
+        const raw = lsGet(STORAGE_KEYS.lastRates, '');
+        if (!raw) return null;
+        const cached = JSON.parse(raw);
+        if (!cached || !Number.isFinite(cached.spotGold) || !Number.isFinite(cached.spotSilver) || !Number.isFinite(cached.usdInr)) return null;
+        return cached;
+      } catch { return null; }
+    }
+
     function hydrateCachedRates() {
       try {
         const raw = lsGet(STORAGE_KEYS.lastRates, '');
@@ -2774,69 +2787,160 @@
       });
     }
 
-    async function fetchFromTiers(tiers, forceAll = false) {
-      const tierErrors = [];
-      const now = Date.now();
-      for (let tIdx = 0; tIdx < tiers.length; tIdx++) {
-        const tier = tiers[tIdx];
-        const activeProviders = forceAll
-          ? tier
-          : tier.filter((p) => !PROVIDER_COOLDOWN_UNTIL[p.name] || PROVIDER_COOLDOWN_UNTIL[p.name] <= now);
-        if (activeProviders.length === 0) continue;
+    // Record a provider success / failure and park a provider for a short cooldown after
+    // two consecutive failures so one blocked host cannot slow every later refresh.
+    function noteProviderOk(name) {
+      PROVIDER_FAIL_STREAK[name] = 0;
+      delete PROVIDER_COOLDOWN_UNTIL[name];
+    }
 
-        const timeoutMs = tIdx === 0 ? 2200 : 3500;
-        try {
-          if (activeProviders.length === 1) {
-            const p = activeProviders[0];
-            try {
-              const { json } = await fetchWithTimeout(p.url, timeoutMs);
-              const val = p.parse(json);
-              if (Number.isFinite(val) && val > 0) {
-                PROVIDER_FAIL_STREAK[p.name] = 0;
-                delete PROVIDER_COOLDOWN_UNTIL[p.name];
-                return { val, source: p.name, asOf: extractFxAsOf(p, json), live: !!p.live };
-              }
-              throw new Error(`${p.name}: invalid value`);
-            } catch (err) {
-              PROVIDER_FAIL_STREAK[p.name] = (PROVIDER_FAIL_STREAK[p.name] || 0) + 1;
-              if (PROVIDER_FAIL_STREAK[p.name] >= 2) {
-                PROVIDER_COOLDOWN_UNTIL[p.name] = Date.now() + PROVIDER_COOLDOWN_MS;
-              }
-              const reason = err && err.name === 'AbortError' ? 'timeout' : (err && err.message ? err.message : 'blocked');
-              throw new Error(`${p.name}: ${reason}`);
-            }
+    function noteProviderFail(name) {
+      PROVIDER_FAIL_STREAK[name] = (PROVIDER_FAIL_STREAK[name] || 0) + 1;
+      if (PROVIDER_FAIL_STREAK[name] >= 2) {
+        PROVIDER_COOLDOWN_UNTIL[name] = Date.now() + PROVIDER_COOLDOWN_MS;
+      }
+    }
+
+    // Hedge a single tier: every provider is asked at once and the first valid value wins.
+    // Requests that lose the race are aborted, so a dead/blocked host costs nothing.
+    function raceTier(tier, timeoutMs) {
+      if (tier.length === 1) {
+        const p = tier[0];
+        return (async () => {
+          try {
+            const { json } = await fetchWithTimeout(p.url, timeoutMs);
+            const val = p.parse(json);
+            if (!(Number.isFinite(val) && val > 0)) throw new Error('invalid value');
+            noteProviderOk(p.name);
+            return { val, source: p.name, asOf: extractFxAsOf(p, json), live: !!p.live };
+          } catch (err) {
+            noteProviderFail(p.name);
+            const reason = err && err.name === 'AbortError' ? 'timeout' : (err && err.message ? err.message : 'blocked');
+            throw new Error(`${p.name}: ${reason}`);
           }
-          const raceController = new AbortController();
-          return await firstFulfilled(activeProviders.map(async (p) => {
-            try {
-              const { json } = await fetchWithTimeout(p.url, timeoutMs, raceController.signal);
-              const val = p.parse(json);
-              if (Number.isFinite(val) && val > 0) {
-                PROVIDER_FAIL_STREAK[p.name] = 0;
-                delete PROVIDER_COOLDOWN_UNTIL[p.name];
-                return { val, source: p.name, asOf: extractFxAsOf(p, json), live: !!p.live };
-              }
-              throw new Error(`${p.name}: invalid value`);
-            } catch (err) {
-              if (!raceController.signal.aborted) {
-                PROVIDER_FAIL_STREAK[p.name] = (PROVIDER_FAIL_STREAK[p.name] || 0) + 1;
-                if (PROVIDER_FAIL_STREAK[p.name] >= 2) {
-                  PROVIDER_COOLDOWN_UNTIL[p.name] = Date.now() + PROVIDER_COOLDOWN_MS;
-                }
-              }
-              const reason = err && err.name === 'AbortError' ? 'timeout' : (err && err.message ? err.message : 'blocked');
-              throw new Error(`${p.name}: ${reason}`);
-            }
-          }), raceController);
+        })();
+      }
+      const raceController = new AbortController();
+      return firstFulfilled(tier.map(async (p) => {
+        try {
+          const { json } = await fetchWithTimeout(p.url, timeoutMs, raceController.signal);
+          const val = p.parse(json);
+          if (Number.isFinite(val) && val > 0) {
+            noteProviderOk(p.name);
+            return { val, source: p.name, asOf: extractFxAsOf(p, json), live: !!p.live };
+          }
+          throw new Error('invalid value');
         } catch (err) {
-          tierErrors.push(err && err.message ? err.message : String(err));
+          if (!raceController.signal.aborted) noteProviderFail(p.name);
+          const reason = err && err.name === 'AbortError' ? 'timeout' : (err && err.message ? err.message : 'blocked');
+          throw new Error(`${p.name}: ${reason}`);
         }
+      }), raceController);
+    }
+
+    // HEDGED TIER LADDER — the reason the desk paints fast on a real phone.
+    //
+    // The old loop awaited tier 0 to fully fail (2.2s) before even asking tier 1, then tier 1
+    // again (3.5s), so anything blocking the tier-0 hosts (ad-blockers, Jio/Airtel DNS, an
+    // office firewall) pushed the first price to ~6s and a captive-portal/offline load to ~11s.
+    // Now the next tier is launched as soon as the faster tier has not answered within a short
+    // hedge delay, so a healthy fallback returns in well under a second while the live tier
+    // simply wins the race (its result is used) when it does answer.
+    async function fetchFromTiers(tiers, forceAll = false, onUpgrade = null) {
+      const now = Date.now();
+      const usable = [];
+      for (let tIdx = 0; tIdx < tiers.length; tIdx++) {
+        const tier = forceAll
+          ? tiers[tIdx]
+          : tiers[tIdx].filter((p) => !PROVIDER_COOLDOWN_UNTIL[p.name] || PROVIDER_COOLDOWN_UNTIL[p.name] <= now);
+        if (tier.length) usable.push({ tier, tIdx });
       }
-      // If all providers were on cooldown, retry once forcing all tiers
-      if (!forceAll && tierErrors.length === 0) {
-        return fetchFromTiers(tiers, true);
+      // All providers cooling down (e.g. a whole network outage) — try everything once.
+      if (usable.length === 0) {
+        if (forceAll) throw new Error('All feeds unavailable');
+        return fetchFromTiers(tiers, true, onUpgrade);
       }
-      throw new Error(tierErrors.join(' | ') || 'All feeds unavailable');
+
+      // Tier 0 is the freshest feed; give it the longest window. Lower tiers are hedged in
+      // quickly, and while nothing has been shown yet the whole ladder gets 2.5s per rung so
+      // a slow-but-alive network still lands the first paint instead of an indefinite skeleton.
+      const coldStart = !state.live.usdInr || !state.live.spotGold || !state.live.spotSilver;
+      const timeoutFor = (rank) => {
+        const base = rank === 0 ? 2200 : 2500;
+        return coldStart ? base : Math.min(base, 1600);
+      };
+      const hedgeFor = (rank) => {
+        const base = rank === 0 ? 700 : 600;
+        return coldStart ? base : Math.min(base, 500);
+      };
+
+      const tierErrors = [];
+      // `onUpgrade` (optional) receives the value from a fresher tier if one lands AFTER a
+      // slower tier already answered. That lets the board paint the moment a fallback responds
+      // and still climb back to the live feed a heartbeat later, instead of showing the stale
+      // number until the next 30s sync.
+      return new Promise((resolve, reject) => {
+        let launched = 0;   // how many rungs have been asked
+        let settled = 0;    // how many asked rungs have replied (ok or failed)
+        let done = false;
+        let bestRank = Infinity;
+        let hedgeTimer = null;
+
+        const stopHedge = () => {
+          if (hedgeTimer) { clearTimeout(hedgeTimer); hedgeTimer = null; }
+        };
+
+        // Nothing is left to ask and nothing is still in flight → the ladder has failed.
+        const failIfExhausted = () => {
+          if (done || settled < launched) return;
+          if (launched < usable.length) { stopHedge(); launch(launched); return; }
+          done = true;
+          stopHedge();
+          reject(new Error(tierErrors.join(' | ') || 'All feeds unavailable'));
+        };
+
+        const launch = (rank) => {
+          if (done || rank >= usable.length) return;
+          // Guard against a rung being asked twice (hedge timer + failure of an earlier rung).
+          if (rank < launched) return;
+          const { tier } = usable[rank];
+          launched = Math.max(launched, rank + 1);
+          raceTier(tier, timeoutFor(rank)).then(
+            (res) => {
+              settled += 1;
+              if (rank >= bestRank) return;
+              bestRank = rank;
+              if (!done) {
+                done = true;
+                stopHedge();
+                resolve(res);
+              } else if (typeof onUpgrade === 'function') {
+                // Slow rung replying after a faster one already answered: it is fresher, so
+                // hand it over as an upgrade instead of throwing the result away.
+                try { onUpgrade(res); } catch { /* never let a repaint break the ladder */ }
+              }
+            },
+            (err) => {
+              tierErrors.push(err && err.message ? err.message : String(err));
+              settled += 1;
+              failIfExhausted();
+            }
+          );
+        };
+
+        // Ask everyone a healthy device has, but do not wait for a blocked host to time out.
+        launch(0);
+        const armHedge = (rank) => {
+          if (rank >= usable.length) return;
+          hedgeTimer = setTimeout(() => {
+            hedgeTimer = null;
+            if (done) return;
+            launch(rank + 1);
+            armHedge(rank + 1);
+          }, hedgeFor(rank));
+        };
+        armHedge(0);
+      });
     }
 
     // =========================================================================
@@ -2850,6 +2954,67 @@
     // A single in-flight attempt is shared by the metal sync and the 60s heartbeat,
     // so they never race each other or clobber a fresher rate with a stale one.
     let fxInFlight = null;
+
+    // Cold-load FX resolution: race the live mid-market tier while the daily reference ladder
+    // is hedged in after a short delay. Without this, a blocked live-FX host (ad-blocker, ISP
+    // DNS, office firewall) kept every rupee price on skeletons for the full 2.2s timeout and
+    // then a second 3.5s fallback — the single biggest reason "prices take forever to load".
+    // The live quote still wins whenever it answers first; daily feeds only fill the gap.
+    // Committed-rate helper: applies a validated quote to the board. `soft` upgrades (a live
+    // quote landing after a daily fallback already painted) never reject the whole attempt —
+    // a bad upgrade is simply dropped and the held rate stays.
+    function commitFxRate(res, soft = false) {
+      const check = validateUsdInr(res.val, state.live.usdInr);
+      if (!check.ok) {
+        if (soft) { console.warn(`USD/INR upgrade from ${res.source || 'feed'} rejected (${check.reason})`); return false; }
+        return check;
+      }
+      state.live.lastFxSync = Date.now();
+      state.live.fxSource = res.source || '';
+      state.live.fxLive = !!res.live;
+      state.live.usdInrAsOf = res.asOf || null;
+      const moved = state.live.usdInr !== check.value;
+      state.live.usdInr = check.value;
+      // Rupee moved → reprice gold & silver immediately; don't wait for the next metal sync.
+      if (moved) applyLiveFxToPrices();
+      return check;
+    }
+
+    function fetchFxWithHedge() {
+      return new Promise((resolve) => {
+        let done = false;
+        let dailyStarted = false;
+        let liveSettled = false;
+        let hedgeTimer = null;
+        let paintedDaily = false;
+        const finish = (res) => {
+          if (done) return;
+          done = true;
+          if (hedgeTimer) { clearTimeout(hedgeTimer); hedgeTimer = null; }
+          resolve(res);
+        };
+        const startDailyLadder = () => {
+          if (dailyStarted || done) return;
+          dailyStarted = true;
+          if (hedgeTimer) { clearTimeout(hedgeTimer); hedgeTimer = null; }
+          fetchFromTiers(FX_TIERS.slice(1)).then(
+            (res) => { paintedDaily = true; finish(res); },
+            () => { if (liveSettled) finish(null); }
+          );
+        };
+        // Live tier answers first → used. Live tier errors → daily ladder starts at once.
+        // Live tier is merely slow/blocked → daily ladder starts at the hedge delay, and the
+        // live quote is then applied as a soft upgrade the moment it finally arrives.
+        fetchFromTiers([FX_TIERS[0]], false, (fresh) => {
+          if (paintedDaily) commitFxRate(fresh, true);
+        }).then(
+          (res) => { liveSettled = true; finish(res); },
+          () => { liveSettled = true; startDailyLadder(); }
+        );
+        hedgeTimer = setTimeout(startDailyLadder, FX_DAILY_HEDGE_MS);
+      });
+    }
+
     function refreshLiveFx(force = false) {
       if (fxInFlight) return fxInFlight;
       const now = Date.now();
@@ -2861,34 +3026,32 @@
       state.live.isFxFetching = true;
       fxInFlight = (async () => {
         try {
-          // Always race the live mid-market providers first.
+          // Always race the live mid-market providers first. Daily reference feeds are only
+          // asked when no usable rate is held or the held rate has gone stale.
+          const stale = !haveRate || now - state.live.lastFxSync > FX_REFRESH_MS;
           let res = null;
-          try { res = await fetchFromTiers([FX_TIERS[0]]); } catch { res = null; }
-          // Fall back to daily reference feeds only when we hold nothing usable yet
-          // or the rate we hold is older than the daily-refresh horizon.
-          if (!res && (!haveRate || now - state.live.lastFxSync > FX_REFRESH_MS)) {
-            res = await fetchFromTiers(FX_TIERS.slice(1));
+          if (stale) {
+            // Cold load / stale rate: hedge the live tier against the daily ladder. The live
+            // tier keeps its preferred timeout, but a blocked live host no longer keeps the
+            // whole board on skeletons — a healthy daily feed answers inside the hedge window
+            // and the live quote still wins the race whenever it does arrive.
+            res = await fetchFxWithHedge();
+          } else {
+            try { res = await fetchFromTiers([FX_TIERS[0]]); } catch { res = null; }
           }
           if (!res) {
             if (haveRate) return state.live.usdInr; // keep last good rate, retry live next minute
             throw new Error('USD/INR feeds unavailable');
           }
-          const check = validateUsdInr(res.val, state.live.usdInr);
-          if (!check.ok) {
+          const check = commitFxRate(res);
+          if (!check || check.ok === false) {
             // Keep previous valid FX rate; the next minute's attempt retries the live tier.
             if (haveRate) {
-              console.warn(`USD/INR from ${res.source || 'feed'} rejected (${check.reason}: ${res.val}) — keeping ₹${state.live.usdInr.toFixed(2)}`);
+              console.warn(`USD/INR from ${res.source || 'feed'} rejected (${check && check.reason}: ${res.val}) — keeping ₹${state.live.usdInr.toFixed(2)}`);
               return state.live.usdInr;
             }
-            throw new Error(`USD/INR ${res.val} rejected (${check.reason})`);
+            throw new Error(`USD/INR ${res.val} rejected (${check && check.reason})`);
           }
-          state.live.lastFxSync = Date.now();
-          state.live.fxSource = res.source || '';
-          state.live.fxLive = !!res.live;
-          state.live.usdInrAsOf = res.asOf || null;
-          state.live.usdInr = check.value;
-          // Rupee moved → reprice gold & silver immediately; don't wait for the next metal sync.
-          applyLiveFxToPrices();
           return check.value;
         } finally {
           state.live.isFxFetching = false;
@@ -2954,6 +3117,55 @@
       }, FX_LIVE_REFRESH_MS);
     }
 
+    // Paint whatever live snapshot is currently held (metal + USD/INR). Shared by the initial
+    // sync and by each metal as it lands, so gold never waits on the silver feed (or vice versa).
+    // Safe to call often: it only repaints when the numbers actually changed.
+    // Paint a live snapshot now (metal + USD/INR all held). Gold and silver each call this the
+    // moment their own feed lands, so neither waits for the other. Paint-only: history/meta is
+    // written by the sync block, so adding a value mid-flight cannot duplicate history points.
+    function paintLiveSnapshot(metal = null) {
+      // Need BOTH metals plus the rupee to price the board. Whichever metal is still missing
+      // is filled from the last cached/live value, so the metal that HAS landed paints now
+      // instead of both waiting for the slowest of three independent hosts. `metal` names the
+      // feed that just landed; its half of the board flashes, the other half stays steady.
+      if (!Number.isFinite(state.live.usdInr)) return;
+      if (!Number.isFinite(state.live.spotGold) || !Number.isFinite(state.live.spotSilver)) {
+        const cached = readCachedRates();
+        if (!Number.isFinite(state.live.spotGold) && cached && Number.isFinite(cached.spotGold)) state.live.spotGold = cached.spotGold;
+        if (!Number.isFinite(state.live.spotSilver) && cached && Number.isFinite(cached.spotSilver)) state.live.spotSilver = cached.spotSilver;
+      }
+      if (!Number.isFinite(state.live.spotGold) || !Number.isFinite(state.live.spotSilver)) return;
+      const prevPrices = state.prices;
+      const nextPrices = computeCityPrices(state.cityId, state.live.spotGold, state.live.spotSilver, state.live.usdInr);
+      if (prevPrices
+        && prevPrices.spotGold === nextPrices.spotGold
+        && prevPrices.spotSilver === nextPrices.spotSilver
+        && prevPrices.usdInr === nextPrices.usdInr) return;
+      const firstPaint = !prevPrices;
+      if (!state.sessionOpen) {
+        state.sessionOpen = {
+          spotGold: state.live.spotGold,
+          spotSilver: state.live.spotSilver,
+          usdInr: state.live.usdInr
+        };
+        state.openPrices = computeCityPrices(state.cityId, state.live.spotGold, state.live.spotSilver, state.live.usdInr);
+      }
+      state.prices = nextPrices;
+      const flash = (prev, next) => (!prev ? null : (next === prev ? null : (next > prev ? 1 : -1)));
+      const goldDir = state.marketMode === 'INR' ? flash(prevPrices && prevPrices.gold999, nextPrices.gold999) : flash(prevPrices && prevPrices.spotGold, nextPrices.spotGold);
+      const silverDir = state.marketMode === 'INR' ? flash(prevPrices && prevPrices.silver999, nextPrices.silver999) : flash(prevPrices && prevPrices.spotSilver, nextPrices.spotSilver);
+      renderAllViews(firstPaint
+        ? { gold: null, silver: null }
+        : {
+            // Only the feed that just landed flashes, so a half-updated board never looks
+            // like the other metal moved too.
+            gold: metal === 'silver' ? null : goldDir,
+            silver: metal === 'gold' ? null : silverDir
+          }, firstPaint);
+      if (state.activeView === 'exchanges') renderExchangeComparison();
+      if (state.activeView === 'accuracy') renderMarketAccuracy();
+    }
+
     async function syncLiveAPIs(isManual = false, isInitialConnect = false) {
       if (state.live.isFetching) return;
       state.live.isFetching = true;
@@ -2966,9 +3178,19 @@
           renderLiveStatusUI();
         }
 
-        const goldPromise = fetchFromTiers(GOLD_TIERS)
+        // Each metal paints the moment ITS value lands (gold and silver feeds are separate
+        // hosts, so silver no longer waits on a gold host that is slow or blocked).
+        // Paint only becomes possible once we hold metal + USD/INR.
+        const goldPromise = fetchFromTiers(GOLD_TIERS, false, (res) => {
+          // A fresher tier answered after the fallback that painted first: correct the board.
+          state.live.goldSource = res.source;
+          state.live.spotGold = res.val;
+          paintLiveSnapshot('gold');
+        })
           .then((res) => {
             state.live.goldSource = res.source;
+            state.live.spotGold = res.val;
+            paintLiveSnapshot('gold');
             return res.val;
           })
           .catch((err) => {
@@ -2976,34 +3198,58 @@
             throw err;
           });
 
-        const silverPromise = fetchFromTiers(SILVER_TIERS).then((res) => res.val);
+        const silverPromise = fetchFromTiers(SILVER_TIERS, false, (res) => {
+          state.live.spotSilver = res.val;
+          paintLiveSnapshot('silver');
+        })
+          .then((res) => {
+            state.live.spotSilver = res.val;
+            paintLiveSnapshot('silver');
+            return res.val;
+          })
+          .catch((err) => {
+            throw err;
+          });
 
         // USD/INR is owned by the dedicated live FX engine: live mid-market first,
         // retried every minute, daily reference feeds only backstopping a stale rate.
+        // It reprices the board itself via applyLiveFxToPrices, so no extra paint here.
         const fxPromise = refreshLiveFx(isInitialConnect || isManual);
 
         const [goldRes, silverRes, fxRes] = await Promise.allSettled([goldPromise, silverPromise, fxPromise]);
-        const allOk = goldRes.status === 'fulfilled' && silverRes.status === 'fulfilled' && fxRes.status === 'fulfilled';
+        const havePrices = Number.isFinite(state.live.spotGold) && Number.isFinite(state.live.spotSilver) && Number.isFinite(state.live.usdInr);
+        const goldOk = goldRes.status === 'fulfilled';
+        const silverOk = silverRes.status === 'fulfilled';
 
-        if (allOk) {
-          const prevSpotGold = state.live.spotGold;
-          const prevSpotSilver = state.live.spotSilver;
-          const prevPrices = state.prices;
-
-          state.live.spotGold = goldRes.value;
-          state.live.spotSilver = silverRes.value;
+        // At least one metal landed: the desk is live, even if the other metal's feed is blocked.
+        if (goldOk || silverOk) {
           // state.live.usdInr is owned by refreshLiveFx (it may already have applied a
-          // fresher rate mid-sync); fxRes.value only gates the allOk check below.
+          // fresher rate mid-sync); fxRes.value only says whether a rate is held.
           state.live.lastSync = new Date();
-          state.live.status = 'live';
+          state.live.status = havePrices ? 'live' : 'connecting';
           state.live.restFailStreak = 0;
 
           const firstEverConnect = !state.live.connected;
-          state.live.connected = true;
+          // Only claim a live connection once the board can actually be priced. A metal feed
+          // without the rupee rate must not stop the retry/FX loops from finishing the job.
+          state.live.connected = havePrices;
+          if (havePrices) state.live.retryAttempt = 0;
           setInlineError(false);
+          if (havePrices) {
+            paintLiveSnapshot();
+            state.live.lastSync = new Date();
+            // Record the snapshot point for the chart history.
+            state.history.push({
+              time: fmtTime(state.live.lastSync),
+              spotGold: state.live.spotGold,
+              spotSilver: state.live.spotSilver,
+              usdInr: state.live.usdInr
+            });
+            if (state.history.length > 40) state.history.shift();
+          }
           persistCachedRates(state.live.spotGold, state.live.spotSilver, state.live.usdInr);
 
-          if (!state.sessionOpen) {
+          if (!state.sessionOpen && havePrices) {
             state.sessionOpen = {
               spotGold: state.live.spotGold,
               spotSilver: state.live.spotSilver,
@@ -3022,38 +3268,10 @@
             if (Math.abs(diffS) < state.live.spotSilver * 0.08) state.ws.basisSilver = diffS;
           }
 
-          // FX-only moves are already repriced by applyLiveFxToPrices inside the engine.
-          const pricesChanged = firstEverConnect
-            || prevSpotGold !== state.live.spotGold
-            || prevSpotSilver !== state.live.spotSilver;
-
-          if (pricesChanged) {
-            state.history.push({
-              time: fmtTime(state.live.lastSync),
-              spotGold: state.live.spotGold,
-              spotSilver: state.live.spotSilver,
-              usdInr: state.live.usdInr
-            });
-            if (state.history.length > 40) state.history.shift();
-
-            state.prices = computeCityPrices(state.cityId, state.live.spotGold, state.live.spotSilver, state.live.usdInr);
-
-            const goldFlashDir = !prevPrices ? null
-              : (state.marketMode === 'INR'
-                  ? (state.prices.gold999 === prevPrices.gold999 ? null : (state.prices.gold999 > prevPrices.gold999 ? 1 : -1))
-                  : (state.prices.spotGold === prevPrices.spotGold ? null : (state.prices.spotGold > prevPrices.spotGold ? 1 : -1)));
-
-            const silverFlashDir = !prevPrices ? null
-              : (state.marketMode === 'INR'
-                  ? (state.prices.silver999 === prevPrices.silver999 ? null : (state.prices.silver999 > prevPrices.silver999 ? 1 : -1))
-                  : (state.prices.spotSilver === prevPrices.spotSilver ? null : (state.prices.spotSilver > prevPrices.spotSilver ? 1 : -1)));
-
-            renderAllViews({ gold: goldFlashDir, silver: silverFlashDir }, firstEverConnect);
-            if (state.activeView === 'exchanges') renderExchangeComparison();
-            if (state.activeView === 'accuracy') renderMarketAccuracy();
-          } else {
-            renderLiveStatusUI();
-          }
+          // Board repaint (history, flash colours, tools, charts) already happened inside
+          // paintLiveSnapshot() for each metal as it landed, and inside the FX engine for the
+          // rupee. Nothing left to paint here — just reflect status.
+          if (!havePrices) renderLiveStatusUI();
 
           const footerEl = getEl('footer-sources');
           if (footerEl && !state.ws.connected) {
@@ -3068,7 +3286,9 @@
 
           if (isManual) {
             const fxNote = state.live.fxLive ? ' (live)' : (() => { const a = fmtFxAsOf(state.live.usdInrAsOf); return a ? ` (as of ${a})` : ''; })();
-            showToast(`Live rates synced: Gold ${fmtUSD(state.prices.spotGold)}/oz · USD/INR ₹${state.live.usdInr.toFixed(2)}${fxNote}`, 'success');
+            const goldPart = havePrices ? `Gold ${fmtUSD(state.prices.spotGold)}/oz` : 'Gold feed unavailable';
+            const fxPart = Number.isFinite(state.live.usdInr) ? `USD/INR ₹${state.live.usdInr.toFixed(2)}${fxNote}` : 'USD/INR unavailable';
+            showToast(`Live rates synced: ${goldPart} · ${fxPart}`, 'success');
           }
         } else {
           state.live.status = 'offline';
@@ -3095,8 +3315,25 @@
         if (state.live.connected && !document.hidden) {
           const elapsed = Math.round(performance.now() - syncStartedAt);
           scheduleAutoSync(elapsed);
+        } else if (!state.live.connected && !document.hidden) {
+          // Never connected yet: retry on the fast cadence instead of going quiet after one
+          // failure, otherwise a single slow/blocked attempt leaves the desk on skeletons.
+          scheduleRetrySync();
         }
       }
+    }
+
+    function scheduleRetrySync() {
+      if (state.live.timerId) {
+        clearTimeout(state.live.timerId);
+        state.live.timerId = null;
+      }
+      if (state.live.connected || document.hidden) return;
+      const attempt = state.live.retryAttempt = Math.min((state.live.retryAttempt || 0) + 1, 4);
+      state.live.timerId = setTimeout(() => {
+        state.live.timerId = null;
+        syncLiveAPIs(false, false);
+      }, Math.min(15000, 1000 * Math.pow(2, attempt - 1)));
     }
 
     function scheduleAutoSync(elapsedMs = 0) {
@@ -8029,6 +8266,12 @@
           if (state.live.connected) {
             connectLiveWebSocket();
             syncLiveAPIs(false, false);
+          } else {
+            // First attempt may have failed while hidden/unfocused — try again immediately
+            // instead of leaving the desk on skeletons until a manual reload.
+            state.live.retryAttempt = 0;
+            syncLiveAPIs(false, !state.prices);
+            connectLiveWebSocket();
           }
         }
       });
