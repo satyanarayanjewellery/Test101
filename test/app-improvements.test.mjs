@@ -662,3 +662,194 @@ test('shop drops the shopping bag and Gemstone/Platinum/Diamond; rates gain a Ra
     'no new capture outside the window');
   assert.equal(readRateOfDay().date, '2026-12-25', 'older capture must remain for display');
 });
+
+test('exchange comparison loads India import duty on foreign markets and never mislabels units', async () => {
+  const html = await loadHtml();
+  const constStart = html.indexOf('    const INDIA_IMPORT_DUTY_MULTIPLIER =');
+  const constEnd = html.indexOf('    const BASIS_SYNC_MS', constStart);
+  const marketsStart = html.indexOf('    const EXCHANGE_MARKETS = [');
+  const marketsEnd = html.indexOf('    // =========================================================================\n    // MARKET FEEDS', marketsStart);
+  const rowsStart = html.indexOf('    function computeExchangeRows(');
+  const rowsEnd = html.indexOf('    function renderExchangeComparison(', rowsStart);
+  assert.ok(constStart >= 0 && constEnd > constStart, 'duty constants must be locatable');
+  assert.ok(marketsStart >= 0 && marketsEnd > marketsStart, 'exchange markets must be locatable');
+  assert.ok(rowsStart >= 0 && rowsEnd > rowsStart, 'computeExchangeRows must be locatable');
+
+  const { computeExchangeRows, EXCHANGE_MARKETS, INDIA_IMPORT_DUTY_MULTIPLIER } = vm.runInNewContext(
+    [
+      html.slice(constStart, constEnd),
+      html.slice(marketsStart, marketsEnd),
+      html.slice(rowsStart, rowsEnd),
+      '({ computeExchangeRows, EXCHANGE_MARKETS, INDIA_IMPORT_DUTY_MULTIPLIER })'
+    ].join('\n'),
+    {
+      TROY_OZ_TO_GRAMS: 31.1034768,
+      CURRENCY_PER_USD: { USD: 1, AED: 3.6725, EUR: 0.92, GBP: 0.79, LBP: 89500 },
+      Number,
+      Math,
+      Infinity
+    }
+  );
+
+  const spotGold = 4100;
+  const spotSilver = 48;
+  const usdInr = 88;
+  const CURRENCY_PER_USD = { USD: 1, AED: 3.6725, EUR: 0.92, GBP: 0.79, LBP: 89500, INR: 1 };
+  const goldBase = (spotGold * usdInr / 31.1034768) * 1.15 * 10;
+  const silverBase = (spotSilver * usdInr / 31.1034768) * 1.15 * 1000;
+  const context = {
+    state: {
+      prices: { spotGold, spotSilver, usdInr, gold999ExGst: goldBase, silver999ExGst: silverBase },
+      exchanges: { metal: 'gold', sortBy: 'diff' }
+    }
+  };
+  const run = vm.runInNewContext(`(${computeExchangeRows.toString()})`, {
+    ...context,
+    EXCHANGE_MARKETS,
+    TROY_OZ_TO_GRAMS: 31.1034768,
+    CURRENCY_PER_USD: { USD: 1, AED: 3.6725, EUR: 0.92, GBP: 0.79, LBP: 89500, INR: 1 },
+    INDIA_IMPORT_DUTY_MULTIPLIER,
+    Infinity,
+    Math
+  });
+
+  const goldRows = run();
+  assert.ok(Array.isArray(goldRows) && goldRows.length > 10);
+  assert.equal(goldRows[0].isShop, true, 'shop reference row comes first');
+  assert.equal(goldRows[0].quoteMetal, 'gold');
+
+  // Every row must equal global parity x basis x USD/INR x 15% duty, in INR per 10g.
+  // (Every market is modeled from duty-free global spot, so duty applies to Indian venues too.)
+  const expected = (market) => (spotGold / 31.1034768)
+    * (1 + market.basisPct / 100)
+    * (usdInr / (CURRENCY_PER_USD[market.currency] || 1))
+    * 10
+    * INDIA_IMPORT_DUTY_MULTIPLIER;
+
+  const foreign = goldRows.find((r) => !r.isShop && r.currency !== 'INR');
+  assert.ok(foreign, 'a non-INR gold market must exist');
+  assert.ok(Math.abs(foreign.theirInr - expected(foreign)) < 1,
+    `${foreign.name} must be duty-loaded: expected ${Math.round(expected(foreign))}, got ${Math.round(foreign.theirInr)}`);
+  // Without the duty the same market would look ~13% cheaper than the shop — that was the bug.
+  assert.ok(Math.abs(foreign.diffPct) < 3,
+    `${foreign.name} must sit near the shop price, got ${foreign.diffPct.toFixed(2)}%`);
+
+  // Indian exchanges keep their basis spread and must never collapse to a spot-only figure.
+  // Before the USD→INR fix MCX showed ~₹1,300 per 10g against a ₹1,33,000 shop price (-99%).
+  const inrMarket = goldRows.find((r) => !r.isShop && r.currency === 'INR');
+  assert.ok(inrMarket, 'an Indian exchange must exist');
+  assert.ok(Math.abs(inrMarket.theirInr - expected(inrMarket)) < 1,
+    `${inrMarket.name} must be converted USD→INR (got ${Math.round(inrMarket.theirInr)})`);
+  assert.ok(Math.abs(inrMarket.diffPct) < 1,
+    `${inrMarket.name} should sit near the shop price, got ${inrMarket.diffPct.toFixed(2)}%`);
+
+  // The comparison must not claim every market is cheaper than the shop.
+  const cheaper = goldRows.filter((r) => !r.isShop && r.diffAmt < -1).length;
+  const pricier = goldRows.filter((r) => !r.isShop && r.diffAmt > 1).length;
+  assert.ok(cheaper > 0 && pricier > 0, `expected a mix of cheaper/pricier, got ${cheaper}/${pricier}`);
+  assert.ok(cheaper < goldRows.length / 2, 'most markets must not be "cheaper than us"');
+
+  // "Both" is not a quote bracket: every row still carries gold or silver.
+  assert.ok(goldRows.every((r) => r.quoteMetal === 'gold' || r.quoteMetal === 'silver'));
+
+  // Silver filter compares against the silver base and quotes per kg.
+  const silverRows = vm.runInNewContext(`(${computeExchangeRows.toString()})`, {
+    state: { prices: context.state.prices, exchanges: { metal: 'silver', sortBy: 'diff' } },
+    EXCHANGE_MARKETS,
+    TROY_OZ_TO_GRAMS: 31.1034768,
+    CURRENCY_PER_USD: { USD: 1, AED: 3.6725, EUR: 0.92, GBP: 0.79, LBP: 89500, INR: 1 },
+    INDIA_IMPORT_DUTY_MULTIPLIER,
+    Infinity,
+    Math
+  })();
+  assert.equal(silverRows[0].quoteMetal, 'silver');
+  assert.ok(Math.abs(silverRows[0].theirInr - silverBase) < 1, 'shop silver row must use the silver base');
+  // Bimetals are priced in gold; every other row in the silver view is silver.
+  assert.ok(silverRows.some((r) => r.quoteMetal === 'silver' && !r.isShop));
+  assert.ok(silverRows.every((r) => r.quoteMetal === 'silver' || r.metal === 'both'));
+  const silverOnly = silverRows.find((r) => !r.isShop && r.metal === 'silver');
+  if (silverOnly) {
+    assert.ok(Math.abs(silverOnly.diffPct) < 3,
+      `${silverOnly.name} must be compared against the silver base, got ${silverOnly.diffPct.toFixed(2)}%`);
+  }
+
+  // The 'Both' filter must stay reachable and list every venue (quoted in gold, one clean column).
+  const bothRows = vm.runInNewContext(`(${computeExchangeRows.toString()})`, {
+    state: { prices: context.state.prices, exchanges: { metal: 'both', sortBy: 'diff' } },
+    EXCHANGE_MARKETS,
+    TROY_OZ_TO_GRAMS: 31.1034768,
+    CURRENCY_PER_USD: { USD: 1, AED: 3.6725, EUR: 0.92, GBP: 0.79, LBP: 89500, INR: 1 },
+    INDIA_IMPORT_DUTY_MULTIPLIER,
+    Infinity,
+    Math
+  })();
+  assert.ok(bothRows.length > silverRows.length, "'Both' must list more venues than Silver");
+  assert.ok(bothRows.every((r) => r.quoteMetal === 'gold'));
+
+  // Row markup uses the quote bracket for the unit label (shop row per-kg in silver view).
+  assert.ok(html.includes("const rowMetal = r.quoteMetal || (r.metal === 'silver' ? 'silver' : 'gold');"));
+  assert.ok(html.includes("const unitLabel = rowMetal === 'gold' ? '/g' : '/kg';"));
+  assert.ok(!html.includes('metalOfPrice'));
+});
+
+test('market accuracy loads import duty, reports variance with a sign, and repaints on calibrate', async () => {
+  const html = await loadHtml();
+  const start = html.indexOf('    async function fetchMarketAccuracy(');
+  const end = html.indexOf('    function renderMarketAccuracy(', start);
+  assert.ok(start >= 0 && end > start);
+  const src = html.slice(start, end);
+
+  // Global quotes are landed at India's duty before comparing with the shop.
+  assert.ok(/results\.push\(\{ \.\.\.f, type: 'live'[^\n]*\n?[^\n]*INDIA_IMPORT_DUTY_MULTIPLIER/.test(src)
+    || src.includes('* INDIA_IMPORT_DUTY_MULTIPLIER'), 'live feeds must add import duty');
+  assert.ok(src.includes('const consensusUsd = median(liveVals)'), 'consensus must be the median of live USD quotes');
+  assert.ok(src.includes('const consensusInr = consensusUsd'), 'consensus must be converted to INR per unit');
+  // Failed feeds are sorted last rather than treated as zero price.
+  assert.ok(src.includes("Number.isFinite(b.theirInr) ? b.theirInr : -Infinity"));
+  // Variance: positive means shop is above consensus (matches the documented meaning).
+  assert.ok(src.includes('((shopBase - consensusInr) / consensusInr) * 100'));
+
+  // Failed feed rows render an em dash, not ₹0 / +0.00%.
+  assert.ok(html.includes("${ok ? fmtINR(r.theirInr, 0) : '—'}"));
+  assert.ok(html.includes("acc-chip acc-chip-fail\">Failed</span>"));
+  // Live feeds quote per ounce; modeled markets quote per gram / kilogram.
+  assert.ok(html.includes("localUnit: '/oz'"));
+  assert.ok(html.includes("const localUnit = r.localUnit || unit;"));
+
+  // Calibration recomputes prices and accuracy KPIs immediately.
+  const calibStart = html.indexOf('    function calibrateToMarket(');
+  const calibEnd = html.indexOf('    function bindAccuracyControls(', calibStart);
+  const calib = html.slice(calibStart, calibEnd);
+  assert.ok(calib.includes('state.prices = computeCityPrices('), 'calibrate must re-price');
+  assert.ok(calib.includes('ma.shopBase ='), 'calibrate must refresh the shop base');
+  assert.ok(calib.includes('ma.variancePct ='), 'calibrate must refresh the variance');
+  assert.ok(calib.includes('renderPriceCards(null, false)'), 'calibrate must repaint the rate board');
+
+  // First open of the accuracy tab fetches and repaints (was blank until manual refresh).
+  const switchStart = html.indexOf('function switchAppView(');
+  const switchView = html.slice(switchStart, switchStart + 9000);
+  assert.ok(/viewName === 'accuracy'[\s\S]{0,400}fetchMarketAccuracy\(false\)\.then\(/.test(switchView),
+    'accuracy view must repaint after its first fetch');
+
+  // Selecting a metal repaints after the new feeds resolve, not before.
+  assert.ok(html.includes('fetchMarketAccuracy(false).then(renderMarketAccuracy)'));
+});
+
+test('Rate of the Day explains a missed noon window instead of waiting forever', async () => {
+  const html = await loadHtml();
+  const start = html.indexOf('    function renderRateOfDay(');
+  const end = html.indexOf('    function renderPriceCards(', start);
+  const fn = html.slice(start, end);
+  assert.ok(fn.includes('const hour = new Date().getHours();'));
+  assert.ok(fn.includes("hour < 12 ? 'Awaiting 12 PM'"));
+  assert.ok(fn.includes('window has closed'), 'must explain the closed window');
+  assert.ok(!fn.includes("dateEl.textContent = 'Awaiting 12 PM';\n"), 'must not always say Awaiting 12 PM');
+});
+
+test('Mintu flows open the chat panel and no dead view alias remains', async () => {
+  const html = await loadHtml();
+  // Ask Mintu buttons/tiles must land on the Tools view with the Mintu sub-tab active.
+  assert.ok(!html.includes("switchAppView('agent')"), 'dead agent alias must not be used');
+  const occurrences = html.match(/switchToolTab\('mintu'\)/g) || [];
+  assert.ok(occurrences.length >= 4, 'quote, old-gold, old-silver and news flows must open Mintu');
+});
