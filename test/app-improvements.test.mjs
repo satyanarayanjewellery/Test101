@@ -1592,7 +1592,7 @@ test('the desk states the duty/GST it prices with and flags a stale regime', asy
   assert.equal(api.statutoryIsStale(Date.parse('2027-06-01T00:00:00Z')), true);
 
   const html = await loadHtml();
-  for (const id of ['statutory-badge', 'statutory-notice', 'statutory-notice-text', 'ex-duty-pct', 'acc-duty-pct', 'footer-gst-pct']) {
+  for (const id of ['statutory-notice', 'statutory-notice-text', 'ex-duty-pct', 'acc-duty-pct']) {
     assert.ok(html.includes(`id="${id}"`), `statutory UI: ${id}`);
   }
   // The prose must be driven by the data, and both duty figures must be wired to the renderer.
@@ -1601,7 +1601,6 @@ test('the desk states the duty/GST it prices with and flags a stale regime', asy
   const render = html.slice(renderStart, renderEnd);
   assert.ok(render.includes("const exDuty = document.getElementById('ex-duty-pct')"));
   assert.ok(render.includes("const accDuty = document.getElementById('acc-duty-pct')"));
-  assert.ok(render.includes("const footerGst = document.getElementById('footer-gst-pct')"));
   assert.ok(render.includes('statutoryIsStale()'), 'a stale regime must raise a notice');
   // Loaded at boot and revalidated on a slow cadence.
   assert.ok(html.includes('loadStatutoryRates().then('), 'boot must load the statutory data');
@@ -1668,4 +1667,17 @@ test('exchange comparison and accuracy checker are owner-only views', async () =
   assert.ok(html.includes('id="mobile-nav-grid" class="grid grid-cols-5'));
   assert.ok(html.includes('[data-owner-view-nav][hidden]{display:none !important}'));
   assert.match(html, /mobileNavGrid\.classList\.toggle\('grid-cols-7', isOwnerActive\)/);
+});
+
+
+test('rates footer and shop introduction omit the removed copy', async () => {
+  const html = await loadHtml();
+  const footer = html.slice(html.indexOf('      <footer class="text-[11px]'), html.indexOf('      </footer>') + '      </footer>'.length);
+  assert.ok(footer.includes('GSTIN: 21AFNPP7926E1ZC'));
+  assert.ok(!footer.includes('footer-sources'));
+  assert.ok(!footer.includes('Informational only'));
+  assert.ok(!footer.includes('Priced with'));
+  const hero = html.match(/<p class="shop-hero-sub">(.*?)<\/p>/)?.[1];
+  assert.ok(hero?.includes('showroom pickup.'));
+  assert.ok(!hero.includes('insured delivery'));
 });
