@@ -447,49 +447,46 @@
         </p>
       </div>
 
-      <!-- RATE OF THE DAY (Retail ex-GST per gram, captured in the 12:00–12:59 PM window) -->
-      <section id="rate-of-day-section" class="glass-card rounded-2xl p-3.5 sm:p-5" aria-label="Rate of the day">
-        <div class="flex items-center justify-between gap-2 mb-3">
-          <div class="min-w-0">
-            <h2 class="text-sm sm:text-base font-semibold text-amber-100 leading-tight">Rate of the Day</h2>
-            <p id="rate-of-day-caption" class="text-[11px] text-slate-400 mt-0.5">Retail ex-GST per gram · captured between 12:00–1:00 PM</p>
-          </div>
-          <span id="rate-of-day-date" class="shrink-0 text-[10px] px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 tabular-nums whitespace-nowrap">Awaiting 12 PM</span>
-        </div>
-        <div class="grid grid-cols-4 gap-1.5 sm:gap-2.5">
-          <div class="rate-tile rate-tile-gold-hi rounded-xl px-1 py-2 sm:p-2.5 flex flex-col justify-between text-center">
-            <div>
-              <p id="rod-999-price" class="price-num text-[11px] sm:text-base font-bold text-white tabular-nums tracking-tight whitespace-nowrap min-h-[1.25rem] flex items-center justify-center">--</p>
-              <p id="rod-999-10g" class="text-[9px] sm:text-[10px] text-amber-200/75 tabular-nums mt-0.5 truncate">-- / 10g</p>
-            </div>
-            <span class="mt-2 block py-1 rounded-lg bg-amber-500 text-slate-950 text-[10px] sm:text-[11px] font-bold">999</span>
-          </div>
-          <div class="rate-tile rate-tile-gold rounded-xl px-1 py-2 sm:p-2.5 flex flex-col justify-between text-center">
-            <div>
-              <p id="rod-995-price" class="price-num text-[11px] sm:text-base font-bold text-white tabular-nums tracking-tight whitespace-nowrap min-h-[1.25rem] flex items-center justify-center">--</p>
-              <p id="rod-995-10g" class="text-[9px] sm:text-[10px] text-slate-400 tabular-nums mt-0.5 truncate">-- / 10g</p>
-            </div>
-            <span class="mt-2 block py-1 rounded-lg bg-amber-500/20 text-amber-200 border border-amber-500/30 text-[10px] sm:text-[11px] font-semibold">995</span>
-          </div>
-          <div class="rate-tile rate-tile-gold rounded-xl px-1 py-2 sm:p-2.5 flex flex-col justify-between text-center">
-            <div>
-              <p id="rod-916-price" class="price-num text-[11px] sm:text-base font-bold text-white tabular-nums tracking-tight whitespace-nowrap min-h-[1.25rem] flex items-center justify-center">--</p>
-              <p id="rod-916-10g" class="text-[9px] sm:text-[10px] text-slate-400 tabular-nums mt-0.5 truncate">-- / 10g</p>
-            </div>
-            <span class="mt-2 block py-1 rounded-lg bg-amber-500/20 text-amber-200 border border-amber-500/30 text-[10px] sm:text-[11px] font-semibold">916</span>
-          </div>
-          <div class="rate-tile rate-tile-gold rounded-xl px-1 py-2 sm:p-2.5 flex flex-col justify-between text-center">
-            <div>
-              <p id="rod-750-price" class="price-num text-[11px] sm:text-base font-bold text-white tabular-nums tracking-tight whitespace-nowrap min-h-[1.25rem] flex items-center justify-center">--</p>
-              <p id="rod-750-10g" class="text-[9px] sm:text-[10px] text-slate-400 tabular-nums mt-0.5 truncate">-- / 10g</p>
-            </div>
-            <span class="mt-2 block py-1 rounded-lg bg-amber-500/20 text-amber-200 border border-amber-500/30 text-[10px] sm:text-[11px] font-semibold">750</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- INDIA (INR) 2-CARD LAYOUT: GOLD & SILVER (CLEAN & SMOOTH) -->
+      <!-- INDIA (INR) CARDS: RATE OF THE DAY, GOLD & SILVER (CLEAN & SMOOTH) -->
       <section id="inr-rates-section" class="flex flex-col gap-3.5" aria-label="India Live Bullion Prices Per 1 Gram">
+        <!-- RATE OF THE DAY (captured in the 12:00–12:59 PM window) -->
+        <div id="rate-of-day-section" class="glass-card rounded-2xl p-3.5 sm:p-5" role="region" aria-label="Rate of the day">
+          <div class="flex items-center justify-between gap-2 mb-3">
+            <h2 class="text-sm sm:text-base font-semibold text-amber-100 leading-tight min-w-0">Rate of the Day</h2>
+            <span id="rate-of-day-date" class="shrink-0 text-[10px] px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 tabular-nums whitespace-nowrap">Awaiting 12 PM</span>
+          </div>
+          <div class="grid grid-cols-4 gap-1.5 sm:gap-2.5">
+            <div class="rate-tile rate-tile-gold-hi rounded-xl px-1 py-2 sm:p-2.5 flex flex-col justify-between text-center">
+              <div>
+                <p id="rod-999-price" class="price-num text-[11px] sm:text-base font-bold text-white tabular-nums tracking-tight whitespace-nowrap min-h-[1.25rem] flex items-center justify-center">--</p>
+                <p id="rod-999-10g" class="text-[9px] sm:text-[10px] text-amber-200/75 tabular-nums mt-0.5 truncate">-- / 10g</p>
+              </div>
+              <span class="mt-2 block py-1 rounded-lg bg-amber-500 text-slate-950 text-[10px] sm:text-[11px] font-bold">999</span>
+            </div>
+            <div class="rate-tile rate-tile-gold rounded-xl px-1 py-2 sm:p-2.5 flex flex-col justify-between text-center">
+              <div>
+                <p id="rod-995-price" class="price-num text-[11px] sm:text-base font-bold text-white tabular-nums tracking-tight whitespace-nowrap min-h-[1.25rem] flex items-center justify-center">--</p>
+                <p id="rod-995-10g" class="text-[9px] sm:text-[10px] text-slate-400 tabular-nums mt-0.5 truncate">-- / 10g</p>
+              </div>
+              <span class="mt-2 block py-1 rounded-lg bg-amber-500/20 text-amber-200 border border-amber-500/30 text-[10px] sm:text-[11px] font-semibold">995</span>
+            </div>
+            <div class="rate-tile rate-tile-gold rounded-xl px-1 py-2 sm:p-2.5 flex flex-col justify-between text-center">
+              <div>
+                <p id="rod-916-price" class="price-num text-[11px] sm:text-base font-bold text-white tabular-nums tracking-tight whitespace-nowrap min-h-[1.25rem] flex items-center justify-center">--</p>
+                <p id="rod-916-10g" class="text-[9px] sm:text-[10px] text-slate-400 tabular-nums mt-0.5 truncate">-- / 10g</p>
+              </div>
+              <span class="mt-2 block py-1 rounded-lg bg-amber-500/20 text-amber-200 border border-amber-500/30 text-[10px] sm:text-[11px] font-semibold">916</span>
+            </div>
+            <div class="rate-tile rate-tile-gold rounded-xl px-1 py-2 sm:p-2.5 flex flex-col justify-between text-center">
+              <div>
+                <p id="rod-750-price" class="price-num text-[11px] sm:text-base font-bold text-white tabular-nums tracking-tight whitespace-nowrap min-h-[1.25rem] flex items-center justify-center">--</p>
+                <p id="rod-750-10g" class="text-[9px] sm:text-[10px] text-slate-400 tabular-nums mt-0.5 truncate">-- / 10g</p>
+              </div>
+              <span class="mt-2 block py-1 rounded-lg bg-amber-500/20 text-amber-200 border border-amber-500/30 text-[10px] sm:text-[11px] font-semibold">750</span>
+            </div>
+          </div>
+        </div>
+
         <!-- GOLD CARD -->
         <div class="glass-card gold-gradient rounded-2xl p-3.5 sm:p-5 relative overflow-hidden">
           <div class="flex items-center justify-between gap-2 mb-3">
@@ -995,7 +992,8 @@
         <p id="print-board-meta" style="font-size:12px;color:#444">Cuttack · Indicative estimates, not firm quotes. Excludes making charges.</p>
       </div>
 
-      <footer class="text-[11px] text-slate-500 px-1 text-right">
+      <footer class="text-[11px] text-slate-500 flex flex-wrap items-center justify-between gap-2 px-1">
+        <span id="footer-sync-meta" class="font-mono tabular-nums">--:--:--.---</span>
         <span class="text-amber-300/75 font-mono select-none">GSTIN: 21AFNPP7926E1ZC</span>
       </footer>
     </div>
@@ -3476,6 +3474,7 @@
           // paintLiveSnapshot() for each metal as it landed, and inside the FX engine for the
           // rupee. Nothing left to paint here — just reflect status.
           if (!havePrices) renderLiveStatusUI();
+          renderFooterSyncMeta();
 
           if (firstEverConnect && !document.hidden) {
             connectLiveWebSocket();
@@ -3781,6 +3780,7 @@
             state.ws.connected = false;
             state.ws.winnerName = '';
             state.ws.ticksPerSec = 0;
+            renderFooterSyncMeta();
             if (wasConnected && state.live.connected && !document.hidden) {
               scheduleAutoSync();
             }
@@ -3828,6 +3828,7 @@
       state.ws.connected = false;
       state.ws.winnerName = '';
       state.ws.ticksPerSec = 0;
+      renderFooterSyncMeta();
     }
 
     // =========================================================================
@@ -4443,7 +4444,6 @@
 
     function renderRateOfDay(prices) {
       const dateEl = document.getElementById('rate-of-day-date');
-      const captionEl = document.getElementById('rate-of-day-caption');
       const entry = captureRateOfDay(prices) || readRateOfDay();
       const tiles = [
         ['rod-999-price', 'rod-999-10g', 'g999'],
@@ -4462,11 +4462,6 @@
         // "Awaiting 12 PM" late in the afternoon, when today's window has already passed.
         const hour = new Date().getHours();
         if (dateEl) dateEl.textContent = hour < 12 ? 'Awaiting 12 PM' : (hour === 12 ? 'Capturing now…' : 'Tomorrow · 12 PM');
-        if (captionEl) {
-          captionEl.textContent = hour < 12
-            ? 'Retail ex-GST per gram · captured between 12:00–1:00 PM'
-            : 'Retail ex-GST per gram · today\'s 12:00–1:00 PM window has closed';
-        }
         return;
       }
       const isToday = entry.date === localDateKey();
@@ -4486,11 +4481,6 @@
             ? entry.date
             : d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
         }
-      }
-      if (captionEl) {
-        captionEl.textContent = isToday
-          ? 'Retail ex-GST per gram · captured in the 12 PM window'
-          : 'Retail ex-GST per gram · last captured rate shown';
       }
     }
 
@@ -4578,6 +4568,19 @@
           ? `Live mid-market USD/INR via ${state.live.fxSource || 'live feed'} — India gold & silver prices are calculated from this rate`
           : 'USD/INR daily reference rate — India gold & silver prices are calculated from this rate';
       }
+    }
+
+    function formatFooterSyncMeta(lastSync, ticksPerSec = 0) {
+      if (!(lastSync instanceof Date) || Number.isNaN(lastSync.getTime())) return '--:--:--.---';
+      const tps = Number(ticksPerSec) > 0 ? ` · ${ticksPerSec} ticks/s` : '';
+      return `${fmtTimeMs(lastSync)}${tps}`;
+    }
+
+    function renderFooterSyncMeta() {
+      const footerEl = getEl('footer-sync-meta');
+      if (!footerEl) return;
+      const tps = state.ws.connected ? state.ws.ticksPerSec : 0;
+      setText(footerEl, formatFooterSyncMeta(state.live.lastSync, tps));
     }
 
     function renderPriceCardsNow(flashDirs = null, animateReveal = false, fromWs = false) {
@@ -4759,6 +4762,7 @@
       }
 
       if (state.activeView === 'news') renderNewsTicker();
+      renderFooterSyncMeta();
       if (animateReveal) {
         for (let i = 0; i < goldFlashTargets.length; i++) {
           const el = goldFlashTargets[i];
