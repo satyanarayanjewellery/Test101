@@ -102,6 +102,7 @@
     .jewel-dropzone.is-dragover{border-color:#E5C55B;background:rgba(212,175,55,0.1)}
     .jewel-modal-backdrop{position:fixed;inset:0;z-index:80;background:rgba(4,2,3,0.86);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:1rem;overflow-y:auto}
     .jewel-modal-backdrop.hidden{display:none}
+    [data-owner-view-nav][hidden]{display:none !important}
     .jewel-modal-card{width:100%;max-width:28rem;max-height:90dvh;overflow-y:auto;background:linear-gradient(165deg,#180D11 0%,#0B0709 100%);border:1px solid rgba(212,175,55,0.28);border-radius:1.125rem;padding:1.25rem;box-shadow:0 24px 60px rgba(0,0,0,0.85)}
     .jewel-lightbox-card{width:100%;max-width:56rem;max-height:92dvh;display:flex;flex-direction:column;gap:0.75rem;background:#090607;border:1px solid rgba(212,175,55,0.28);border-radius:1.125rem;padding:1rem;box-shadow:0 24px 60px rgba(0,0,0,0.9)}
     .jewel-lightbox-stage{position:relative;background:#050304;border-radius:0.75rem;overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:240px;max-height:68dvh}
@@ -1838,7 +1839,7 @@
 
   <!-- Mobile Bottom Navigation Bar (7 Tabs — Rates Centered in Middle) -->
   <nav id="mobile-nav-bar" class="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-slate-800/90 bg-[#090607]/98" style="padding-bottom: env(safe-area-inset-bottom);" aria-label="Bottom navigation">
-    <div id="mobile-nav-grid" class="grid grid-cols-7 h-16 max-w-lg mx-auto px-1">
+    <div id="mobile-nav-grid" class="grid grid-cols-5 h-16 max-w-lg mx-auto px-1">
       <button data-app-view="charts" type="button" class="app-nav-mobile relative flex flex-col items-center justify-center gap-0.5 text-slate-400 hover:text-slate-200 transition-colors duration-150">
         <span class="nav-indicator hidden absolute top-0 w-8 h-0.5 rounded-full bg-amber-400"></span>
         <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
@@ -7724,6 +7725,11 @@
       if (studio) studio.classList.toggle('hidden', !isOwnerActive);
       if (pill) pill.classList.toggle('hidden', !isOwnerActive);
       (document.querySelectorAll?.('[data-owner-view-nav]') || []).forEach((nav) => { nav.hidden = !isOwnerActive; });
+      const mobileNavGrid = document.getElementById('mobile-nav-grid');
+      if (mobileNavGrid) {
+        mobileNavGrid.classList.toggle('grid-cols-5', !isOwnerActive);
+        mobileNavGrid.classList.toggle('grid-cols-7', isOwnerActive);
+      }
       // Owner entry button stays hidden for customers until Owner Mode is live or the secret reveal fired
       if (accessBtn) accessBtn.classList.toggle('hidden', !(isOwnerActive || productOwner.accessRevealed));
       if (btnLabel) btnLabel.textContent = isOwnerActive ? 'Token Settings' : 'Owner';
