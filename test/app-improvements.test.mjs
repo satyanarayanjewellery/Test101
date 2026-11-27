@@ -1249,3 +1249,107 @@ test('live FX engine is wired into boot, sync, visibility and the INR board', as
   assert.ok(apply.includes('computeCityPrices(state.cityId, state.live.spotGold, state.live.spotSilver, state.live.usdInr)'), 'FX moves must recompute gold & silver');
   assert.ok(apply.includes('persistCachedRates('), 'FX reprices must persist the cached rates');
 });
+
+// ---------------------------------------------------------------------------
+// FAST FIRST PAINT — the desk must not wait for the slowest of three independent
+// hosts (or for a blocked tier to time out) before showing a price.
+// ---------------------------------------------------------------------------
+async function loadTierEngine({ fetchImpl, state }) {
+  const html = await loadHtml();
+  const start = html.indexOf('    function parseSwissquoteMid(');
+  const end = html.indexOf('    // =========================================================================\n    // LIVE USD/INR ENGINE');
+  assert.ok(start >= 0 && end > start, 'tier engine must be locatable');
+  const sandbox = {
+    Number, Date, Math, JSON, Infinity, Promise, Error, console, AbortController,
+    setTimeout, clearTimeout, fetch: fetchImpl,
+    // The engine reads live.spotGold/spotSilver/usdInr to decide what it still needs.
+    state: { live: { usdInr: null, spotGold: null, spotSilver: null, ...(state && state.live) } },
+    window: { addEventListener: () => {} }
+  };
+  vm.runInNewContext([
+    html.slice(start, end),
+    'globalThis.api = { fetchFromTiers, GOLD_TIERS };'
+  ].join('\n'), sandbox);
+  return sandbox.api;
+}
+
+function makeFetch({ dead = /$^/, latency = 80 }) {
+  const calls = [];
+  const fetchImpl = (url, opts = {}) => {
+    calls.push(url);
+    if (dead.test(url)) {
+      // Host never answers (ad-blocker / ISP DNS): only our own abort ends the request.
+      return new Promise((_, reject) => {
+        const fail = () => { const e = new Error('aborted'); e.name = 'AbortError'; reject(e); };
+        const sig = opts.signal;
+        if (sig) { if (sig.aborted) return fail(); sig.addEventListener('abort', fail, { once: true }); }
+      });
+    }
+    return new Promise((resolve) => setTimeout(() => resolve({
+      ok: true,
+      json: async () => ({ price: 4100, xau: { usd: 4100 }, xag: { usd: 48 }, usd: { inr: 92.9 }, rate: 92.9, rates: { INR: 92.9 }, date: '2026-11-27' })
+    }), latency));
+  };
+  return { fetchImpl, calls };
+}
+
+test('price feeds hedge to the fallback tier instead of waiting for a dead host to time out', async () => {
+  const { fetchImpl } = makeFetch({ dead: /swissquote|gold-api\.com/, latency: 60 });
+  const api = await loadTierEngine({ fetchImpl, state: {} });
+  const started = Date.now();
+  const res = await api.fetchFromTiers(api.GOLD_TIERS);
+  const elapsed = Date.now() - started;
+  assert.equal(res.source, 'jsDelivr', 'the healthy fallback must supply the price');
+  // Old behaviour: full 2.2s tier-0 timeout before tier 1 was even asked (~2.3s total).
+  assert.ok(elapsed < 1800, `first price must arrive well under the old 2.2s tier timeout (took ${elapsed}ms)`);
+});
+
+test('a fresher tier that answers late still upgrades a price already painted from a fallback', async () => {
+  const deadFirst = makeFetch({ dead: /$^/, latency: 30 });
+  // Tier 0 is slower than the hedge delay (1.4s), tier 1 is fast (30ms): the fallback paints
+  // almost immediately, then the live quote corrects the board when it finally arrives.
+  const fetchImpl = (url, opts) => {
+    const isTier0 = /swissquote|gold-api\.com/.test(url);
+    if (isTier0) {
+      return new Promise((resolve) => setTimeout(() => resolve({
+        ok: true, json: async () => ({ price: 4111, xau: { usd: 4111 }, date: '2026-11-27' })
+      }), 1800));
+    }
+    return deadFirst.fetchImpl(url, opts);
+  };
+  const api = await loadTierEngine({ fetchImpl, state: {} });
+  const upgrades = [];
+  const started = Date.now();
+  const res = await api.fetchFromTiers(api.GOLD_TIERS, false, (fresh) => upgrades.push({ at: Date.now() - started, val: fresh.val }));
+  assert.equal(res.val, 4100, 'the fast fallback paints first');
+  // Cold start hedges the next rung at ~0.9s, so the fallback paints ~1s in — while the live
+  // tier is still 0.8s away. Old behaviour waited the full 2.2s for tier 0 before trying.
+  assert.ok(Date.now() - started < 1300, `first paint must not wait for the slow live tier (took ${Date.now() - started}ms)`);
+  await new Promise((r) => setTimeout(r, 1200));
+  assert.equal(upgrades.length, 1, 'the late live quote must arrive as an upgrade');
+  assert.equal(upgrades[0].val, 4111, 'the upgrade carries the fresher live value');
+});
+
+test('each metal paints on its own feed and FX hedges instead of blocking the board', async () => {
+  const html = await loadHtml();
+  // Gold and silver must not be gated behind a single all-three-feeds Promise.allSettled paint.
+  const syncStart = html.indexOf('async function syncLiveAPIs(');
+  const syncEnd = html.indexOf('function scheduleRetrySync(', syncStart);
+  const sync = html.slice(syncStart, syncEnd);
+  assert.ok(/paintLiveSnapshot\('gold'\)/.test(sync), 'gold must paint as soon as its feed lands');
+  assert.ok(/paintLiveSnapshot\('silver'\)/.test(sync), 'silver must paint as soon as its feed lands');
+  assert.ok(!/const allOk =/.test(sync), 'no single all-or-nothing gate may hold the board back');
+  assert.ok(sync.includes('if (goldOk || silverOk)'), 'one working metal must be enough to be live');
+  // A metal feed can fail without leaving the desk stuck on skeletons forever.
+  assert.ok(sync.includes('scheduleRetrySync()'), 'a never-connected desk must retry on a timer');
+  // Cold-load FX hedges the live tier against the daily ladder with an upgrade path.
+  const hedgeStart = html.indexOf('function fetchFxWithHedge(');
+  const hedgeEnd = html.indexOf('function refreshLiveFx(', hedgeStart);
+  assert.ok(hedgeStart >= 0 && hedgeEnd > hedgeStart, 'fetchFxWithHedge must exist');
+  const hedge = html.slice(hedgeStart, hedgeEnd);
+  assert.ok(hedge.includes('FX_DAILY_HEDGE_MS'), 'the daily ladder must be hedged in');
+  assert.ok(hedge.includes('commitFxRate(fresh, true)'), 'a late live quote must upgrade a daily fallback rate');
+  assert.match(html, /const FX_DAILY_HEDGE_MS = \d+;/, 'the hedge delay must be a named constant');
+  // Paint may borrow the cached snapshot for the metal that has not arrived yet.
+  assert.ok(html.includes('function readCachedRates('), 'cached rates must be readable by the paint path');
+});
