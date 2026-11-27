@@ -79,14 +79,16 @@ test('2. Owner Service Worker and Customer Service Worker have isolated scopes a
   assert.doesNotThrow(() => new vm.Script(ownerSw, { filename: 'owner/sw.js' }));
   assert.doesNotThrow(() => new vm.Script(rootSw, { filename: 'sw.js' }));
 
-  assert.match(ownerSw, /const CACHE = 'sj-owner-desk-v1'/);
+  assert.match(ownerSw, /const CACHE = 'sj-owner-desk-v2'/);
   assert.match(ownerSw, /key\.startsWith\('sj-owner-desk-'\)/, 'Owner SW should only delete its own cache namespace');
   assert.match(ownerSw, /SKIP_WAITING/, 'Owner SW should support controlled update reload');
   assert.match(ownerSw, /catalog\/products\.json/);
   assert.match(ownerSw, /catalog\/statutory-rates\.json/);
+  assert.match(ownerSw, /\/manifest\.webmanifest/);
 
   assert.match(rootSw, /url\.pathname\.includes\('\/owner\/'\)/, 'Customer SW must bypass /owner/ routes');
   assert.match(rootSw, /!key\.startsWith\('sj-owner-desk-'\)/, 'Customer SW must preserve owner caches');
+  assert.match(rootSw, /\/manifest\.webmanifest/);
 });
 
 test('3. Owner HTML locks workspace behind auth gate by default and includes PWA + noindex metadata', () => {

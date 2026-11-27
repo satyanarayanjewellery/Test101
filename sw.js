@@ -54,6 +54,22 @@ self.addEventListener('fetch', event => {
     return;
   }
 
+  // Keep manifest.webmanifest network-first so updated PWA id/scope/icons reach phones immediately.
+  if (url.pathname.endsWith('/manifest.webmanifest') || url.pathname === '/manifest.webmanifest') {
+    event.respondWith(
+      fetch(req)
+        .then(res => {
+          if (isCacheable(res)) {
+            const copy = res.clone();
+            caches.open(CACHE).then(cache => cache.put('./manifest.webmanifest', copy));
+          }
+          return res;
+        })
+        .catch(() => caches.match('./manifest.webmanifest'))
+    );
+    return;
+  }
+
   // Always try the network first for navigations so users get fresh HTML when online.
   if (req.mode === 'navigate') {
     event.respondWith(

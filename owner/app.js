@@ -2378,18 +2378,22 @@
   }
 
   function updateInstallUI() {
+    if (!state.pwa.deferredPrompt && typeof window !== 'undefined' && window.__ownerDeferredPrompt) {
+      state.pwa.deferredPrompt = window.__ownerDeferredPrompt;
+    }
     const installed = isStandaloneMode();
     const hasPrompt = Boolean(state.pwa.deferredPrompt);
     $('btn-install-header')?.classList.toggle('hidden', installed || !hasPrompt);
     $('btn-install-settings')?.classList.toggle('hidden', installed || !hasPrompt);
     $('auth-install-wrap')?.classList.toggle('hidden', installed || !hasPrompt);
+    $('auth-install-help')?.classList.toggle('hidden', installed);
     const status = $('pwa-install-status');
     if (status) {
       status.textContent = installed
         ? 'SJ Owner Desk is installed and running in standalone app mode.'
         : hasPrompt
           ? 'Ready to install as a standalone app on this device.'
-          : 'Installs as a separate Owner app beside SJ Price Desk (use browser Add to Home Screen if no install button appears).';
+          : 'Open directly in Chrome (not an in-app tab). If an older SJ Price Desk copy is installed, remove it once, then install both via their in-app Install buttons (or Chrome 157+).';
     }
     updateDiagnostics();
   }
@@ -2400,6 +2404,7 @@
     promptEvt.prompt();
     const choice = await promptEvt.userChoice.catch(() => ({ outcome: 'dismissed' }));
     state.pwa.deferredPrompt = null;
+    if (typeof window !== 'undefined') window.__ownerDeferredPrompt = null;
     updateInstallUI();
     if (choice && choice.outcome === 'accepted') {
       showToast('Installing SJ Owner Desk to your home screen!', 'success');

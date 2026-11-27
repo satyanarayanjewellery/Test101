@@ -20,6 +20,13 @@
   <link rel="preconnect" href="https://stream.bybit.com" crossorigin />
   <link rel="stylesheet" href="styles.css" />
   <title>SJ Owner — Satyanarayan Jewellers Owner Desk</title>
+  <script>
+    window.__ownerDeferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', function (e) {
+      e.preventDefault();
+      window.__ownerDeferredPrompt = e;
+    });
+  </script>
 </head>
 <body>
   <div id="toast-stack" class="toast-stack" aria-live="polite" role="status"></div>
@@ -88,6 +95,16 @@
         <span style="font-size:0.74rem;color:var(--text-muted);">Install SJ Owner on your home screen</span>
         <button id="btn-install-auth" type="button" class="btn btn-gold-outline btn-sm">Install Owner App</button>
       </div>
+
+      <details id="auth-install-help" style="margin-top:0.85rem;padding-top:0.75rem;border-top:1px solid var(--border);font-size:0.72rem;color:var(--text-muted);line-height:1.5;">
+        <summary style="cursor:pointer;color:var(--gold-200);font-weight:600;">Installing alongside SJ Price Desk on Android?</summary>
+        <ol style="margin:0.45rem 0 0;padding-left:1.1rem;display:flex;flex-direction:column;gap:0.3rem;">
+          <li>Open this URL directly in <strong>Chrome</strong> (not an in-app preview).</li>
+          <li>If you installed <strong>SJ Price Desk</strong> earlier, uninstall that old copy once so Chrome clears its old site-wide install record.</li>
+          <li>Use the in-app <strong>Install Owner App</strong> button above (on Chrome 154–156 Android, Chrome's ⋮ menu can falsely say <em>"This app is already installed"</em> when another app on the same domain is installed; updating Chrome to 157+ also fixes the menu).</li>
+          <li>Alternatively, install <strong>SJ Price Desk</strong> in Chrome and <strong>SJ Owner</strong> in Edge / Samsung Internet for instant separate icons.</li>
+        </ol>
+      </details>
     </div>
   </section>
 
