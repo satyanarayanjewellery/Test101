@@ -318,6 +318,7 @@
       localItems: [],
       pendingFiles: [],
       objectUrls: [],
+      lightboxObjectUrls: [],
       filter: 'all',
       search: '',
       sort: 'new',
@@ -370,6 +371,20 @@
   // =========================================================================
   const roundSpot = (v) => (Number.isFinite(v) ? Number(v.toFixed(4)) : NaN);
   const roundFxRate = (v) => (Number.isFinite(v) ? Number(v.toFixed(6)) : NaN);
+
+  function todayIstIso(date = new Date()) {
+    try {
+      const iso = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Kolkata',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).format(date);
+      if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) return iso;
+    } catch { /* fallback below */ }
+    const ist = new Date(date.getTime() + 5.5 * 3600000);
+    return ist.toISOString().slice(0, 10);
+  }
 
   function escapeHtml(str) {
     return String(str == null ? '' : str)
@@ -856,8 +871,8 @@
     }
     if (!repoRes.ok) throw new Error(`GitHub verification failed (HTTP ${repoRes.status}).`);
     const repo = await repoRes.json();
-    if (repo.permissions && repo.permissions.push === false) {
-      const err = new Error('This token is read-only. Enable "Contents: Read and write" on satyanarayanjewellery/shop.');
+    if (!repo.permissions || repo.permissions.push !== true) {
+      const err = new Error('This token is read-only or lacks write access. Enable "Contents: Read and write" on satyanarayanjewellery/shop.');
       err.authError = true;
       throw err;
     }
@@ -1185,29 +1200,40 @@
       let res = null;
       try {
         if (!hasRate) {
-          // Cold load: hedge daily tiers if live tier is silent.
-          res = await new Promise((resolve, reject) => {
+          // Cold load: hedge daily tiers if live tier is silent, while guaranteeing settlement
+          // even if every live and daily feed fails (e.g. offline device).
+          res = await new Promise((resolve) => {
             let settled = false;
+            let dailyStarted = false;
+            let dailySettled = false;
+            let liveSettled = false;
             let hedgeTimer = null;
-            const liveP = raceTier(FX_TIERS[0], 3500, (v) => validateUsdInr(v, state.live.usdInr).ok);
-            liveP.then((r) => {
-              clearTimeout(hedgeTimer);
-              if (!settled) { settled = true; resolve(r); }
-              else commitFxRate(r);
-            }).catch(() => {
-              if (!settled && !hedgeTimer) {
-                fetchFromTiers(FX_TIERS.slice(1), (v) => validateUsdInr(v, state.live.usdInr).ok)
-                  .then((r) => { if (!settled) { settled = true; resolve(r); } })
-                  .catch((e) => { if (!settled) { settled = true; reject(e); } });
-              }
-            });
-            hedgeTimer = setTimeout(() => {
-              hedgeTimer = null;
+            const finish = (v) => {
               if (settled) return;
+              settled = true;
+              if (hedgeTimer) { clearTimeout(hedgeTimer); hedgeTimer = null; }
+              resolve(v);
+            };
+            const startDaily = () => {
+              if (dailyStarted || settled) return;
+              dailyStarted = true;
+              if (hedgeTimer) { clearTimeout(hedgeTimer); hedgeTimer = null; }
               fetchFromTiers(FX_TIERS.slice(1), (v) => validateUsdInr(v, state.live.usdInr).ok)
-                .then((r) => { if (!settled) { settled = true; resolve(r); } })
-                .catch(() => {});
-            }, FX_DAILY_HEDGE_MS);
+                .then((r) => { dailySettled = true; finish(r); })
+                .catch(() => { dailySettled = true; if (liveSettled) finish(null); });
+            };
+            raceTier(FX_TIERS[0], 3500, (v) => validateUsdInr(v, state.live.usdInr).ok)
+              .then((r) => {
+                liveSettled = true;
+                if (!settled) finish(r);
+                else commitFxRate(r);
+              })
+              .catch(() => {
+                liveSettled = true;
+                if (dailySettled) finish(null);
+                else startDaily();
+              });
+            hedgeTimer = setTimeout(startDaily, FX_DAILY_HEDGE_MS);
           });
         } else {
           res = await raceTier(FX_TIERS[0], 3500, (v) => validateUsdInr(v, state.live.usdInr).ok);
@@ -1500,10 +1526,10 @@
     const mkt = $('header-market-pill');
     if (mkt) {
       const parts = new Intl.DateTimeFormat('en-US', {
-        timeZone: 'Asia/Kolkata', weekday: 'short', hour: '2-digit', minute: '2-digit', hour12: false
+        timeZone: 'Asia/Kolkata', weekday: 'short', hour: '2-digit', minute: '2-digit', hour12: false, hourCycle: 'h23'
       }).formatToParts(new Date());
       const wd = parts.find((x) => x.type === 'weekday')?.value || '';
-      const h = Number(parts.find((x) => x.type === 'hour')?.value || 0);
+      const h = (Number(parts.find((x) => x.type === 'hour')?.value || 0)) % 24;
       const m = Number(parts.find((x) => x.type === 'minute')?.value || 0);
       const mins = h * 60 + m;
       const isWeekend = wd === 'Sat' || wd === 'Sun';
@@ -1590,7 +1616,7 @@
       }
     }
     if (!check.ok || !state.prices) return;
-    const current = state.prices;
+    const current = computeCityPrices('cuttack', state.live.spotGold, state.live.spotSilver, state.live.usdInr);
     const preview = computeCityPrices('cuttack', state.live.spotGold, state.live.spotSilver, state.live.usdInr, { statutory: check.payload });
     const paint = (valId, diffId, next, cur) => {
       const d = next - cur;
@@ -1635,7 +1661,7 @@
         sha = meta && meta.sha ? meta.sha : null;
       } catch { /* file may not exist */ }
 
-      const today = new Date().toISOString().slice(0, 10);
+      const today = todayIstIso();
       const fileContent = {
         _comment: 'Statutory landing costs used to price gold & silver in INR. Update this file when the Government of India changes customs duty or GST — the desk picks it up on the next load, no code change needed. Verify each change against a primary source before publishing.',
         updatedAt: today,
@@ -1678,12 +1704,17 @@
               ...p,
               media: Array.isArray(p.media)
                 ? p.media
-                    .map((m) => ({
-                      type: m && m.type === 'video' ? 'video' : 'image',
-                      src: sanitizeCatalogMediaUrl(m && m.src),
-                      mime: typeof (m && m.mime) === 'string' ? m.mime : ''
-                    }))
-                    .filter((m) => Boolean(m.src))
+                    .map((m) => {
+                      const clean = sanitizeCatalogMediaUrl(m && m.src);
+                      return clean.startsWith(CATALOG_MEDIA_PREFIX)
+                        ? {
+                            type: m && m.type === 'video' ? 'video' : 'image',
+                            src: clean,
+                            mime: typeof (m && m.mime) === 'string' ? m.mime : ''
+                          }
+                        : null;
+                    })
+                    .filter(Boolean)
                 : []
             }));
         }
@@ -1860,11 +1891,25 @@
         ext = opt.ext;
       }
       const mediaPath = `${CATALOG_MEDIA_PREFIX}${safeId}-${i}.${ext}`;
-      await ghContentsRequest('PUT', mediaPath, {
+      const mediaPut = {
         message: `Add jewellery media for ${item.name}`,
         content: await blobToBase64(uploadBlob),
         branch: CATALOG_REPO_BRANCH
-      });
+      };
+      try {
+        await ghContentsRequest('PUT', mediaPath, mediaPut);
+      } catch (err) {
+        if (/HTTP 422|"sha" wasn't supplied/i.test(err && err.message ? err.message : '')) {
+          const meta = await ghContentsRequest('GET', `${mediaPath}?ref=${CATALOG_REPO_BRANCH}`);
+          if (meta && meta.sha) {
+            await ghContentsRequest('PUT', mediaPath, { ...mediaPut, sha: meta.sha });
+          } else {
+            throw err;
+          }
+        } else {
+          throw err;
+        }
+      }
       publishedMedia.push({ type: isVideo ? 'video' : 'image', src: mediaPath, mime: uploadMime });
       done += 1;
     }
@@ -1989,16 +2034,21 @@
     state.owner.objectUrls = [];
   }
 
-  function resolveDisplayMedia(item) {
+  function revokeLightboxObjectUrls() {
+    state.owner.lightboxObjectUrls.forEach((u) => { try { URL.revokeObjectURL(u); } catch { /* ignore */ } });
+    state.owner.lightboxObjectUrls = [];
+  }
+
+  function resolveDisplayMedia(item, urlPool = state.owner.objectUrls) {
     return (Array.isArray(item.media) ? item.media : []).map((m) => {
       if (m && m._previewBlob instanceof Blob) {
         const u = URL.createObjectURL(m._previewBlob);
-        state.owner.objectUrls.push(u);
+        urlPool.push(u);
         return { type: m.type === 'video' ? 'video' : 'image', src: u };
       }
       if (m && m.blob instanceof Blob) {
         const u = URL.createObjectURL(m.blob);
-        state.owner.objectUrls.push(u);
+        urlPool.push(u);
         return { type: m.type === 'video' ? 'video' : 'image', src: u };
       }
       const src = toOwnerMediaSrc(m && m.src);
@@ -2113,7 +2163,8 @@
   function openLightbox(id, src) {
     const item = findItem(id, src);
     if (!item) return;
-    const media = resolveDisplayMedia(item);
+    revokeLightboxObjectUrls();
+    const media = resolveDisplayMedia(item, state.owner.lightboxObjectUrls);
     if (!media.length) return;
     state.owner.lightboxItem = { item, media };
     state.owner.lightboxIdx = 0;
@@ -2226,7 +2277,7 @@
           id: `ind-${m.id}`, name: m.name, city: m.city, country: m.country, currency: 'INR',
           type: 'indicative', valid: true, theirInr,
           local: metal === 'gold' ? theirInr / 10 : theirInr / 1000,
-          localUnit: metal === 'gold' ? '/g' : '/kg',
+          localUnit: '/g',
           usdPrice: NaN
         });
       }
@@ -2499,14 +2550,19 @@
     if (clearToken) {
       storeGitHubToken('', false);
       lsRemove(OWNER_VERIFIED_META_KEY);
-      if ($('auth-token-input')) $('auth-token-input').value = '';
     }
+    const tokenInp = $('auth-token-input');
+    if (tokenInp) {
+      tokenInp.value = '';
+      tokenInp.type = 'password';
+    }
+    const toggleBtn = $('btn-auth-toggle-vis');
+    if (toggleBtn) toggleBtn.textContent = 'Show';
     state.owner.unlocked = false;
     state.owner.offlineSession = false;
-    if (clearToken) {
-      state.owner.token = '';
-      state.owner.login = '';
-    }
+    state.owner.token = '';
+    if (clearToken) state.owner.login = '';
+    revokeLightboxObjectUrls();
     clearPendingFiles();
     $('owner-app')?.classList.add('hidden');
     $('auth-gate')?.classList.remove('hidden');
@@ -2517,7 +2573,6 @@
     const saved = getStoredGitHubToken();
     if (!saved) return;
     $('auth-checking')?.classList.remove('hidden');
-    if ($('auth-token-input')) $('auth-token-input').value = saved;
     try {
       const verified = await verifyGitHubToken(saved);
       saveVerifiedMeta(verified.token, verified.login);
@@ -2909,6 +2964,7 @@
       $('lightbox-modal')?.classList.add('hidden');
       if ($('lb-stage')) $('lb-stage').innerHTML = '';
       state.owner.lightboxItem = null;
+      revokeLightboxObjectUrls();
     };
     $('btn-close-lb')?.addEventListener('click', closeLb);
     $('lightbox-modal')?.addEventListener('click', (e) => { if (e.target.id === 'lightbox-modal') closeLb(); });
@@ -3024,7 +3080,7 @@
       .forEach((id) => $(id)?.addEventListener('input', renderStatutoryPreview));
     $('btn-reload-statutory')?.addEventListener('click', () => loadStatutoryRates(true).then(() => showToast('Reloaded catalog/statutory-rates.json.', 'success')));
     $('btn-st-mark-today')?.addEventListener('click', () => {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = todayIstIso();
       if ($('st-gold-ver')) $('st-gold-ver').value = today;
       if ($('st-silver-ver')) $('st-silver-ver').value = today;
       renderStatutoryPreview();
@@ -3073,7 +3129,12 @@
             saveVerifiedMeta(v.token, v.login);
             unlockWorkspace({ token: v.token, login: v.login, offline: false });
             showToast('Back online · GitHub owner session verified.', 'success');
-          }).catch(() => {});
+          }).catch((err) => {
+            if (err && err.authError) {
+              lockWorkspace(true);
+              showToast(err.message || 'Owner token revoked or invalid. Please sign in again.', 'error');
+            }
+          });
         }
         connectLiveWebSockets();
         syncMetalsRest(false);
@@ -3118,6 +3179,8 @@
       acceptSpot,
       validateUsdInr,
       tokenFingerprint,
+      todayIstIso,
+      refreshLiveFx,
       state
     };
   }

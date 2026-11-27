@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
   <meta name="description" content="Satyanarayan Jewellers live gold & silver price desk for Cuttack — retail rates per gram and 10g for 999/995/916/750 purity, ex-GST and incl. 3% GST, plus charts, calculator and Mintu assistant." />
   <meta name="author" content="Satyanarayan Jewellers, Cuttack" />
   <meta name="robots" content="index, follow" />
@@ -2127,6 +2128,7 @@
           minute: '2-digit',
           second: '2-digit',
           hour12: false,
+          hourCycle: 'h23',
           timeZoneName: 'short'
         });
       }
@@ -2795,6 +2797,7 @@
       return new Promise((resolve) => {
         let done = false;
         let dailyStarted = false;
+        let dailySettled = false;
         let liveSettled = false;
         let hedgeTimer = null;
         let paintedDaily = false;
@@ -2809,18 +2812,18 @@
           dailyStarted = true;
           if (hedgeTimer) { clearTimeout(hedgeTimer); hedgeTimer = null; }
           fetchFromTiers(FX_TIERS.slice(1)).then(
-            (res) => { paintedDaily = true; finish(res); },
-            () => { if (liveSettled) finish(null); }
+            (res) => { dailySettled = true; paintedDaily = true; finish(res); },
+            () => { dailySettled = true; if (liveSettled) finish(null); }
           );
         };
-        // Live tier answers first → used. Live tier errors → daily ladder starts at once.
-        // Live tier is merely slow/blocked → daily ladder starts at the hedge delay, and the
-        // live quote is then applied as a soft upgrade the moment it finally arrives.
+        // Live tier answers first → used. Live tier errors → daily ladder starts at once (or
+        // finishes null if daily already failed). Live tier is merely slow/blocked → daily ladder
+        // starts at the hedge delay, and the live quote is applied as a soft upgrade if it arrives.
         fetchFromTiers([FX_TIERS[0]], false, (fresh) => {
           if (paintedDaily) commitFxRate(fresh, true);
         }).then(
           (res) => { liveSettled = true; finish(res); },
-          () => { liveSettled = true; startDailyLadder(); }
+          () => { liveSettled = true; if (dailySettled) finish(null); else startDailyLadder(); }
         );
         hedgeTimer = setTimeout(startDailyLadder, FX_DAILY_HEDGE_MS);
       });
@@ -4571,6 +4574,18 @@
       return candidates[0];
     }
 
+    function sanitizeExternalUrl(url) {
+      if (!url || typeof url !== 'string') return '#';
+      const trimmed = url.trim();
+      if (!/^https?:\/\//i.test(trimmed)) return '#';
+      try {
+        const parsed = new URL(trimmed);
+        return (parsed.protocol === 'https:' || parsed.protocol === 'http:') ? parsed.href : '#';
+      } catch {
+        return '#';
+      }
+    }
+
     function sanitizeImgUrl(url) {
       if (!url || typeof url !== 'string') return '';
       let clean = url.trim().replace(/&amp;/g, '&').replace(/&#038;/g, '&');
@@ -5146,7 +5161,7 @@
       const usedScenes = new Set();
       const usedRealUrls = new Set();
       listEl.innerHTML = filtered.map((item, idx) => {
-        const safeUrl = item.url && /^https?:\/\//i.test(item.url) ? item.url : '#';
+        const safeUrl = sanitizeExternalUrl(item.url);
         const sceneIdx = getUniqueNewsSceneIdx(item, idx, usedScenes);
         const uniqueScene = NEWS_UNIQUE_SCENES[sceneIdx];
         let rawImg = sanitizeImgUrl(item.image || '');
@@ -5161,7 +5176,7 @@
         return `
           <article class="news-card rounded-2xl overflow-hidden">
             <a href="${escapeHtml(safeUrl)}" target="_blank" rel="noopener noreferrer" class="block w-full h-44 sm:h-52 overflow-hidden bg-slate-950/60 border-b border-amber-500/15">
-              <img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(item.title)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src=window.NEWS_UNIQUE_SCENES[${sceneIdx}];" class="w-full h-full object-cover" />
+              <img src="${escapeHtml(imgSrc)}" data-news-fallback="${sceneIdx}" alt="${escapeHtml(item.title)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" class="w-full h-full object-cover" />
             </a>
             <div class="p-3.5">
               <div class="flex items-center justify-between gap-2 mb-1.5">
@@ -5187,6 +5202,13 @@
           </article>
         `;
       }).join('');
+
+      listEl.querySelectorAll('img[data-news-fallback]').forEach((img) => {
+        img.addEventListener('error', () => {
+          const fallback = NEWS_UNIQUE_SCENES[Number(img.dataset.newsFallback)];
+          if (fallback && img.src !== fallback) img.src = fallback;
+        }, { once: true });
+      });
 
       listEl.querySelectorAll('.news-ask-mintu').forEach((btn) => {
         btn.addEventListener('click', () => {
@@ -5325,7 +5347,11 @@
       const makingTypeEl = document.getElementById('calc-making-type');
       const makingType = makingTypeEl ? makingTypeEl.value : 'pct';
       const includeGst = document.getElementById('calc-gst-toggle').checked;
-      const gstPct = includeGst ? 3 : 0;
+      const isSilverMetal = metal === '999' || metal === '925' || metal === '750S';
+      const statutoryGst = typeof statutoryRatesFor === 'function'
+        ? statutoryRatesFor(isSilverMetal ? 'silver' : 'gold').gstPct
+        : 3;
+      const gstPct = includeGst ? statutoryGst : 0;
 
       const totalGrams = weight * unitToGrams(unit);
       const ratePerGram = getPerGramPrice(metal);
@@ -5734,7 +5760,7 @@
       if (state.prices) {
         const city = getCurrentCity();
         const sched = getMarketSchedule();
-        const gstLbl = '3% GST';
+        const gstLbl = `${statutoryRatesFor('gold').gstPct}% GST`;
         lines.push(
           `Live rates (${city.name}, ${gstLbl}): ` +
           `With GST: Gold 999 (24K)=${fmtINR(state.prices.gold999Gram, 2)}/g, Gold 995=${fmtINR(state.prices.gold995Gram, 2)}/g, Gold 916 (22K)=${fmtINR(state.prices.gold916Gram, 2)}/g, Gold 750 (18K)=${fmtINR(state.prices.gold18Gram, 2)}/g, Silver 999=${fmtINR(state.prices.silver999Gram, 2)}/g, Silver 925=${fmtINR(state.prices.silver925Gram, 2)}/g, Silver 750=${fmtINR(state.prices.silver750Gram, 2)}/g, Silver MCX=${fmtINR(state.prices.silverMCXGstGram, 2)}/g; ` +
@@ -5862,7 +5888,8 @@
           const rate = getPerGramPrice(metal);
           const base = grams * rate;
           const making = base * (makingPct / 100);
-          const gstPct = 3;
+          const isSilverMeta = metal === '999' || metal === '925' || metal === '750S';
+          const gstPct = statutoryRatesFor(isSilverMeta ? 'silver' : 'gold').gstPct;
           const gst = (base + making) * (gstPct / 100);
           const total = base + making + gst;
           return `Estimated jewellery quote for **${w}${unit} ${metal}** (${city.name}):
@@ -5873,7 +5900,8 @@
 - **Estimated Total:** **${fmtINR(Math.round(total))}**`;
         }
 
-        return `Live **${city.name}** bullion rates (incl. 3% GST):
+        const goldGstPct = statutoryRatesFor('gold').gstPct;
+        return `Live **${city.name}** bullion rates (incl. ${goldGstPct}% GST):
 
 - **Gold 999 (24K):** ${fmtINR(state.prices.gold999)} / 10g *(Ex-GST: ${fmtINR(state.prices.gold999ExGst)})*
 - **Gold 995:** ${fmtINR(state.prices.gold995)} / 10g *(Ex-GST: ${fmtINR(state.prices.gold995ExGst)})*
@@ -6032,7 +6060,6 @@
 
     function renderChat() {
       const container = document.getElementById('chat-messages');
-      const avatarErr = `onerror="this.onerror=null;this.src=window.MINTU_DEFAULT_AVATAR;"`;
       const safeAvatarAttr = escapeHtml(safeAvatarSrc(mintuAvatarSrc));
 
       let html = state.messages.map((m, idx) => {
@@ -6049,7 +6076,7 @@
         const welcomeBanner = idx === 0
           ? `<div class="flex flex-col items-center text-center pb-2">
                <div class="w-24 h-24 rounded-2xl overflow-hidden border-2 border-amber-400/80 bg-slate-900 mb-2 mintu-hero-avatar">
-                 <img decoding="async" src="${safeAvatarAttr}" ${avatarErr} alt="Mintu AI Agent" class="mintu-avatar-img w-full h-full object-cover object-top" />
+                 <img decoding="async" src="${safeAvatarAttr}" data-avatar-fallback="1" alt="Mintu AI Agent" class="mintu-avatar-img w-full h-full object-cover object-top" />
                </div>
                <p class="text-xs font-semibold text-amber-300">Mintu &middot; Satyanarayan Jewellers Agent</p>
              </div>`
@@ -6059,7 +6086,7 @@
           ${welcomeBanner}
           <div class="flex items-start gap-2.5 justify-start">
             <div class="w-8 h-8 rounded-full overflow-hidden border border-amber-400/70 bg-slate-900 shrink-0 mt-0.5 shadow">
-              <img decoding="async" src="${safeAvatarAttr}" ${avatarErr} alt="Mintu" class="mintu-avatar-img w-full h-full object-cover object-top" />
+              <img decoding="async" src="${safeAvatarAttr}" data-avatar-fallback="1" alt="Mintu" class="mintu-avatar-img w-full h-full object-cover object-top" />
             </div>
             <div class="max-w-[88%] rounded-2xl rounded-tl-sm bg-slate-900/90 border border-slate-800 px-3.5 py-2.5 text-xs sm:text-sm text-slate-200 shadow-sm">
               ${renderMarkdown(m.text)}
@@ -6072,7 +6099,7 @@
         html += `
           <div class="flex items-start gap-2.5 justify-start">
             <div class="w-8 h-8 rounded-full overflow-hidden border-2 border-amber-400 ring-2 ring-amber-400/40 animate-pulse bg-slate-900 shrink-0 mt-0.5 shadow">
-              <img decoding="async" src="${safeAvatarAttr}" ${avatarErr} alt="Mintu thinking" class="mintu-avatar-img w-full h-full object-cover object-top" />
+              <img decoding="async" src="${safeAvatarAttr}" data-avatar-fallback="1" alt="Mintu thinking" class="mintu-avatar-img w-full h-full object-cover object-top" />
             </div>
             <div class="rounded-2xl rounded-tl-sm bg-slate-900/90 border border-slate-800 px-4 py-3 flex items-center gap-1.5">
               <span class="w-1.5 h-1.5 rounded-full bg-amber-400 typing-dot"></span>
@@ -6084,6 +6111,11 @@
       }
 
       container.innerHTML = html;
+      container.querySelectorAll('img[data-avatar-fallback]').forEach((img) => {
+        img.addEventListener('error', () => {
+          if (img.src !== MINTU_DEFAULT_AVATAR) img.src = MINTU_DEFAULT_AVATAR;
+        }, { once: true });
+      });
       container.scrollTop = container.scrollHeight;
     }
 
@@ -6297,6 +6329,7 @@
       pendingFiles: [],
       activeMediaIndex: new Map(),
       objectUrls: [],
+      lightboxObjectUrls: [],
       lightboxItem: null,
       lightboxIdx: 0,
       savedIds: new Set(),
@@ -6530,12 +6563,17 @@
                 ...p,
                 media: Array.isArray(p.media)
                   ? p.media
-                      .map((m) => ({
-                        type: m && m.type === 'video' ? 'video' : 'image',
-                        src: sanitizeCatalogMediaUrl(m && m.src),
-                        mime: typeof (m && m.mime) === 'string' ? m.mime : ''
-                      }))
-                      .filter((m) => Boolean(m.src))
+                      .map((m) => {
+                        const clean = sanitizeCatalogMediaUrl(m && m.src);
+                        return clean.startsWith(CATALOG_MEDIA_PREFIX)
+                          ? {
+                              type: m && m.type === 'video' ? 'video' : 'image',
+                              src: clean,
+                              mime: typeof (m && m.mime) === 'string' ? m.mime : ''
+                            }
+                          : null;
+                      })
+                      .filter(Boolean)
                   : []
               }));
           }
@@ -6593,19 +6631,10 @@
       }
       if (!repoRes.ok) throw new Error(`GitHub verification failed (HTTP ${repoRes.status}).`);
       const repo = await repoRes.json();
-      if (repo.permissions && repo.permissions.push === false) {
-        const err = new Error('This token is read-only. Enable "Contents: Read and write" on satyanarayanjewellery/shop.');
+      if (!repo.permissions || repo.permissions.push !== true) {
+        const err = new Error('This token is read-only or lacks write access. Enable "Contents: Read and write" on satyanarayanjewellery/shop.');
         err.authError = true;
         throw err;
-      }
-      if (!repo.permissions) {
-        // Fallback check if GitHub omits permissions on a scoped token: confirm token is authenticated
-        const userCheck = await fetch('https://api.github.com/user', { headers, cache: 'no-store' }).catch(() => null);
-        if (!userCheck || userCheck.status === 401) {
-          const err = new Error('Token is invalid or expired.');
-          err.authError = true;
-          throw err;
-        }
       }
       let login = CATALOG_REPO_OWNER;
       try {
@@ -6757,11 +6786,25 @@
         }
         const mediaPath = `${CATALOG_MEDIA_PREFIX}${safeId}-${i}.${ext}`;
         const contentB64 = await blobToBase64(uploadBlob);
-        await ghContentsRequest('PUT', mediaPath, {
+        const mediaPut = {
           message: `Add jewellery media for ${item.name}`,
           content: contentB64,
           branch: CATALOG_REPO_BRANCH
-        });
+        };
+        try {
+          await ghContentsRequest('PUT', mediaPath, mediaPut);
+        } catch (err) {
+          if (/HTTP 422|"sha" wasn't supplied/i.test(err && err.message ? err.message : '')) {
+            const meta = await ghContentsRequest('GET', `${mediaPath}?ref=${CATALOG_REPO_BRANCH}`);
+            if (meta && meta.sha) {
+              await ghContentsRequest('PUT', mediaPath, { ...mediaPut, sha: meta.sha });
+            } else {
+              throw err;
+            }
+          } else {
+            throw err;
+          }
+        }
         publishedMedia.push({ type: isVideo ? 'video' : 'image', src: mediaPath, mime: uploadMime });
         doneSteps += 1;
       }
@@ -6843,20 +6886,25 @@
       productOwner.objectUrls = [];
     }
 
-    function trackObjectUrl(blob) {
+    function revokeLightboxObjectUrls() {
+      productOwner.lightboxObjectUrls.forEach((u) => { try { URL.revokeObjectURL(u); } catch { /* ignore */ } });
+      productOwner.lightboxObjectUrls = [];
+    }
+
+    function trackObjectUrl(blob, pool = productOwner.objectUrls) {
       const url = URL.createObjectURL(blob);
-      productOwner.objectUrls.push(url);
+      pool.push(url);
       return url;
     }
 
-    function resolveItemMediaList(item) {
+    function resolveItemMediaList(item, urlPool = productOwner.objectUrls) {
       const list = Array.isArray(item.media) ? item.media : [];
       return list.map((m) => {
         if (m && m._previewBlob instanceof Blob) {
-          return { type: m.type === 'video' ? 'video' : 'image', src: trackObjectUrl(m._previewBlob), mime: m.mime || m._previewBlob.type || '' };
+          return { type: m.type === 'video' ? 'video' : 'image', src: trackObjectUrl(m._previewBlob, urlPool), mime: m.mime || m._previewBlob.type || '' };
         }
         if (m && m.blob instanceof Blob) {
-          return { type: m.type === 'video' ? 'video' : 'image', src: trackObjectUrl(m.blob), mime: m.mime || m.blob.type || '' };
+          return { type: m.type === 'video' ? 'video' : 'image', src: trackObjectUrl(m.blob, urlPool), mime: m.mime || m.blob.type || '' };
         }
         const safe = sanitizeCatalogMediaUrl(m && m.src);
         return safe ? { type: m.type === 'video' ? 'video' : 'image', src: safe, mime: m.mime || '' } : null;
@@ -7061,7 +7109,7 @@
       document.getElementById('btn-clear-filters')?.classList.toggle('hidden', !hasFilters);
       if (resultsEl) {
         if (!allItems.length) {
-          resultsEl.textContent = 'Collection loading…';
+          resultsEl.textContent = productOwner.catalogLoaded ? '0 pieces' : 'Collection loading…';
         } else if (!sorted.length) {
           resultsEl.innerHTML = `Showing <strong>0</strong> of ${allItems.length} pieces`;
         } else {
@@ -7168,7 +7216,8 @@
       const pool = source === 'local' ? productOwner.localItems : productOwner.publishedItems;
       const item = pool.find((x) => x.id === itemId);
       if (!item) return;
-      const media = resolveItemMediaList(item);
+      revokeLightboxObjectUrls();
+      const media = resolveItemMediaList(item, productOwner.lightboxObjectUrls);
       if (!media.length) return;
       productOwner.lightboxItem = { item, media };
       productOwner.lightboxIdx = Math.max(0, Math.min(startIdx, media.length - 1));
@@ -7205,10 +7254,11 @@
         const priceNum = Number(item.price) || 0;
         const isSaved = productOwner.savedIds.has(item.id);
         const specs = [item.category, item.purity, Number(item.weight) > 0 ? `${Number(item.weight).toLocaleString('en-IN')} g` : '', item.sku ? `#${item.sku}` : ''].filter(Boolean);
+        const itemGstPct = statutoryRatesFor(String(item.category || '').toLowerCase() === 'silver' ? 'silver' : 'gold').gstPct;
         actions.innerHTML = `
           <div class="shop-lightbox-price">
             <strong>${priceNum > 0 ? formatShopPrice(priceNum) : 'Price on request'}</strong>
-            <span>${priceNum > 0 ? 'Incl. 3% GST · making charges extra' : escapeHtml(specs.join(' · ') || 'Our team will quote on WhatsApp')}</span>
+            <span>${priceNum > 0 ? `Incl. ${itemGstPct}% GST · making charges extra` : escapeHtml(specs.join(' · ') || 'Our team will quote on WhatsApp')}</span>
           </div>
           <button type="button" class="shop-quick-btn product-wa-enquire" data-product-id="${escapeHtml(item.id)}" data-source="${src}" aria-label="Enquire on WhatsApp" title="Enquire on WhatsApp">
             <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91C21.95 6.45 17.5 2 12.04 2zm5.82 14.01c-.24.68-1.41 1.3-1.95 1.38-.5.08-1.13.11-1.82-.11-.42-.13-.96-.31-1.65-.61-2.9-1.25-4.79-4.17-4.93-4.36-.14-.19-1.18-1.57-1.18-3 0-1.43.75-2.13 1.01-2.42.27-.29.58-.36.78-.36.19 0 .39 0 .56.01.18.01.42-.07.66.5.24.58.82 2.01.89 2.15.07.15.12.32.02.51-.1.19-.15.32-.29.49-.15.17-.31.38-.44.51-.15.15-.3.31-.13.6.17.29.76 1.25 1.63 2.03 1.12 1 2.06 1.31 2.35 1.46.29.15.46.12.63-.07.17-.19.73-.85.92-1.14.19-.29.39-.24.66-.15.27.1 1.7.8 1.99.95.29.14.49.22.56.34.07.12.07.7-.17 1.38z"/></svg>
@@ -7225,6 +7275,7 @@
       if (modal) modal.classList.add('hidden');
       if (stage) stage.innerHTML = '';
       productOwner.lightboxItem = null;
+      revokeLightboxObjectUrls();
       if (document.getElementById('owner-auth-modal')?.classList.contains('hidden')) {
         document.body.style.overflow = '';
       }
@@ -7238,7 +7289,7 @@
       if (errGh) { errGh.classList.add('hidden'); errGh.textContent = ''; }
       if (tokenInput) {
         tokenInput.type = 'password';
-        tokenInput.value = productOwner.ghToken || getStoredGitHubToken() || '';
+        tokenInput.value = '';
       }
       const toggleBtn = document.getElementById('btn-toggle-gh-token');
       if (toggleBtn) toggleBtn.textContent = 'Show';
@@ -7456,8 +7507,18 @@
 
       document.getElementById('btn-owner-lock')?.addEventListener('click', () => {
         productOwner.unlocked = false;
+        productOwner.ghConnected = false;
+        productOwner.ghToken = '';
         concealOwnerAccess();
+        const tokenInput = document.getElementById('owner-gh-token');
+        if (tokenInput) {
+          tokenInput.value = '';
+          tokenInput.type = 'password';
+        }
+        const toggleBtn = document.getElementById('btn-toggle-gh-token');
+        if (toggleBtn) toggleBtn.textContent = 'Show';
         clearPendingMedia();
+        revokeLightboxObjectUrls();
         renderProducts();
         showToast('Owner Mode locked. Showing customer gallery view.', 'info');
       });

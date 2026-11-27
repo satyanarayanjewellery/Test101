@@ -29,27 +29,38 @@ self.addEventListener('fetch', event => {
   // Never intercept the dedicated Owner PWA scope; owner/sw.js manages /owner/ independently.
   if (url.pathname.includes('/owner/') || url.pathname.endsWith('/owner')) return;
 
-  // Always fetch live catalogue manifest from network so newly published jewellery appears immediately.
+  // Always fetch live catalogue manifest from network so newly published jewellery appears immediately;
+  // cache under pathname (stripping ?t= cache-buster) so offline visitors still see the last good catalog.
   if (url.pathname.endsWith('/catalog/products.json') || url.pathname === '/catalog/products.json') {
     event.respondWith(
-      fetch(req).catch(() => new Response('[]', { headers: { 'content-type': 'application/json' } }))
+      fetch(req)
+        .then(res => {
+          if (isCacheable(res)) {
+            const copy = res.clone();
+            caches.open(CACHE).then(cache => cache.put(url.pathname, copy));
+          }
+          return res;
+        })
+        .catch(() => caches.match(url.pathname).then(cached => cached || new Response('[]', { headers: { 'content-type': 'application/json' } })))
     );
     return;
   }
 
   // Statutory duty/GST is policy data: a stale cached copy would misprice every rupee figure, so
   // it always goes to the network and only a previously good cached copy may stand in offline.
+  // Cache under url.pathname (stripping ?t= cache-buster) to avoid polluting cache storage and to
+  // guarantee offline fallback hits.
   if (url.pathname.endsWith('/catalog/statutory-rates.json') || url.pathname === '/catalog/statutory-rates.json') {
     event.respondWith(
       fetch(req)
         .then(res => {
           if (isCacheable(res)) {
             const copy = res.clone();
-            caches.open(CACHE).then(cache => cache.put(req, copy));
+            caches.open(CACHE).then(cache => cache.put(url.pathname, copy));
           }
           return res;
         })
-        .catch(() => caches.match(req).then(cached => cached || Response.error()))
+        .catch(() => caches.match(url.pathname).then(cached => cached || Response.error()))
     );
     return;
   }
@@ -65,7 +76,7 @@ self.addEventListener('fetch', event => {
           }
           return res;
         })
-        .catch(() => caches.match('./manifest.webmanifest'))
+        .catch(() => caches.match('./manifest.webmanifest').then(cached => cached || new Response('Offline', { status: 503 })))
     );
     return;
   }
@@ -82,7 +93,7 @@ self.addEventListener('fetch', event => {
           }
           return caches.match('./index.html').then(cached => cached || res);
         })
-        .catch(() => caches.match('./index.html'))
+        .catch(() => caches.match('./index.html').then(cached => cached || new Response('Offline', { status: 503 })))
     );
     return;
   }
@@ -98,7 +109,7 @@ self.addEventListener('fetch', event => {
           }
           return res;
         })
-        .catch(() => cached);
+        .catch(() => cached || new Response('Offline', { status: 503 }));
       return cached || networkFetch;
     })
   );
