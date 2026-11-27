@@ -148,7 +148,7 @@ test('manifest and service worker are valid, referenced, and prevent cache poiso
   assert.ok(manifest.icons.some(i => i.sizes === '192x192'));
   assert.ok(manifest.icons.some(i => i.sizes === '512x512'));
   const sw = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
-  assert.match(sw, /sj-price-desk-v6/);
+  assert.match(sw, /sj-price-desk-v7/);
   assert.match(sw, /index\.html/);
   assert.match(sw, /skipWaiting/);
   const html = await loadHtml();
@@ -852,4 +852,77 @@ test('Mintu flows open the chat panel and no dead view alias remains', async () 
   assert.ok(!html.includes("switchAppView('agent')"), 'dead agent alias must not be used');
   const occurrences = html.match(/switchToolTab\('mintu'\)/g) || [];
   assert.ok(occurrences.length >= 4, 'quote, old-gold, old-silver and news flows must open Mintu');
+});
+
+// The inline sheet is hand-written Tailwind: any utility the markup uses but the sheet
+// never defines is silently inert. That is what stacked the 7-tab bottom nav into one
+// column on phones, so every utility used by markup is now checked against the sheet.
+function definedCssNames(css) {
+  const names = new Set();
+  // Tailwind escapes the variant colon (`hover\:text-white`) and decimals/arbitrary values
+  // (`gap-1\.5`, `text-\[8px\]`). Park the escaped colon behind a sentinel so a bare `:`
+  // can still end a selector, then normalise every name back to the token markup carries.
+  const MARK = '\u0000';
+  const parked = css.replace(/\\:/g, MARK);
+  for (const match of parked.matchAll(/\.((?:\\[^\s,{}>]|[^\\\s,{}>:])+)/g)) {
+    const name = match[1]
+      .replace(/::?[a-z-]+(?:\([^)]*\))?$/i, '') // drop trailing :hover / ::placeholder
+      .replace(/\\/g, '')
+      .split(MARK)
+      .join(':');
+    if (name) names.add(name);
+  }
+  return names;
+}
+
+function usedClassTokens(html) {
+  const styleMatch = /<style[^>]*>([\s\S]*?)<\/style>/.exec(html);
+  const css = styleMatch ? styleMatch[1] : '';
+  const withoutCss = html.replace(css, '');
+  const tokens = new Set();
+  const add = (value) => {
+    for (const token of value.split(/\s+/)) {
+      if (token && !token.includes('$') && !token.includes('{') && !token.includes('}')) tokens.add(token);
+    }
+  };
+  for (const match of withoutCss.matchAll(/\bclass="([^"]*)"/g)) add(match[1]);
+  for (const match of withoutCss.matchAll(/className = '([^']*)'/g)) add(match[1]);
+  return tokens;
+}
+
+test('every Tailwind utility used by markup is defined in the inline stylesheet', async () => {
+  const html = await loadHtml();
+  const styleMatch = /<style[^>]*>([\s\S]*?)<\/style>/.exec(html);
+  assert.ok(styleMatch, 'inline stylesheet must exist');
+  const defined = definedCssNames(styleMatch[1]);
+  const knownUtility = /^(?:sm:|md:|lg:|hover:|focus:|active:|group-hover:|selection:|placeholder:|disabled:)?(?:text|bg|border|grid-cols|col-span|gap|space-y|p|px|py|pt|pb|pl|pr|m|mx|my|mt|mb|ml|mr|w|h|min-w|min-h|max-w|max-h|rounded|shadow|ring|z|inset|top|bottom|left|right|flex|grid|items|justify|self|font|leading|tracking|opacity|overflow|place|line-clamp|list|object|whitespace|uppercase|tabular-nums|truncate|pointer-events|select|transition|duration|animate|antialiased|sr-only|accent|fill|stroke|no-underline|italic|break|skeleton)(?:-|$)/;
+  const missing = [...usedClassTokens(html)]
+    .filter((token) => knownUtility.test(token) && !defined.has(token))
+    .sort();
+  assert.deepEqual(missing, [], `stylesheet is missing: ${missing.join(', ')}`);
+});
+
+test('mobile bottom nav is a single 7-column row that replaces the desktop tabs', async () => {
+  const html = await loadHtml();
+  // The grid class on the nav wrapper must resolve to 7 columns, or the 7 tabs stack.
+  assert.ok(html.includes('.grid-cols-7{grid-template-columns:repeat(7,minmax(0,1fr))}'),
+    'grid-cols-7 must be defined or the bottom nav stacks vertically');
+  const navStart = html.indexOf('id="mobile-nav-bar"');
+  assert.ok(navStart >= 0, 'mobile nav must exist');
+  const nav = html.slice(navStart, html.indexOf('</nav>', navStart));
+  assert.ok(nav.includes('grid grid-cols-7'), 'mobile nav wrapper must use the 7-column grid');
+  const tabs = nav.match(/data-app-view="[a-z]+"/g) || [];
+  assert.deepEqual(
+    tabs.map((t) => t.slice('data-app-view="'.length, -1)),
+    ['charts', 'news', 'rates', 'exchanges', 'accuracy', 'products', 'tools'],
+    'bottom nav must keep all 7 tabs in one row'
+  );
+  // The bar must be hidden from md upward, otherwise it duplicates the desktop tabs.
+  assert.ok(/@media \(min-width:768px\)\{#mobile-nav-bar\{display:none\}\}/.test(html),
+    'mobile nav must be hidden at md and up');
+  // Active-tab styling must not rewrite label sizes (it used to inflate them to 10px).
+  const switchStart = html.indexOf('function switchAppView(');
+  const switchView = html.slice(switchStart, switchStart + 9000);
+  assert.ok(!/lbl\.className\s*=/.test(switchView), 'label sizing must be left to the markup');
+  assert.ok(switchView.includes("lbl.classList.toggle('font-semibold', active)"));
 });
