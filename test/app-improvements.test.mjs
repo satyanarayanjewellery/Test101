@@ -964,7 +964,7 @@ test('mobile bottom nav is a single 7-column row that replaces the desktop tabs'
   const navStart = html.indexOf('id="mobile-nav-bar"');
   assert.ok(navStart >= 0, 'mobile nav must exist');
   const nav = html.slice(navStart, html.indexOf('</nav>', navStart));
-  assert.ok(nav.includes('grid grid-cols-7'), 'mobile nav wrapper must use the 7-column grid');
+  assert.ok(nav.includes('grid grid-cols-5'), 'customer mobile nav must use the 5-column grid');
   const tabs = nav.match(/data-app-view="[a-z]+"/g) || [];
   assert.deepEqual(
     tabs.map((t) => t.slice('data-app-view="'.length, -1)),
@@ -1665,5 +1665,7 @@ test('exchange comparison and accuracy checker are owner-only views', async () =
   }
   assert.match(html, /querySelectorAll\?\.\('\[data-owner-view-nav\]'\).*nav\.hidden = !isOwnerActive/);
   assert.match(html, /ownerOnlyView && !isOwnerActive\) viewName = 'rates'/);
-  assert.ok(html.includes('id="mobile-nav-grid" class="grid grid-cols-7'));
+  assert.ok(html.includes('id="mobile-nav-grid" class="grid grid-cols-5'));
+  assert.ok(html.includes('[data-owner-view-nav][hidden]{display:none !important}'));
+  assert.match(html, /mobileNavGrid\.classList\.toggle\('grid-cols-7', isOwnerActive\)/);
 });
