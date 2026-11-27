@@ -52,7 +52,7 @@ test('1. Owner manifest is valid, independent from customer PWA, and references 
   assert.equal(manifest.display, 'standalone');
   assert.equal(manifest.scope, './');
   assert.equal(manifest.start_url, './index.html');
-  assert.equal(manifest.id, './index.html');
+  assert.equal(manifest.id, '/shop/owner/index.html');
   assert.ok(Array.isArray(manifest.icons) && manifest.icons.length >= 3);
 
   const sizes = new Set(manifest.icons.map((i) => i.sizes));
@@ -258,4 +258,39 @@ test('9. Customer index.html keeps Owner PWA link strictly hidden inside #owner-
   const linkPos = customerHtml.indexOf('id="link-owner-pwa"');
   assert.ok(linkPos > studioStart && linkPos < studioEnd, 'Owner PWA link must remain strictly inside hidden #owner-studio');
   assert.equal(customerHtml.indexOf('href="owner/"', studioEnd), -1, 'No customer-visible link to owner/ outside #owner-studio');
+});
+
+test('10. Customer PWA and Owner PWA have disjoint resolved IDs, non-overlapping scopes, and in-app install buttons', () => {
+  const ownerManifest = JSON.parse(ownerManifestRaw);
+  const origin = 'https://satyanarayanjewellery.github.io';
+  const customerManifestUrl = `${origin}/shop/manifest.webmanifest`;
+  const ownerManifestUrl = `${origin}/shop/owner/manifest.webmanifest`;
+
+  // Per W3C Web App Manifest spec: start_url & scope resolve against manifest URL; id resolves against origin.
+  const customerStart = new URL(rootManifest.start_url, customerManifestUrl).href;
+  const customerScope = new URL(rootManifest.scope, customerManifestUrl).href;
+  const customerId = new URL(rootManifest.id, `${origin}/`).href;
+
+  const ownerStart = new URL(ownerManifest.start_url, ownerManifestUrl).href;
+  const ownerScope = new URL(ownerManifest.scope, ownerManifestUrl).href;
+  const ownerId = new URL(ownerManifest.id, `${origin}/`).href;
+
+  assert.notEqual(customerId, ownerId, 'Customer and Owner PWAs must resolve to distinct manifest IDs');
+  assert.ok(customerStart.startsWith(customerScope), 'Customer start_url must lie inside Customer scope');
+  assert.ok(ownerStart.startsWith(ownerScope), 'Owner start_url must lie inside Owner scope');
+
+  // Critical for Android Chrome WebAPK side-by-side install: neither app scope may cover the other's start_url.
+  assert.equal(ownerStart.startsWith(customerScope), false, 'Customer scope must not swallow Owner start_url');
+  assert.equal(customerStart.startsWith(ownerScope), false, 'Owner scope must not swallow Customer start_url');
+
+  // Every Owner shortcut must stay inside Owner scope.
+  for (const sc of ownerManifest.shortcuts) {
+    const scUrl = new URL(sc.url, ownerManifestUrl).href;
+    assert.ok(scUrl.startsWith(ownerScope), `Shortcut ${sc.name} (${scUrl}) must be inside Owner scope (${ownerScope})`);
+  }
+
+  // Both Customer and Owner PWAs expose in-app beforeinstallprompt handlers (avoids Android menu origin-conflict).
+  assert.match(customerHtml, /id="btn-install-customer-pwa"/);
+  assert.match(customerHtml, /addEventListener\('beforeinstallprompt'/);
+  assert.match(ownerJs, /addEventListener\('beforeinstallprompt'/);
 });
