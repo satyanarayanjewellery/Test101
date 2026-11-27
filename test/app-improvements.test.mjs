@@ -148,7 +148,7 @@ test('manifest and service worker are valid, referenced, and prevent cache poiso
   assert.ok(manifest.icons.some(i => i.sizes === '192x192'));
   assert.ok(manifest.icons.some(i => i.sizes === '512x512'));
   const sw = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
-  assert.match(sw, /sj-price-desk-v11/);
+  assert.match(sw, /sj-price-desk-v12/);
   assert.match(sw, /index\.html/);
   assert.match(sw, /skipWaiting/);
   const html = await loadHtml();
@@ -678,217 +678,6 @@ test('shop drops the shopping bag and Gemstone/Platinum/Diamond; rates gain a Ra
   assert.equal(readRateOfDay().date, '2026-12-25', 'older capture must remain for display');
 });
 
-test('exchange comparison loads India import duty on foreign markets and never mislabels units', async () => {
-  const html = await loadHtml();
-  const constStart = html.indexOf('    const DEFAULT_STATUTORY_RATES =');
-  const constEnd = html.indexOf('    const BASIS_SYNC_MS', constStart);
-  const marketsStart = html.indexOf('    const EXCHANGE_MARKETS = [');
-  const marketsEnd = html.indexOf('    // =========================================================================\n    // MARKET FEEDS', marketsStart);
-  const rowsStart = html.indexOf('    function computeExchangeRows(');
-  const rowsEnd = html.indexOf('    function renderExchangeComparison(', rowsStart);
-  assert.ok(constStart >= 0 && constEnd > constStart, 'duty constants must be locatable');
-  assert.ok(marketsStart >= 0 && marketsEnd > marketsStart, 'exchange markets must be locatable');
-  assert.ok(rowsStart >= 0 && rowsEnd > rowsStart, 'computeExchangeRows must be locatable');
-  // The statutory model (constants + per-metal helpers) must be locatable as one block and must
-  // have no hidden dependency on the rest of the app, or pricing could not be audited in isolation.
-  const statutoryStart = html.indexOf('    function spotInBand(');
-  const statutoryEnd = html.indexOf('    function statutoryLabel(', statutoryStart);
-  assert.ok(statutoryStart > constStart && statutoryEnd > statutoryStart, 'statutory helpers must be locatable');
-
-  const { computeExchangeRows, EXCHANGE_MARKETS, INDIA_IMPORT_DUTY_MULTIPLIER, DEFAULT_STATUTORY_RATES, importDutyMultiplier } = vm.runInNewContext(
-    [
-      html.slice(constStart, constEnd),
-      html.slice(statutoryStart, statutoryEnd),
-      html.slice(marketsStart, marketsEnd),
-      html.slice(rowsStart, rowsEnd),
-      '({ computeExchangeRows, EXCHANGE_MARKETS, INDIA_IMPORT_DUTY_MULTIPLIER, DEFAULT_STATUTORY_RATES, importDutyMultiplier })'
-    ].join('\n'),
-    {
-      TROY_OZ_TO_GRAMS: 31.1034768,
-      CURRENCY_PER_USD: { USD: 1, AED: 3.6725, EUR: 0.92, GBP: 0.79, LBP: 89500 },
-      Number,
-      Math,
-      Infinity
-    }
-  );
-
-  const spotGold = 4100;
-  const spotSilver = 48;
-  const usdInr = 88;
-  const CURRENCY_PER_USD = { USD: 1, AED: 3.6725, EUR: 0.92, GBP: 0.79, LBP: 89500, INR: 1 };
-  const goldBase = (spotGold * usdInr / 31.1034768) * 1.15 * 10;
-  const silverBase = (spotSilver * usdInr / 31.1034768) * 1.15 * 1000;
-  const context = {
-    state: {
-      prices: { spotGold, spotSilver, usdInr, gold999ExGst: goldBase, silver999ExGst: silverBase },
-      exchanges: { metal: 'gold', sortBy: 'diff' }
-    }
-  };
-  const rowContext = {
-    EXCHANGE_MARKETS,
-    TROY_OZ_TO_GRAMS: 31.1034768,
-    CURRENCY_PER_USD: { USD: 1, AED: 3.6725, EUR: 0.92, GBP: 0.79, LBP: 89500, INR: 1 },
-    INDIA_IMPORT_DUTY_MULTIPLIER,
-    DEFAULT_STATUTORY_RATES,
-    importDutyMultiplier,
-    Infinity,
-    Math
-  };
-  const run = vm.runInNewContext(`(${computeExchangeRows.toString()})`, { ...context, ...rowContext });
-
-  const goldRows = run();
-  assert.ok(Array.isArray(goldRows) && goldRows.length > 10);
-  assert.equal(goldRows[0].isShop, true, 'shop reference row comes first');
-  assert.equal(goldRows[0].quoteMetal, 'gold');
-
-  // Every row must equal global parity x basis x USD/INR x 15% duty, in INR per 10g.
-  // (Every market is modeled from duty-free global spot, so duty applies to Indian venues too.)
-  const expected = (market) => (spotGold / 31.1034768)
-    * (1 + market.basisPct / 100)
-    * (usdInr / (CURRENCY_PER_USD[market.currency] || 1))
-    * 10
-    * INDIA_IMPORT_DUTY_MULTIPLIER;
-
-  const foreign = goldRows.find((r) => !r.isShop && r.currency !== 'INR');
-  assert.ok(foreign, 'a non-INR gold market must exist');
-  assert.ok(Math.abs(foreign.theirInr - expected(foreign)) < 1,
-    `${foreign.name} must be duty-loaded: expected ${Math.round(expected(foreign))}, got ${Math.round(foreign.theirInr)}`);
-  // Without the duty the same market would look ~13% cheaper than the shop — that was the bug.
-  assert.ok(Math.abs(foreign.diffPct) < 3,
-    `${foreign.name} must sit near the shop price, got ${foreign.diffPct.toFixed(2)}%`);
-
-  // Indian exchanges keep their basis spread and must never collapse to a spot-only figure.
-  // Before the USD→INR fix MCX showed ~₹1,300 per 10g against a ₹1,33,000 shop price (-99%).
-  const inrMarket = goldRows.find((r) => !r.isShop && r.currency === 'INR');
-  assert.ok(inrMarket, 'an Indian exchange must exist');
-  assert.ok(Math.abs(inrMarket.theirInr - expected(inrMarket)) < 1,
-    `${inrMarket.name} must be converted USD→INR (got ${Math.round(inrMarket.theirInr)})`);
-  assert.ok(Math.abs(inrMarket.diffPct) < 1,
-    `${inrMarket.name} should sit near the shop price, got ${inrMarket.diffPct.toFixed(2)}%`);
-
-  // The comparison must not claim every market is cheaper than the shop.
-  const cheaper = goldRows.filter((r) => !r.isShop && r.diffAmt < -1).length;
-  const pricier = goldRows.filter((r) => !r.isShop && r.diffAmt > 1).length;
-  assert.ok(cheaper > 0 && pricier > 0, `expected a mix of cheaper/pricier, got ${cheaper}/${pricier}`);
-  assert.ok(cheaper < goldRows.length / 2, 'most markets must not be "cheaper than us"');
-
-  // "Both" is not a quote bracket: every row still carries gold or silver.
-  assert.ok(goldRows.every((r) => r.quoteMetal === 'gold' || r.quoteMetal === 'silver'));
-
-  // Silver duty is read from the same statutory model and can differ from gold's: the exchange
-  // view must never quote silver at gold's duty. Flip only the silver rate and re-check.
-  const silverDutyRows = vm.runInNewContext(`(${computeExchangeRows.toString()})`, {
-    state: { prices: context.state.prices, exchanges: { metal: 'silver', sortBy: 'diff' } },
-    EXCHANGE_MARKETS,
-    TROY_OZ_TO_GRAMS: 31.1034768,
-    CURRENCY_PER_USD: { USD: 1, AED: 3.6725, EUR: 0.92, GBP: 0.79, LBP: 89500, INR: 1 },
-    INDIA_IMPORT_DUTY_MULTIPLIER,
-    Infinity,
-    Math,
-    DEFAULT_STATUTORY_RATES: { gold: { importDutyPct: 15 }, silver: { importDutyPct: 10 } },
-    importDutyMultiplier: (metal) => (metal === 'silver' ? 1.10 : 1.15)
-  })();
-  const silverForeign = silverDutyRows.find((r) => !r.isShop && r.currency === 'USD');
-  assert.ok(silverForeign, 'a USD silver market must exist');
-  const expectedSilverUsd = (spotSilver / 31.1034768)
-    * (1 + silverForeign.basisPct / 100)
-    * usdInr
-    * 1000
-    * 1.10;
-  assert.ok(Math.abs(silverForeign.theirInr - expectedSilverUsd) < 1,
-    `silver must use the silver duty, got ${Math.round(silverForeign.theirInr)} vs ${Math.round(expectedSilverUsd)}`);
-
-  // Silver filter compares against the silver base and quotes per kg.
-  const silverRows = vm.runInNewContext(`(${computeExchangeRows.toString()})`, {
-    state: { prices: context.state.prices, exchanges: { metal: 'silver', sortBy: 'diff' } },
-    EXCHANGE_MARKETS,
-    TROY_OZ_TO_GRAMS: 31.1034768,
-    CURRENCY_PER_USD: { USD: 1, AED: 3.6725, EUR: 0.92, GBP: 0.79, LBP: 89500, INR: 1 },
-    INDIA_IMPORT_DUTY_MULTIPLIER,
-    DEFAULT_STATUTORY_RATES,
-    importDutyMultiplier,
-    Infinity,
-    Math
-  })();
-  assert.equal(silverRows[0].quoteMetal, 'silver');
-  assert.ok(Math.abs(silverRows[0].theirInr - silverBase) < 1, 'shop silver row must use the silver base');
-  // Bimetals are priced in gold; every other row in the silver view is silver.
-  assert.ok(silverRows.some((r) => r.quoteMetal === 'silver' && !r.isShop));
-  assert.ok(silverRows.every((r) => r.quoteMetal === 'silver' || r.metal === 'both'));
-  const silverOnly = silverRows.find((r) => !r.isShop && r.metal === 'silver');
-  if (silverOnly) {
-    assert.ok(Math.abs(silverOnly.diffPct) < 3,
-      `${silverOnly.name} must be compared against the silver base, got ${silverOnly.diffPct.toFixed(2)}%`);
-  }
-
-  // The 'Both' filter must stay reachable and list every venue (quoted in gold, one clean column).
-  const bothRows = vm.runInNewContext(`(${computeExchangeRows.toString()})`, {
-    state: { prices: context.state.prices, exchanges: { metal: 'both', sortBy: 'diff' } },
-    EXCHANGE_MARKETS,
-    TROY_OZ_TO_GRAMS: 31.1034768,
-    CURRENCY_PER_USD: { USD: 1, AED: 3.6725, EUR: 0.92, GBP: 0.79, LBP: 89500, INR: 1 },
-    INDIA_IMPORT_DUTY_MULTIPLIER,
-    DEFAULT_STATUTORY_RATES,
-    importDutyMultiplier,
-    Infinity,
-    Math
-  })();
-  assert.ok(bothRows.length > silverRows.length, "'Both' must list more venues than Silver");
-  assert.ok(bothRows.every((r) => r.quoteMetal === 'gold'));
-
-  // Row markup uses the quote bracket for the unit label (shop row per-kg in silver view).
-  assert.ok(html.includes("const rowMetal = r.quoteMetal || (r.metal === 'silver' ? 'silver' : 'gold');"));
-  assert.ok(html.includes("const unitLabel = rowMetal === 'gold' ? '/g' : '/kg';"));
-  assert.ok(!html.includes('metalOfPrice'));
-});
-
-test('market accuracy loads import duty, reports variance with a sign, and repaints on calibrate', async () => {
-  const html = await loadHtml();
-  const start = html.indexOf('    async function fetchMarketAccuracy(');
-  const end = html.indexOf('    function renderMarketAccuracy(', start);
-  assert.ok(start >= 0 && end > start);
-  const src = html.slice(start, end);
-
-  // Global quotes are landed at India's duty (for the selected metal) before comparing with the shop.
-  assert.ok(src.includes('importDutyMultiplier(metal)'), 'live feeds must add the selected metal\'s import duty');
-  assert.ok(!src.includes('INDIA_IMPORT_DUTY_MULTIPLIER'), 'no hardcoded gold duty may leak into the silver comparison');
-  // An out-of-domain quote is rejected rather than priced into the consensus.
-  assert.ok(src.includes('const band = SPOT_BANDS[metal];'), 'accuracy feeds must be domain-guarded');
-  // The accuracy view must not disagree with the visible board rate.
-  assert.ok(src.includes('state.live.usdInr'), 'accuracy must prefer the engine-owned FX rate');
-  assert.ok(src.includes('const consensusUsd = median(liveVals)'), 'consensus must be the median of live USD quotes');
-  assert.ok(src.includes('const consensusInr = consensusUsd'), 'consensus must be converted to INR per unit');
-  // Failed feeds are sorted last rather than treated as zero price.
-  assert.ok(src.includes("Number.isFinite(b.theirInr) ? b.theirInr : -Infinity"));
-  // Variance: positive means shop is above consensus (matches the documented meaning).
-  assert.ok(src.includes('((shopBase - consensusInr) / consensusInr) * 100'));
-
-  // Failed feed rows render an em dash, not ₹0 / +0.00%.
-  assert.ok(html.includes("${ok ? fmtINR(r.theirInr, 0) : '—'}"));
-  assert.ok(html.includes("acc-chip acc-chip-fail\">Failed</span>"));
-  // Live feeds quote per ounce; modeled markets quote per gram / kilogram.
-  assert.ok(html.includes("localUnit: '/oz'"));
-  assert.ok(html.includes("const localUnit = r.localUnit || unit;"));
-
-  // Calibration recomputes prices and accuracy KPIs immediately.
-  const calibStart = html.indexOf('    function calibrateToMarket(');
-  const calibEnd = html.indexOf('    function bindAccuracyControls(', calibStart);
-  const calib = html.slice(calibStart, calibEnd);
-  assert.ok(calib.includes('state.prices = computeCityPrices('), 'calibrate must re-price');
-  assert.ok(calib.includes('ma.shopBase ='), 'calibrate must refresh the shop base');
-  assert.ok(calib.includes('ma.variancePct ='), 'calibrate must refresh the variance');
-  assert.ok(calib.includes('renderPriceCards(null, false)'), 'calibrate must repaint the rate board');
-
-  // First open of the accuracy tab fetches and repaints (was blank until manual refresh).
-  const switchStart = html.indexOf('function switchAppView(');
-  const switchView = html.slice(switchStart, switchStart + 9000);
-  assert.ok(/viewName === 'accuracy'[\s\S]{0,400}fetchMarketAccuracy\(false\)\.then\(/.test(switchView),
-    'accuracy view must repaint after its first fetch');
-
-  // Selecting a metal repaints after the new feeds resolve, not before.
-  assert.ok(html.includes('fetchMarketAccuracy(false).then(renderMarketAccuracy)'));
-});
-
 test('Rate of the Day explains a missed noon window instead of waiting forever', async () => {
   const html = await loadHtml();
   const start = html.indexOf('    function renderRateOfDay(');
@@ -955,11 +744,8 @@ test('every Tailwind utility used by markup is defined in the inline stylesheet'
   assert.deepEqual(missing, [], `stylesheet is missing: ${missing.join(', ')}`);
 });
 
-test('mobile bottom nav is a single 7-column row that replaces the desktop tabs', async () => {
+test('mobile bottom nav is a single 5-tab row that replaces the desktop tabs', async () => {
   const html = await loadHtml();
-  // The grid class on the nav wrapper must resolve to 7 columns, or the 7 tabs stack.
-  assert.ok(html.includes('.grid-cols-7{grid-template-columns:repeat(7,minmax(0,1fr))}'),
-    'grid-cols-7 must be defined or the bottom nav stacks vertically');
   const navStart = html.indexOf('id="mobile-nav-bar"');
   assert.ok(navStart >= 0, 'mobile nav must exist');
   const nav = html.slice(navStart, html.indexOf('</nav>', navStart));
@@ -967,9 +753,11 @@ test('mobile bottom nav is a single 7-column row that replaces the desktop tabs'
   const tabs = nav.match(/data-app-view="[a-z]+"/g) || [];
   assert.deepEqual(
     tabs.map((t) => t.slice('data-app-view="'.length, -1)),
-    ['charts', 'news', 'rates', 'exchanges', 'accuracy', 'products', 'tools'],
-    'bottom nav must keep all 7 tabs in one row'
+    ['charts', 'news', 'rates', 'products', 'tools'],
+    'bottom nav must keep exactly the five customer tabs in one row'
   );
+  assert.ok(!html.includes('id="view-exchanges"') && !html.includes('id="view-accuracy"'),
+    'exchanges and accuracy views must not ship in the customer app');
   // The bar must be hidden from md upward, otherwise it duplicates the desktop tabs.
   assert.ok(/@media \(min-width:768px\)\{#mobile-nav-bar\{display:none\}\}/.test(html),
     'mobile nav must be hidden at md and up');
@@ -983,7 +771,7 @@ test('mobile bottom nav is a single 7-column row that replaces the desktop tabs'
 test('USD/INR feeds are preference-ordered, as-of aware and sanity-guarded', async () => {
   const html = await loadHtml();
   const fxStart = html.indexOf('    // USD/INR plausibility band');
-  const fxEnd = html.indexOf('    // Approximate USD cross-rates', fxStart);
+  const fxEnd = html.indexOf('    const CITIES = {', fxStart);
   assert.ok(fxStart >= 0 && fxEnd > fxStart, 'FX feed block must be locatable');
 
   const { FX_TIERS, extractFxAsOf, validateUsdInr } = vm.runInNewContext(
@@ -1065,7 +853,7 @@ async function loadFxEngine({ fetchFromTiers, state, now = () => 1_000_000 }) {
   const computeStart = html.indexOf('    function computeCityPrices(');
   const computeEnd = html.indexOf('    function formatIndianInt(', computeStart);
   const fxStart = html.indexOf('    // USD/INR plausibility band');
-  const fxEnd = html.indexOf('    // Approximate USD cross-rates', fxStart);
+  const fxEnd = html.indexOf('    const CITIES = {', fxStart);
   assert.ok(constantsStart >= 0 && constantsEnd > constantsStart);
   assert.ok(citiesStart >= 0 && citiesEnd > citiesStart);
   assert.ok(computeStart >= 0 && computeEnd > computeStart);
@@ -1082,8 +870,6 @@ async function loadFxEngine({ fetchFromTiers, state, now = () => 1_000_000 }) {
     fmtTime: () => '12:00',
     renderPriceCards: (dirs) => renders.push(dirs),
     updateRatesUpdatedLabel: () => {},
-    renderExchangeComparison: () => {},
-    renderMarketAccuracy: () => {},
     renderChart: () => {},
     updateAllTools: () => {},
     renderNewsTicker: () => {},
@@ -1591,7 +1377,7 @@ test('a restored snapshot is never presented as a live price', async () => {
   for (const id of ['cache-notice', 'cache-notice-text']) assert.ok(html.includes(`id="${id}"`), id);
 });
 
-test('the desk states the duty/GST it prices with and flags a stale regime', async () => {
+test('the statutory duty/GST model flags a stale regime and refuses corrupt data', async () => {
   const api = await loadStatutoryEngine();
   // The compiled regime was verified on 13 May 2026, so it is not stale today…
   assert.equal(api.statutoryIsStale(Date.parse('2026-11-27T00:00:00Z')), false);
@@ -1599,18 +1385,9 @@ test('the desk states the duty/GST it prices with and flags a stale regime', asy
   assert.equal(api.statutoryIsStale(Date.parse('2027-06-01T00:00:00Z')), true);
 
   const html = await loadHtml();
-  for (const id of ['statutory-notice', 'statutory-notice-text', 'ex-duty-pct', 'acc-duty-pct']) {
-    assert.ok(html.includes(`id="${id}"`), `statutory UI: ${id}`);
-  }
-  // The prose must be driven by the data, and both duty figures must be wired to the renderer.
-  const renderStart = html.indexOf('    function renderStatutoryNotice()');
-  const renderEnd = html.indexOf('    // =========================================================================\n    // HEADER & KPI LIVE STATUS UI', renderStart);
-  const render = html.slice(renderStart, renderEnd);
-  assert.ok(render.includes("const exDuty = document.getElementById('ex-duty-pct')"));
-  assert.ok(render.includes("const accDuty = document.getElementById('acc-duty-pct')"));
-  assert.ok(render.includes('statutoryIsStale()'), 'a stale regime must raise a notice');
   // Loaded at boot and revalidated on a slow cadence.
-  assert.ok(html.includes('loadStatutoryRates().then('), 'boot must load the statutory data');
+  assert.ok(html.includes('loadStatutoryRates();'), 'boot must load the statutory data');
+  assert.ok(html.includes('STATUTORY_MIN_REFRESH_MS'), 'statutory data must be revalidated');
   assert.ok(html.includes('STATUTORY_RATES_PATH = \'catalog/statutory-rates.json\''));
   // The loader refuses a corrupt/out-of-range policy file rather than pricing off it.
   const sanitizeStart = html.indexOf('    function sanitizeStatutoryPayload(');
@@ -1619,28 +1396,6 @@ test('the desk states the duty/GST it prices with and flags a stale regime', asy
   assert.ok(sanitize.includes('duty > 60'), 'duty must be range-checked');
   assert.ok(sanitize.includes('gst > 30'), 'GST must be range-checked');
   assert.ok(sanitize.includes('return null'), 'an invalid payload must be rejected wholesale');
-});
-
-test('price accuracy surfaces stay consistent with the priced board', async () => {
-  const html = await loadHtml();
-  // The accuracy view compares against the same live FX the board shows…
-  const accStart = html.indexOf('    async function fetchMarketAccuracy(');
-  const accEnd = html.indexOf('    function renderMarketAccuracy(', accStart);
-  const acc = html.slice(accStart, accEnd);
-  assert.ok(acc.includes('state.live.usdInr'), 'accuracy must use the board FX rate');
-  assert.ok(!/resolvedUsdInr = v;\s*break;/.test(acc), 'a raw accuracy-feed rate must not override the board');
-  assert.ok(acc.includes('if (!Number.isFinite(resolvedUsdInr) || resolvedUsdInr <= 0)'), 'feeds are only a fallback');
-  // …and it records the FX + duty it used so a variance can be reconstructed later.
-  assert.ok(acc.includes('ma.fxUsed = resolvedUsdInr'));
-  assert.ok(acc.includes('ma.dutyPct = statutoryRatesFor(metal).importDutyPct'));
-  // Indicative city rows are derived from the shop base (never from an unpriced spot).
-  assert.ok(acc.includes('const theirInr = shopBase * premium;'));
-  // Calibrating re-prices through the same statutory model (duty/GST stay intact).
-  const calibStart = html.indexOf('    function calibrateToMarket(');
-  const calibEnd = html.indexOf('    function bindAccuracyControls(', calibStart);
-  const calib = html.slice(calibStart, calibEnd);
-  assert.ok(calib.includes('state.prices = computeCityPrices('));
-  assert.ok(!calib.includes('INDIA_IMPORT_DUTY_MULTIPLIER'), 'calibration must not bypass the statutory model');
 });
 
 test('the price board cannot sit on stale numbers when the frame clock stalls', async () => {
@@ -1664,16 +1419,25 @@ test('the price board cannot sit on stale numbers when the frame clock stalls', 
   assert.match(html, /const PRICE_PAINT_STALL_MS = \d+;/);
 });
 
-test('exchange comparison and accuracy checker are owner-only views', async () => {
+test('exchange comparison and accuracy checker live only in the owner desk', async () => {
   const html = await loadHtml();
-  for (const view of ['exchanges', 'accuracy']) {
-    assert.match(html, new RegExp(`data-owner-view-nav data-app-view="${view}"[^>]* hidden`));
+  // The customer storefront must not ship the owner views or their machinery at all.
+  for (const marker of [
+    'id="view-exchanges"', 'id="view-accuracy"', 'data-app-view="exchanges"', 'data-app-view="accuracy"',
+    'renderExchangeComparison', 'renderMarketAccuracy', 'fetchMarketAccuracy', 'computeExchangeRows',
+    'EXCHANGE_MARKETS', 'MARKET_FEEDS', 'state.exchanges', 'state.marketAccuracy'
+  ]) {
+    assert.ok(!html.includes(marker), `customer app must not contain ${marker}`);
   }
-  assert.match(html, /querySelectorAll\?\.\('\[data-owner-view-nav\]'\).*nav\.hidden = !isOwnerActive/);
-  assert.match(html, /ownerOnlyView && !isOwnerActive\) viewName = 'rates'/);
+  assert.ok(!html.includes('data-owner-view-nav'), 'no owner-only nav hooks should remain');
   assert.ok(html.includes('id="mobile-nav-grid" class="grid grid-cols-5'));
-  assert.ok(html.includes('[data-owner-view-nav][hidden]{display:none !important}'));
-  assert.match(html, /mobileNavGrid\.classList\.toggle\('grid-cols-7', isOwnerActive\)/);
+  // The private owner desk still offers both sections.
+  const ownerHtml = await readFile(new URL('../owner/index.html', import.meta.url), 'utf8');
+  assert.ok(ownerHtml.includes('data-view="exchanges"'), 'owner desk keeps Exchanges');
+  assert.ok(ownerHtml.includes('data-view="accuracy"'), 'owner desk keeps Accuracy');
+  const ownerJs = await readFile(new URL('../owner/app.js', import.meta.url), 'utf8');
+  assert.ok(ownerJs.includes('function renderExchangeComparison()'));
+  assert.ok(ownerJs.includes('function renderMarketAccuracy()'));
 });
 
 

@@ -36,12 +36,12 @@
 @media (min-width:768px){.md\:block{display:block}.md\:hidden{display:none}.md\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.md\:pb-8{padding-bottom:2rem}.md\:h-\[calc\(100dvh-7rem\)\]{height:calc(100dvh - 7rem)}}
     .select-none{user-select:none;-webkit-user-select:none}.pt-2{padding-top:0.5rem}.pb-1{padding-bottom:0.25rem}.pb-3{padding-bottom:0.75rem}.text-amber-300\/75{color:rgba(242,220,136,0.75)}.text-amber-300\/85{color:rgba(242,220,136,0.85)}.text-amber-200\/90{color:rgba(249,235,184,0.9)}@media (min-width:640px){.sm\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.sm\:p-5{padding:1.25rem}}
     .p-3\.5{padding:0.875rem}.whitespace-nowrap{white-space:nowrap}.text-\[9px\]{font-size:9px}.w-12{width:3rem}.border-amber-500\/35{border-color:rgba(212,175,55,0.35)}@media (min-width:640px){.sm\:gap-2\.5{gap:0.625rem}.sm\:p-2\.5{padding:0.625rem}.sm\:text-\[10px\]{font-size:10px}.sm\:text-xs{font-size:0.75rem;line-height:1rem}}
-    .mt-3{margin-top:0.75rem}.pt-2\.5{padding-top:0.625rem}.gap-3\.5{gap:0.875rem}.border-amber-500\/15{border-color:rgba(212,175,55,0.15)}.border-slate-400\/15{border-color:rgba(173,153,158,0.15)}.text-slate-200\/90{color:rgba(236,229,231,0.9)}.font-normal{font-weight:400}.self-end{align-self:flex-end}.grid-cols-7{grid-template-columns:repeat(7,minmax(0,1fr))}@media (min-width:768px){.md\:grid-cols-7{grid-template-columns:repeat(7,minmax(0,1fr))}}.text-\[8px\]{font-size:8px}.text-amber-500\/40{color:rgba(212,175,55,0.4)}
+    .mt-3{margin-top:0.75rem}.pt-2\.5{padding-top:0.625rem}.gap-3\.5{gap:0.875rem}.border-amber-500\/15{border-color:rgba(212,175,55,0.15)}.border-slate-400\/15{border-color:rgba(173,153,158,0.15)}.text-slate-200\/90{color:rgba(236,229,231,0.9)}.font-normal{font-weight:400}.self-end{align-self:flex-end}.text-amber-500\/40{color:rgba(212,175,55,0.4)}
     .grid-cols-5{grid-template-columns:repeat(5,minmax(0,1fr))}.gap-0\.5{gap:0.125rem}.min-w-0{min-width:0px}.-mt-3{margin-top:-0.75rem}.px-3\.5{padding-left:0.875rem;padding-right:0.875rem}.line-clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.center-rate-fab{width:2.75rem;height:2.75rem;border-radius:9999px;display:flex;align-items:center;justify-content:center;transition:transform 180ms cubic-bezier(0.22,1,0.36,1),box-shadow 200ms ease,background-color 200ms ease,border-color 200ms ease}.center-rate-fab-active{background:linear-gradient(145deg,#F2DC88 0%,#D4AF37 65%,#B58E22 100%);color:#070506;box-shadow:0 6px 18px -4px rgba(212,175,55,0.55),0 0 0 3px #090607;border:1px solid rgba(254,240,138,0.65)}.center-rate-fab-idle{background:linear-gradient(160deg,#24151A 0%,#130B0E 100%);color:#D6C9CC;box-shadow:0 4px 12px -4px rgba(0,0,0,0.7),0 0 0 3px #090607;border:1px solid rgba(212,175,55,0.28)}
-    /* Mobile bottom navigation: 7 tabs in one row. The bar is hidden from md up, where the
-       desktop tab strip takes over, and no tab is allowed to widen past its 1/7 column. */
+    /* Mobile bottom navigation: 5 tabs in one row. The bar is hidden from md up, where the
+       desktop tab strip takes over, and no tab is allowed to widen past its 1/5 column. */
     @media (min-width:768px){#mobile-nav-bar{display:none}}
-    /* Keep each tab inside its 1/7 column on narrow phones instead of pushing the row wide. */
+    /* Keep each tab inside its 1/5 column on narrow phones instead of pushing the row wide. */
     .app-nav-mobile{min-width:0;overflow:visible}
     .app-nav-mobile .nav-label{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .news-card{background:linear-gradient(165deg,rgba(22,13,16,0.92) 0%,rgba(12,7,9,0.96) 100%);border:1px solid rgba(212,175,55,0.14);transition:transform 180ms cubic-bezier(0.22,1,0.36,1),border-color 180ms ease,background-color 180ms ease}.news-card:hover{border-color:rgba(212,175,55,0.34)}.news-card:active{transform:scale(0.985)}
@@ -102,7 +102,6 @@
     .jewel-dropzone.is-dragover{border-color:#E5C55B;background:rgba(212,175,55,0.1)}
     .jewel-modal-backdrop{position:fixed;inset:0;z-index:80;background:rgba(4,2,3,0.86);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:1rem;overflow-y:auto}
     .jewel-modal-backdrop.hidden{display:none}
-    [data-owner-view-nav][hidden]{display:none !important}
     .jewel-modal-card{width:100%;max-width:28rem;max-height:90dvh;overflow-y:auto;background:linear-gradient(165deg,#180D11 0%,#0B0709 100%);border:1px solid rgba(212,175,55,0.28);border-radius:1.125rem;padding:1.25rem;box-shadow:0 24px 60px rgba(0,0,0,0.85)}
     .jewel-lightbox-card{width:100%;max-width:56rem;max-height:92dvh;display:flex;flex-direction:column;gap:0.75rem;background:#090607;border:1px solid rgba(212,175,55,0.28);border-radius:1.125rem;padding:1rem;box-shadow:0 24px 60px rgba(0,0,0,0.9)}
     .jewel-lightbox-stage{position:relative;background:#050304;border-radius:0.75rem;overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:240px;max-height:68dvh}
@@ -251,71 +250,6 @@
       .print-only{display:block!important}
       main{padding:0!important}
     }
-
-    /* =========================================================================
-       EXCHANGE COMPARISON VIEW — SATYANARAYAN vs ~100 GLOBAL BULLION MARKETS
-       ========================================================================= */
-    .ex-search{position:relative;flex:1;min-width:0;display:flex;align-items:center;gap:0.4rem;padding:0 0.6rem;border-radius:0.6rem;background:rgba(7,5,6,0.85);border:1px solid rgba(58,35,42,0.95)}
-    .ex-search:focus-within{border-color:#D4AF37}
-    .ex-search svg{width:13px;height:13px;color:#8A7B7E;flex-shrink:0}
-    .ex-search input{flex:1;min-width:0;background:transparent;border:0;outline:none;padding:0.55rem 0;font-size:12px;color:#F7F3F4}
-    .ex-search input::placeholder{color:#7E6F72}
-    .ex-chip{display:inline-flex;align-items:center;gap:0.35rem;padding:0.22rem 0.6rem;border-radius:9999px;font-size:10.5px;font-weight:600;border:1px solid transparent;background:rgba(7,5,6,0.7);color:#C9BFC1}
-    .ex-chip.is-active{background:linear-gradient(135deg,#F2DC88,#D4AF37);border-color:#E5C55B;color:#1A1005;font-weight:800}
-    .ex-chip:hover:not(.is-active){border-color:rgba(212,175,55,0.45)}
-    .ex-table-wrap{overflow:auto;margin-top:0.75rem}
-    .ex-table{width:100%;border-collapse:collapse}
-    .ex-table th{text-align:left;font-size:9.5px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#9A8B8E;padding:0.5rem 0.6rem;border-bottom:1px solid rgba(212,175,55,0.12)}
-    .ex-table th div{font-weight:400;letter-spacing:normal;text-transform:none;font-size:9.5px}
-    .ex-table td{font-size:12px;padding:0.55rem 0.6rem;border-bottom:1px solid rgba(58,35,42,0.55);vertical-align:middle}
-    .ex-table tr:last-child td{border-bottom:0}
-    .ex-table tr:hover td{background:rgba(212,175,55,0.04)}
-    .ex-name{font-weight:700;color:#F7F3F4}
-    .ex-meta{font-size:10.5px;color:#9A8B8E;display:block;margin-top:1px}
-    .ex-metal-badge{display:inline-flex;align-items:center;gap:0.2rem;padding:0.1rem 0.35rem;border-radius:9999px;font-size:8.5px;font-weight:800;letter-spacing:0.04em;text-transform:uppercase;margin-top:6px}
-    .ex-metal-gold{background:rgba(212,175,55,0.14);border:1px solid rgba(212,175,55,0.3);color:#E5C55B}
-    .ex-metal-silver{background:rgba(173,153,158,0.14);border:1px solid rgba(173,153,158,0.3);color:#D6C9CC}
-    .ex-metal-both{background:rgba(74,144,226,0.14);border:1px solid rgba(74,144,226,0.3);color:#7DD3FC}
-    .ex-price{font-weight:800;color:#F2DC88;font-variant-numeric:tabular-nums}
-    .ex-price-local{font-size:10.5px;color:#9A8B8E}
-    .ex-ref{background:rgba(212,175,55,0.07)}
-    .ex-ref td{background:rgba(212,175,55,0.07)}
-    .ex-diff{font-weight:800;font-variant-numeric:tabular-nums}
-    .ex-diff-up{color:#34D399}
-    .ex-diff-down{color:#FB7185}
-    .ex-diff-zero{color:#9A8B8E}
-    .ex-diff-note{font-size:9.5px;color:#9A8B8E;margin-top:2px}
-    .ex-empty{display:grid;place-items:center;padding:4rem 1rem;color:#9A8B8E}
-    .ex-note{font-size:10.5px;color:#9A8B8E;line-height:1.6;margin-top:0.75rem}
-
-    /* =========================================================================
-       MARKET ACCURACY — LIVE EXCHANGE PRICE COMPARISON & CALIBRATION
-       ========================================================================= */
-    .acc-feed{display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.6rem;border-bottom:1px solid rgba(58,35,42,0.55)}
-    .acc-feed:last-child{border-bottom:0}
-    .acc-feed.live{border-left:3px solid rgba(52,211,153,0.45)}
-    .acc-feed.indicative{border-left:3px solid rgba(173,153,158,0.3)}
-    .acc-feed.failed{opacity:0.55}
-    .acc-info{flex:1;min-width:0}
-    .acc-name{font-weight:700;color:#F7F3F4;font-size:12px}
-    .acc-meta{font-size:10px;color:#9A8B8E}
-    .acc-price{font-weight:800;color:#F2DC88;font-variant-numeric:tabular-nums}
-    .acc-price-local{font-size:10px;color:#9A8B8E}
-    .acc-variance{font-weight:800;font-variant-numeric:tabular-nums}
-    .acc-variance-up{color:#FB7185}
-    .acc-variance-down{color:#34D399}
-    .acc-variance-zero{color:#9A8B8E}
-    .acc-chip{display:inline-flex;align-items:center;gap:0.25rem;padding:0.12rem 0.5rem;border-radius:9999px;font-size:8.5px;font-weight:800;border:1px solid transparent;letter-spacing:0.04em;text-transform:uppercase}
-    .acc-chip-live{background:rgba(52,211,153,0.14);border-color:rgba(52,211,153,0.3);color:#34D399}
-    .acc-chip-ind{background:rgba(173,153,158,0.14);border-color:rgba(173,153,158,0.3);color:#D6C9CC}
-    .acc-chip-fail{background:rgba(244,63,94,0.14);border-color:rgba(244,63,94,0.3);color:#F43F5E}
-    .acc-kpis{display:flex;gap:0.5rem;flex-wrap:wrap;margin:0.5rem 0 0.75rem}
-    .acc-kpi{flex:1;min-width:120px;background:rgba(24,13,17,0.6);border:1px solid rgba(212,175,55,0.14);border-radius:0.75rem;padding:0.6rem 0.75rem}
-    .acc-kpi .k-label{font-size:9.5px;color:#9A8B8E;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.25rem;display:block}
-    .acc-kpi .k-value{font-size:15px;font-weight:800;color:#F7F3F4;font-variant-numeric:tabular-nums}
-    .acc-kpi .k-sub{font-size:9.5px;color:#9A8B8E;margin-top:2px;display:block}
-    .acc-empty{display:grid;place-items:center;padding:4rem 1rem;color:#9A8B8E}
-    .acc-note{font-size:10px;color:#9A8B8E;line-height:1.6;margin-top:0.75rem}
   </style>
 </head>
 <body class="min-h-screen antialiased selection:bg-amber-500/30 selection:text-amber-200">
@@ -389,7 +323,7 @@
 
       </div>
     </div>
-    <!-- Desktop / Tablet Tab Bar (7 Tabs — Rates in Middle) -->
+    <!-- Desktop / Tablet Tab Bar (5 Tabs — Rates in Middle) -->
     <nav id="desktop-nav-bar" class="hidden md:block border-t border-slate-800/70 bg-[#090607]/80" aria-label="Main sections">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 flex items-center gap-1.5 py-2">
         <button data-app-view="charts" type="button" class="app-nav-desktop flex-1 inline-flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-medium transition-colors duration-150 text-slate-400 hover:text-white border border-transparent hover:bg-slate-900/70">
@@ -400,12 +334,6 @@
         </button>
         <button data-app-view="rates" type="button" class="app-nav-desktop flex-1 inline-flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-semibold transition-colors duration-150 bg-amber-500/15 text-amber-300 border border-amber-500/30">
           <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg> Rates
-        </button>
-        <button data-owner-view-nav data-app-view="exchanges" type="button" hidden class="app-nav-desktop flex-1 inline-flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-medium transition-colors duration-150 text-slate-400 hover:text-white border border-transparent hover:bg-slate-900/70">
-          <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 18"/><polyline points="6 12 18 12"/></svg> Exchanges
-        </button>
-        <button data-owner-view-nav data-app-view="accuracy" type="button" hidden class="app-nav-desktop flex-1 inline-flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-medium transition-colors duration-150 text-slate-400 hover:text-white border border-transparent hover:bg-slate-900/70">
-          <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/><path d="M12 6V12"/><path d="M12 18V12"/></svg> Accuracy
         </button>
         <button data-app-view="products" type="button" class="app-nav-desktop flex-1 inline-flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-medium transition-colors duration-150 text-slate-400 hover:text-white border border-transparent hover:bg-slate-900/70">
           <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m4.3 7.5 7.7 4.4 7.7-4.4M12 21v-9.1"/></svg> Shop
@@ -1710,110 +1638,9 @@
       </section>
     </div>
 
-    <!-- VIEW 6: EXCHANGE COMPARISON — SATYANARAYAN vs ~100 GLOBAL BULLION MARKETS -->
-    <div id="view-exchanges" class="app-view hidden flex flex-col gap-4">
-      <section class="glass-card rounded-2xl p-5" aria-label="Exchange comparison — live rates vs global markets">
-        <div class="flex flex-wrap items-start justify-between gap-3 mb-3">
-          <div>
-            <h2 class="text-sm sm:text-base font-semibold text-white">Exchange Comparison</h2>
-            <p class="text-xs text-slate-400 mt-0.5">Satyanarayan Jewellers (Cuttack) vs 100 bullion markets worldwide — live spot XAU/XAG with each market's basis spread</p>
-          </div>
-          <button id="btn-refresh-exchanges" type="button" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition-colors duration-150 shadow shadow-amber-500/15">
-            <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 4v3.5c0 5.66-3.78 10.45-9 11.77M1 20.5V17c0-5.66 3.78-10.45 9-11.77"/></svg> Refresh
-          </button>
-        </div>
-
-        <div class="flex flex-wrap items-center gap-2 mb-3">
-          <div class="ex-search">
-            <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-            <input id="exchange-search" type="text" placeholder="Search exchange, city or country…" class="w-full sm:w-64" />
-          </div>
-          <div role="group" aria-label="Metal filter" class="flex items-center gap-1">
-            <button data-ex-metal="gold" type="button" class="ex-chip is-active">Gold</button>
-            <button data-ex-metal="silver" type="button" class="ex-chip">Silver</button>
-            <button data-ex-metal="both" type="button" class="ex-chip">Both</button>
-          </div>
-          <select id="exchange-sort" class="shop-sort">
-            <option value="diff">Closest to our price</option>
-            <option value="az">A → Z</option>
-          </select>
-        </div>
-
-        <div class="flex flex-wrap gap-2 mb-2">
-          <span class="ex-chip" id="exchange-stat-total" style="pointer-events:none;cursor:default">Markets: —</span>
-          <span class="ex-chip" id="exchange-stat-cheaper" style="pointer-events:none;cursor:default">Cheaper than us: —</span>
-          <span class="ex-chip" id="exchange-stat-pricier" style="pointer-events:none;cursor:default">Pricier than us: —</span>
-          <span id="exchange-updated-at" class="ml-auto text-[10px] text-slate-500">—</span>
-        </div>
-
-        <div id="exchange-comparison-empty" class="ex-empty hidden">
-          <p>Waiting for live rates… Open the Rates screen to connect to live market feeds.</p>
-        </div>
-
-        <div class="ex-table-wrap">
-          <table class="ex-table">
-            <thead>
-              <tr>
-                <th style="width:36%">Exchange<span class="text-slate-500 font-normal text-[10px] block mt-0.5">· city, country · metal</span></th>
-                <th style="width:32%">Their price<span class="text-slate-500 font-normal text-[10px] block mt-0.5">INR landed (duty incl.) · local rate</span></th>
-                <th style="width:32%">vs Satyanarayan Jewellers<span class="text-slate-500 font-normal text-[10px] block mt-0.5">₹ difference · %</span></th>
-              </tr>
-            </thead>
-            <tbody id="exchange-comparison-body"></tbody>
-          </table>
-        </div>
-
-        <p class="ex-note mt-3">Prices are indicative estimates derived from live global spot (XAU/XAG) and each market's typical basis spread — not firm quotes. Every market is shown at India's landed cost (global quote + <span id="ex-duty-pct">15</span>% import duty) so the comparison with our price is like-for-like; GST is excluded. Gold compared per 10 g, silver per 1 kg. Refresh anytime for the latest spot.</p>
-      </section>
-    </div>
-
-    <!-- VIEW 7: MARKET ACCURACY — LIVE EXCHANGE COMPARISON & CALIBRATION -->
-    <div id="view-accuracy" class="app-view hidden flex flex-col gap-4">
-      <section class="glass-card rounded-2xl p-5" aria-label="Market accuracy — live exchange comparison & calibration">
-        <div class="flex flex-wrap items-start justify-between gap-3 mb-3">
-          <div>
-            <h2 class="text-sm sm:text-base font-semibold text-white">Market Accuracy</h2>
-            <p class="text-xs text-slate-400 mt-0.5">Compare Satyanarayan Jewellers vs live exchange prices · calibrate so your rate tracks the market consensus</p>
-          </div>
-          <div class="flex flex-wrap gap-2">
-            <button id="btn-refresh-accuracy" type="button" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition-colors duration-150 shadow shadow-amber-500/15">
-              <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 4v3.5c0 5.66-3.78 10.45-9 11.77M1 20.5V17c0-5.66 3.78-10.45 9-11.77"/></svg> Refresh
-            </button>
-            <button id="btn-calibrate-market" type="button" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-200 text-xs font-bold transition-colors duration-150">
-              <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="m16 6-4-4-4 4"/></svg> Calibrate to market
-            </button>
-            <select id="accuracy-metal" class="shop-sort">
-              <option value="gold">Gold</option>
-              <option value="silver">Silver</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="acc-kpis">
-          <div class="acc-kpi"><span class="k-label">Your shop price</span><span class="k-value" id="accuracy-stat-shop">—</span><span class="k-sub">ex-GST, per unit</span></div>
-          <div class="acc-kpi"><span class="k-label">Market consensus</span><span class="k-value" id="accuracy-stat-consensus">—</span><span class="k-sub">median of live feeds</span></div>
-          <div class="acc-kpi"><span class="k-label">Variance vs market</span><span class="k-value" id="accuracy-stat-variance">—</span><span class="k-sub">positive = your price above consensus</span></div>
-          <div class="acc-kpi"><span class="k-label">Feeds / markets</span><span class="k-value" id="accuracy-stat-live">—</span><span class="k-sub">live · indicative</span></div>
-          <span id="accuracy-updated-at" class="ml-auto self-end text-[10px] text-slate-500">—</span>
-        </div>
-
-        <div id="statutory-notice" class="hidden rounded-xl border border-amber-500/35 bg-amber-500/10 px-3 py-2.5 mb-3" role="status">
-          <p id="statutory-notice-text" class="text-[11px] leading-snug text-amber-200"></p>
-        </div>
-
-        <div id="accuracy-empty" class="acc-empty hidden">
-          <p>Waiting for live rates… Open the Rates screen to connect to live market feeds.</p>
-        </div>
-
-        <div id="accuracy-body"></div>
-
-        <p class="acc-note mt-3">Live prices are fetched from your browser directly to each exchange (CORS permitting). Feeds that can't be reached show as "Failed"; quotes outside the metal's plausible USD/oz range are ignored. Global quotes are converted at India's landed cost (+<span id="acc-duty-pct">15</span>% import duty) so they are comparable with our ex-GST shop price; indicative markets are modeled from live spot XAU/XAG with each city's typical basis spread. Calibration nudges your spot price toward the exchange consensus while keeping India's import duty and local premium intact. The import duty and GST themselves come from catalog/statutory-rates.json so a change in the law is a data edit, not a code edit.</p>
-      </section>
-    </div>
-
   </main>
 
-  <!-- Mobile Bottom Navigation Bar (7 Tabs — Rates Centered in Middle) -->
+  <!-- Mobile Bottom Navigation Bar (5 Tabs — Rates Centered in Middle) -->
   <nav id="mobile-nav-bar" class="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-slate-800/90 bg-[#090607]/98" style="padding-bottom: env(safe-area-inset-bottom);" aria-label="Bottom navigation">
     <div id="mobile-nav-grid" class="grid grid-cols-5 h-16 max-w-lg mx-auto px-1">
       <button data-app-view="charts" type="button" class="app-nav-mobile relative flex flex-col items-center justify-center gap-0.5 text-slate-400 hover:text-slate-200 transition-colors duration-150">
@@ -1831,16 +1658,6 @@
           <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg>
         </span>
         <span class="nav-label text-[9px] font-semibold">Rates</span>
-      </button>
-      <button data-owner-view-nav data-app-view="exchanges" type="button" hidden class="app-nav-mobile relative flex flex-col items-center justify-center gap-0.5 text-slate-400 hover:text-slate-200 transition-colors duration-150">
-        <span class="nav-indicator hidden absolute top-0 w-8 h-0.5 rounded-full bg-amber-400"></span>
-        <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 18"/><polyline points="6 12 18 12"/></svg>
-        <span class="nav-label text-[9px] font-medium">Exchanges</span>
-      </button>
-      <button data-owner-view-nav data-app-view="accuracy" type="button" hidden class="app-nav-mobile relative flex flex-col items-center justify-center gap-0.5 text-slate-400 hover:text-slate-200 transition-colors duration-150">
-        <span class="nav-indicator hidden absolute top-0 w-8 h-0.5 rounded-full bg-amber-400"></span>
-        <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/><path d="M12 6V12"/><path d="M12 18V12"/></svg>
-        <span class="nav-label text-[8px] font-medium">Accuracy</span>
       </button>
       <button data-app-view="products" type="button" class="app-nav-mobile relative flex flex-col items-center justify-center gap-0.5 text-slate-400 hover:text-slate-200 transition-colors duration-150">
         <span class="nav-indicator hidden absolute top-0 w-8 h-0.5 rounded-full bg-amber-400"></span>
@@ -2180,162 +1997,6 @@
       try { return new Date(t).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }); } catch { return null; }
     }
 
-    // Approximate USD cross-rates for non-INR bullion markets (indicative daily reference; USD/INR is a daily feed shown with its as-of date).
-    const CURRENCY_PER_USD = {
-      USD: 1, CNY: 7.25, HKD: 7.80, SGD: 1.35, AED: 3.6725, SAR: 3.75, QAR: 3.64, KWD: 0.308,
-      JPY: 149.0, KRW: 1390.0, THB: 35.0, MYR: 4.40, IDR: 16000.0, PHP: 58.0, TWD: 32.20,
-      VND: 25400.0, LKR: 290.0, BHD: 0.377, OMR: 0.385, JOD: 0.710, NPR: 1.60, BDT: 120.0,
-      PKR: 280.0, IRR: 42000.0, UAH: 41.0,
-      GBP: 0.79, EUR: 0.92, CHF: 0.89, AUD: 1.55, CAD: 1.38, NZD: 1.78,
-      ZAR: 18.50, EGP: 49.50, KES: 129.0, NGN: 1550.0, GHS: 14.50,
-      TRY: 35.0, ILS: 3.70, RUB: 93.0, MXN: 19.50, BRL: 5.30, ARS: 1100.0,
-      CLP: 920.0, PEN: 3.75, COP: 4100.0, UYU: 40.50, NOK: 11.20, SEK: 10.90,
-      DKK: 6.90, PLN: 3.95, CZK: 23.40, HUF: 370.0, RON: 4.70, BGN: 1.78,
-      HRK: 7.20, RSD: 105.0, ALL: 96.0, MKD: 55.0
-    };
-
-    // ~100 bullion exchanges & city markets used for the exchange comparison view.
-    // basisPct = typical premium/discount vs global spot (indicative). 'both' markets trade gold & silver.
-    // Every quote here is landed at India's ~15% import duty (global parity markets included) so comparisons
-    // with Satyanarayan Jewellers' price are like-for-like; GST is excluded everywhere.
-    const EXCHANGE_MARKETS = [
-      { id: 'x-001', name: 'Satyanarayan Jewellers', city: 'Cuttack', state: 'Odisha', country: 'India', currency: 'INR', metal: 'gold', basisPct: 0, isShop: true },
-      { id: 'x-002', name: 'MCX', city: 'Mumbai', state: 'Maharashtra', country: 'India', currency: 'INR', metal: 'both', basisPct: 0.10 },
-      { id: 'x-003', name: 'IBJA', city: 'Mumbai', state: 'Maharashtra', country: 'India', currency: 'INR', metal: 'both', basisPct: 0.05 },
-      { id: 'x-004', name: 'Bombay Bullion Association', city: 'Mumbai', state: 'Maharashtra', country: 'India', currency: 'INR', metal: 'gold', basisPct: 0.08 },
-      { id: 'x-005', name: 'Zaveri Bazaar Bullion Market', city: 'Mumbai', state: 'Maharashtra', country: 'India', currency: 'INR', metal: 'gold', basisPct: 0.12 },
-      { id: 'x-006', name: 'Chennai Jewellers Association', city: 'Chennai', state: 'Tamil Nadu', country: 'India', currency: 'INR', metal: 'gold', basisPct: -0.05 },
-      { id: 'x-007', name: 'Kolkata Bullion Association', city: 'Kolkata', state: 'West Bengal', country: 'India', currency: 'INR', metal: 'gold', basisPct: 0.10 },
-      { id: 'x-008', name: 'Delhi Bullion & Jewellers Association', city: 'Delhi', state: 'Delhi', country: 'India', currency: 'INR', metal: 'gold', basisPct: 0.15 },
-      { id: 'x-009', name: 'Jaipur Bullion Market', city: 'Jaipur', state: 'Rajasthan', country: 'India', currency: 'INR', metal: 'gold', basisPct: 0.08 },
-      { id: 'x-010', name: 'Hyderabad Bullion Market', city: 'Hyderabad', state: 'Telangana', country: 'India', currency: 'INR', metal: 'gold', basisPct: 0.05 },
-      { id: 'x-011', name: 'Bengaluru Bullion Market', city: 'Bengaluru', state: 'Karnataka', country: 'India', currency: 'INR', metal: 'gold', basisPct: -0.02 },
-      { id: 'x-012', name: 'Ahmedabad Bullion Association', city: 'Ahmedabad', state: 'Gujarat', country: 'India', currency: 'INR', metal: 'gold', basisPct: 0.10 },
-      { id: 'x-013', name: 'Pune Bullion Market', city: 'Pune', state: 'Maharashtra', country: 'India', currency: 'INR', metal: 'gold', basisPct: 0.04 },
-      { id: 'x-014', name: 'Nagpur Bullion Market', city: 'Nagpur', state: 'Maharashtra', country: 'India', currency: 'INR', metal: 'gold', basisPct: 0.06 },
-      { id: 'x-015', name: 'Surat Bullion Market', city: 'Surat', state: 'Gujarat', country: 'India', currency: 'INR', metal: 'gold', basisPct: 0.09 },
-      { id: 'x-016', name: 'Rajkot Bullion Market', city: 'Rajkot', state: 'Gujarat', country: 'India', currency: 'INR', metal: 'gold', basisPct: 0.07 },
-      { id: 'x-017', name: 'Coimbatore Bullion Market', city: 'Coimbatore', state: 'Tamil Nadu', country: 'India', currency: 'INR', metal: 'gold', basisPct: -0.04 },
-      { id: 'x-018', name: 'Madurai Bullion Market', city: 'Madurai', state: 'Tamil Nadu', country: 'India', currency: 'INR', metal: 'gold', basisPct: -0.03 },
-      { id: 'x-019', name: 'Trichy Bullion Market', city: 'Tiruchirappalli', state: 'Tamil Nadu', country: 'India', currency: 'INR', metal: 'gold', basisPct: -0.02 },
-      { id: 'x-020', name: 'Kochi Bullion Market', city: 'Kochi', state: 'Kerala', country: 'India', currency: 'INR', metal: 'gold', basisPct: 0.05 },
-      { id: 'x-021', name: 'Bhubaneswar Bullion Market', city: 'Bhubaneswar', state: 'Odisha', country: 'India', currency: 'INR', metal: 'gold', basisPct: 0.03 },
-      { id: 'x-022', name: 'Patna Bullion Market', city: 'Patna', state: 'Bihar', country: 'India', currency: 'INR', metal: 'gold', basisPct: 0.07 },
-      { id: 'x-023', name: 'Lucknow Bullion Market', city: 'Lucknow', state: 'Uttar Pradesh', country: 'India', currency: 'INR', metal: 'gold', basisPct: 0.09 },
-      { id: 'x-024', name: 'Kanpur Bullion Market', city: 'Kanpur', state: 'Uttar Pradesh', country: 'India', currency: 'INR', metal: 'gold', basisPct: 0.06 },
-      { id: 'x-025', name: 'Indore Bullion Market', city: 'Indore', state: 'Madhya Pradesh', country: 'India', currency: 'INR', metal: 'gold', basisPct: 0.08 },
-      { id: 'x-026', name: 'Bhopal Bullion Market', city: 'Bhopal', state: 'Madhya Pradesh', country: 'India', currency: 'INR', metal: 'gold', basisPct: 0.05 },
-      { id: 'x-027', name: 'Guwahati Bullion Market', city: 'Guwahati', state: 'Assam', country: 'India', currency: 'INR', metal: 'gold', basisPct: 0.10 },
-      { id: 'x-028', name: 'Visakhapatnam Bullion Market', city: 'Visakhapatnam', state: 'Andhra Pradesh', country: 'India', currency: 'INR', metal: 'gold', basisPct: 0.04 },
-      { id: 'x-029', name: 'Vijayawada Bullion Market', city: 'Vijayawada', state: 'Andhra Pradesh', country: 'India', currency: 'INR', metal: 'gold', basisPct: 0.05 },
-      { id: 'x-030', name: 'Goa Bullion Market', city: 'Panaji', state: 'Goa', country: 'India', currency: 'INR', metal: 'gold', basisPct: 0.09 },
-      { id: 'x-031', name: 'Pondicherry Bullion Market', city: 'Puducherry', state: 'Puducherry', country: 'India', currency: 'INR', metal: 'gold', basisPct: 0.06 },
-      { id: 'x-032', name: 'Thrissur Bullion Market', city: 'Thrissur', state: 'Kerala', country: 'India', currency: 'INR', metal: 'gold', basisPct: 0.03 },
-      { id: 'x-033', name: 'ICEX', city: 'Mumbai', state: 'Maharashtra', country: 'India', currency: 'INR', metal: 'both', basisPct: 0.10 },
-      { id: 'x-034', name: 'LBMA', city: 'London', state: 'England', country: 'United Kingdom', currency: 'GBP', metal: 'both', basisPct: 0.10 },
-      { id: 'x-035', name: 'COMEX', city: 'New York', state: 'NY', country: 'USA', currency: 'USD', metal: 'both', basisPct: -0.05 },
-      { id: 'x-036', name: 'NYMEX', city: 'New York', state: 'NY', country: 'USA', currency: 'USD', metal: 'both', basisPct: 0.00 },
-      { id: 'x-037', name: 'Shanghai Gold Exchange', city: 'Shanghai', state: 'Shanghai', country: 'China', currency: 'CNY', metal: 'gold', basisPct: 0.30 },
-      { id: 'x-038', name: 'Shanghai Futures Exchange', city: 'Shanghai', state: 'Shanghai', country: 'China', currency: 'CNY', metal: 'both', basisPct: 0.20 },
-      { id: 'x-039', name: 'Tokyo Commodity Exchange (TOCOM)', city: 'Tokyo', state: 'Tokyo', country: 'Japan', currency: 'JPY', metal: 'both', basisPct: 0.15 },
-      { id: 'x-040', name: 'Hong Kong Gold & Silver Exchange', city: 'Hong Kong', state: 'Hong Kong', country: 'Hong Kong', currency: 'HKD', metal: 'both', basisPct: 0.25 },
-      { id: 'x-041', name: 'Dubai Gold & Commodities Exchange', city: 'Dubai', state: 'Dubai', country: 'UAE', currency: 'AED', metal: 'both', basisPct: 0.10 },
-      { id: 'x-042', name: 'Dubai Gold & Jewellery Group', city: 'Dubai', state: 'Dubai', country: 'UAE', currency: 'AED', metal: 'gold', basisPct: 0.05 },
-      { id: 'x-043', name: 'Singapore Bullion Market Association', city: 'Singapore', state: 'Singapore', country: 'Singapore', currency: 'SGD', metal: 'both', basisPct: 0.15 },
-      { id: 'x-044', name: 'Borsa Istanbul', city: 'Istanbul', state: 'Istanbul', country: 'Türkiye', currency: 'TRY', metal: 'both', basisPct: 0.45 },
-      { id: 'x-045', name: 'Johannesburg Bullion Market', city: 'Johannesburg', state: 'Gauteng', country: 'South Africa', currency: 'ZAR', metal: 'gold', basisPct: 0.20 },
-      { id: 'x-046', name: 'Sydney Bullion Market', city: 'Sydney', state: 'NSW', country: 'Australia', currency: 'AUD', metal: 'both', basisPct: 0.20 },
-      { id: 'x-047', name: 'Toronto Bullion Market', city: 'Toronto', state: 'Ontario', country: 'Canada', currency: 'CAD', metal: 'both', basisPct: 0.15 },
-      { id: 'x-048', name: 'Bangkok Gold Exchange', city: 'Bangkok', state: 'Bangkok', country: 'Thailand', currency: 'THB', metal: 'both', basisPct: 0.35 },
-      { id: 'x-049', name: 'Kuala Lumpur Bullion Market', city: 'Kuala Lumpur', state: 'Kuala Lumpur', country: 'Malaysia', currency: 'MYR', metal: 'both', basisPct: 0.30 },
-      { id: 'x-050', name: 'Jakarta Bullion Market', city: 'Jakarta', state: 'Jakarta', country: 'Indonesia', currency: 'IDR', metal: 'gold', basisPct: 0.40 },
-      { id: 'x-051', name: 'Manila Bullion Market', city: 'Manila', state: 'Metro Manila', country: 'Philippines', currency: 'PHP', metal: 'gold', basisPct: 0.40 },
-      { id: 'x-052', name: 'Colombo Gold Market', city: 'Colombo', state: 'Western', country: 'Sri Lanka', currency: 'LKR', metal: 'gold', basisPct: 0.45 },
-      { id: 'x-053', name: 'Kathmandu Gold Market', city: 'Kathmandu', state: 'Bagmati', country: 'Nepal', currency: 'NPR', metal: 'gold', basisPct: 0.50 },
-      { id: 'x-054', name: 'Dhaka Bullion Market', city: 'Dhaka', state: 'Dhaka', country: 'Bangladesh', currency: 'BDT', metal: 'gold', basisPct: 0.55 },
-      { id: 'x-055', name: 'Karachi Bullion Market', city: 'Karachi', state: 'Sindh', country: 'Pakistan', currency: 'PKR', metal: 'gold', basisPct: 0.60 },
-      { id: 'x-056', name: 'Lahore Bullion Market', city: 'Lahore', state: 'Punjab', country: 'Pakistan', currency: 'PKR', metal: 'gold', basisPct: 0.55 },
-      { id: 'x-057', name: 'Tehran Bullion Market', city: 'Tehran', state: 'Tehran', country: 'Iran', currency: 'IRR', metal: 'gold', basisPct: 1.20 },
-      { id: 'x-058', name: 'Tel Aviv Bullion Market', city: 'Tel Aviv', state: 'Tel Aviv', country: 'Israel', currency: 'ILS', metal: 'gold', basisPct: 0.25 },
-      { id: 'x-059', name: 'Moscow Exchange', city: 'Moscow', state: 'Moscow', country: 'Russia', currency: 'RUB', metal: 'both', basisPct: 0.30 },
-      { id: 'x-060', name: 'São Paulo Bullion Market', city: 'São Paulo', state: 'São Paulo', country: 'Brazil', currency: 'BRL', metal: 'gold', basisPct: 0.50 },
-      { id: 'x-061', name: 'Mexico City Bullion Market', city: 'Mexico City', state: 'CDMX', country: 'Mexico', currency: 'MXN', metal: 'gold', basisPct: 0.40 },
-      { id: 'x-062', name: 'Buenos Aires Bullion Market', city: 'Buenos Aires', state: 'Buenos Aires', country: 'Argentina', currency: 'ARS', metal: 'gold', basisPct: 0.70 },
-      { id: 'x-063', name: 'Lima Bullion Market', city: 'Lima', state: 'Lima', country: 'Peru', currency: 'PEN', metal: 'gold', basisPct: 0.35 },
-      { id: 'x-064', name: 'Santiago Bullion Market', city: 'Santiago', state: 'Santiago', country: 'Chile', currency: 'CLP', metal: 'gold', basisPct: 0.30 },
-      { id: 'x-065', name: 'Bogotá Bullion Market', city: 'Bogotá', state: 'Bogotá', country: 'Colombia', currency: 'COP', metal: 'gold', basisPct: 0.35 },
-      { id: 'x-066', name: 'Vancouver Bullion Market', city: 'Vancouver', state: 'British Columbia', country: 'Canada', currency: 'CAD', metal: 'gold', basisPct: 0.15 },
-      { id: 'x-067', name: 'Melbourne Bullion Market', city: 'Melbourne', state: 'Victoria', country: 'Australia', currency: 'AUD', metal: 'gold', basisPct: 0.20 },
-      { id: 'x-068', name: 'Auckland Bullion Market', city: 'Auckland', state: 'Auckland', country: 'New Zealand', currency: 'NZD', metal: 'gold', basisPct: 0.25 },
-      { id: 'x-069', name: 'Seoul Bullion Market', city: 'Seoul', state: 'Seoul', country: 'South Korea', currency: 'KRW', metal: 'gold', basisPct: 0.30 },
-      { id: 'x-070', name: 'Taipei Bullion Market', city: 'Taipei', state: 'Taipei', country: 'Taiwan', currency: 'TWD', metal: 'gold', basisPct: 0.30 },
-      { id: 'x-071', name: 'Zurich Bullion Market', city: 'Zurich', state: 'Zürich', country: 'Switzerland', currency: 'CHF', metal: 'gold', basisPct: 0.10 },
-      { id: 'x-072', name: 'Frankfurt Bullion Market', city: 'Frankfurt', state: 'Hesse', country: 'Germany', currency: 'EUR', metal: 'gold', basisPct: 0.10 },
-      { id: 'x-073', name: 'Paris Bullion Market', city: 'Paris', state: 'Île-de-France', country: 'France', currency: 'EUR', metal: 'gold', basisPct: 0.10 },
-      { id: 'x-074', name: 'Milan Bullion Market', city: 'Milan', state: 'Lombardy', country: 'Italy', currency: 'EUR', metal: 'gold', basisPct: 0.12 },
-      { id: 'x-075', name: 'Madrid Bullion Market', city: 'Madrid', state: 'Madrid', country: 'Spain', currency: 'EUR', metal: 'gold', basisPct: 0.10 },
-      { id: 'x-076', name: 'Amsterdam Bullion Market', city: 'Amsterdam', state: 'North Holland', country: 'Netherlands', currency: 'EUR', metal: 'gold', basisPct: 0.10 },
-      { id: 'x-077', name: 'Brussels Bullion Market', city: 'Brussels', state: 'Brussels', country: 'Belgium', currency: 'EUR', metal: 'gold', basisPct: 0.10 },
-      { id: 'x-078', name: 'Copenhagen Bullion Market', city: 'Copenhagen', state: 'Capital Region', country: 'Denmark', currency: 'DKK', metal: 'gold', basisPct: 0.10 },
-      { id: 'x-079', name: 'Stockholm Bullion Market', city: 'Stockholm', state: 'Stockholm', country: 'Sweden', currency: 'SEK', metal: 'gold', basisPct: 0.10 },
-      { id: 'x-080', name: 'Oslo Bullion Market', city: 'Oslo', state: 'Oslo', country: 'Norway', currency: 'NOK', metal: 'gold', basisPct: 0.10 },
-      { id: 'x-081', name: 'Helsinki Bullion Market', city: 'Helsinki', state: 'Uusimaa', country: 'Finland', currency: 'EUR', metal: 'gold', basisPct: 0.10 },
-      { id: 'x-082', name: 'Warsaw Bullion Market', city: 'Warsaw', state: 'Masovia', country: 'Poland', currency: 'PLN', metal: 'gold', basisPct: 0.15 },
-      { id: 'x-083', name: 'Prague Bullion Market', city: 'Prague', state: 'Prague', country: 'Czechia', currency: 'CZK', metal: 'gold', basisPct: 0.12 },
-      { id: 'x-084', name: 'Budapest Bullion Market', city: 'Budapest', state: 'Budapest', country: 'Hungary', currency: 'HUF', metal: 'gold', basisPct: 0.18 },
-      { id: 'x-085', name: 'Vienna Bullion Market', city: 'Vienna', state: 'Vienna', country: 'Austria', currency: 'EUR', metal: 'gold', basisPct: 0.10 },
-      { id: 'x-086', name: 'Lisbon Bullion Market', city: 'Lisbon', state: 'Lisbon', country: 'Portugal', currency: 'EUR', metal: 'gold', basisPct: 0.10 },
-      { id: 'x-087', name: 'Cape Town Bullion Market', city: 'Cape Town', state: 'Western Cape', country: 'South Africa', currency: 'ZAR', metal: 'gold', basisPct: 0.20 },
-      { id: 'x-088', name: 'Lagos Bullion Market', city: 'Lagos', state: 'Lagos', country: 'Nigeria', currency: 'NGN', metal: 'gold', basisPct: 0.60 },
-      { id: 'x-089', name: 'Nairobi Bullion Market', city: 'Nairobi', state: 'Nairobi', country: 'Kenya', currency: 'KES', metal: 'gold', basisPct: 0.55 },
-      { id: 'x-090', name: 'Cairo Bullion Market', city: 'Cairo', state: 'Cairo', country: 'Egypt', currency: 'EGP', metal: 'gold', basisPct: 0.50 },
-      { id: 'x-091', name: 'Muscat Bullion Market', city: 'Muscat', state: 'Muscat', country: 'Oman', currency: 'OMR', metal: 'gold', basisPct: 0.08 },
-      { id: 'x-092', name: 'Doha Bullion Market', city: 'Doha', state: 'Doha', country: 'Qatar', currency: 'QAR', metal: 'gold', basisPct: 0.08 },
-      { id: 'x-093', name: 'Kuwait City Bullion Market', city: 'Kuwait City', state: 'Al Asimah', country: 'Kuwait', currency: 'KWD', metal: 'gold', basisPct: 0.05 },
-      { id: 'x-094', name: 'Manama Bullion Market', city: 'Manama', state: 'Al Manamah', country: 'Bahrain', currency: 'BHD', metal: 'gold', basisPct: 0.05 },
-      { id: 'x-095', name: 'Beirut Bullion Market', city: 'Beirut', state: 'Beirut', country: 'Lebanon', currency: 'LBP', metal: 'gold', basisPct: 1.50 },
-      { id: 'x-096', name: 'Amman Bullion Market', city: 'Amman', state: 'Amman', country: 'Jordan', currency: 'JOD', metal: 'gold', basisPct: 0.20 },
-      { id: 'x-097', name: 'Kyiv Bullion Market', city: 'Kyiv', state: 'Kyiv', country: 'Ukraine', currency: 'UAH', metal: 'gold', basisPct: 0.40 },
-      { id: 'x-098', name: 'Bucharest Bullion Market', city: 'Bucharest', state: 'Bucharest', country: 'Romania', currency: 'RON', metal: 'gold', basisPct: 0.15 },
-      { id: 'x-099', name: 'Sofia Bullion Market', city: 'Sofia', state: 'Sofia', country: 'Bulgaria', currency: 'BGN', metal: 'gold', basisPct: 0.12 },
-      { id: 'x-100', name: 'Athens Bullion Market', city: 'Athens', state: 'Attica', country: 'Greece', currency: 'EUR', metal: 'gold', basisPct: 0.10 }
-    ];
-
-    // =========================================================================
-    // MARKET FEEDS — LIVE EXCHANGE PRICES + INDICATIVE CITY MARKETS (~100)
-    // =========================================================================
-    // Live feeds are fetched from the visitor's browser (CORS permitting). Indicative
-    // city markets are modeled from live spot XAU/XAG with each market's typical basis spread.
-    const MARKET_FEEDS = (() => {
-      const feeds = [
-        // --- Live API feeds (real prices from the exchange, browser-fetched) ---
-        { id: 'm-live-1', name: 'Binance', city: 'Global', country: 'Worldwide', currency: 'USD', metal: 'gold',   type: 'live', url: 'https://api.binance.com/api/v3/ticker/bookTicker?symbol=XAUUSDT', parse: (j) => (Number(j && j.bidPrice) + Number(j && j.askPrice)) / 2 },
-        { id: 'm-live-2', name: 'Binance', city: 'Global', country: 'Worldwide', currency: 'USD', metal: 'silver', type: 'live', url: 'https://api.binance.com/api/v3/ticker/bookTicker?symbol=XAGUSDT', parse: (j) => (Number(j && j.bidPrice) + Number(j && j.askPrice)) / 2 },
-        { id: 'm-live-3', name: 'OKX',     city: 'Global', country: 'Worldwide', currency: 'USD', metal: 'gold',   type: 'live', url: 'https://www.okx.com/api/v5/market/ticker?instId=XAU-USDT-SWAP', parse: (j) => (Number(j && j.data && j.data[0] && j.data[0].bidPx) + Number(j && j.data && j.data[0] && j.data[0].askPx)) / 2 },
-        { id: 'm-live-4', name: 'OKX',     city: 'Global', country: 'Worldwide', currency: 'USD', metal: 'silver', type: 'live', url: 'https://www.okx.com/api/v5/market/ticker?instId=XAG-USDT-SWAP', parse: (j) => (Number(j && j.data && j.data[0] && j.data[0].bidPx) + Number(j && j.data && j.data[0] && j.data[0].askPx)) / 2 },
-        { id: 'm-live-5', name: 'Bybit',   city: 'Global', country: 'Worldwide', currency: 'USD', metal: 'gold',   type: 'live', url: 'https://api.bybit.com/v5/market/tickers?category=linear&symbol=XAUUSDT', parse: (j) => (Number(j && j.result && j.result.list && j.result.list[0] && j.result.list[0].bid1Price) + Number(j && j.result && j.result.list && j.result.list[0] && j.result.list[0].ask1Price)) / 2 },
-        { id: 'm-live-6', name: 'Coinbase',city: 'Global', country: 'Worldwide', currency: 'USD', metal: 'gold',   type: 'live', url: 'https://api.coinbase.com/v2/prices/XAU-USD/spot', parse: (j) => Number(j && j.data && j.data.amount) },
-        { id: 'm-live-7', name: 'Gold-API',city: 'Global', country: 'Worldwide', currency: 'USD', metal: 'gold',   type: 'live', url: 'https://api.gold-api.com/price/XAU', parse: (j) => Number(j && j.price) },
-        { id: 'm-live-8', name: 'Gold-API',city: 'Global', country: 'Worldwide', currency: 'USD', metal: 'silver', type: 'live', url: 'https://api.gold-api.com/price/XAG', parse: (j) => Number(j && j.price) },
-        { id: 'm-live-9', name: 'Swissquote', city: 'Global', country: 'Worldwide', currency: 'USD', metal: 'gold',   type: 'live', url: 'https://forex-data-feed.swissquote.com/public-quotes/bboquotes/instrument/XAU/USD', parse: parseSwissquoteMid },
-        { id: 'm-live-10', name: 'Swissquote', city: 'Global', country: 'Worldwide', currency: 'USD', metal: 'silver', type: 'live', url: 'https://forex-data-feed.swissquote.com/public-quotes/bboquotes/instrument/XAG/USD', parse: parseSwissquoteMid },
-        { id: 'm-live-13', name: 'currency-converter.live (FX live)', city: 'Global', country: 'Worldwide', currency: 'USD', metal: 'fx', type: 'live', url: 'https://currency-converter.live/api/v1/cross?base=USD&symbols=INR', parse: (j) => Number(j && j.data && j.data.rates && j.data.rates.INR) },
-        { id: 'm-live-14', name: 'fxapi.app (FX live)', city: 'Global', country: 'Worldwide', currency: 'USD', metal: 'fx', type: 'live', url: 'https://fxapi.app/api/USD/INR.json', parse: (j) => Number(j && j.rate) },
-        { id: 'm-live-12', name: 'er-api (FX)', city: 'Global', country: 'Worldwide', currency: 'USD', metal: 'fx', type: 'live', url: 'https://open.er-api.com/v6/latest/USD', parse: (j) => Number(j && j.rates && j.rates.INR) },
-        { id: 'm-live-11', name: 'Frankfurter (FX)', city: 'Global', country: 'Worldwide', currency: 'USD', metal: 'fx', type: 'live', url: 'https://api.frankfurter.dev/v1/latest?base=USD&symbols=INR', parse: (j) => Number(j && j.rates && j.rates.INR) }
-      ];
-      // --- Indicative city / bullion markets (modeled from live spot + basis spread) ---
-      EXCHANGE_MARKETS.forEach((m) => {
-        if (m.isShop) return;
-        if (m.metal !== 'both' && m.metal !== 'gold' && m.metal !== 'silver') return;
-        feeds.push({
-          id: 'm-ind-' + m.id, name: m.name, city: m.city, country: m.country, currency: m.currency,
-          metal: m.metal, type: 'indicative', basisPct: m.basisPct, state: m.state
-        });
-      });
-      return feeds;
-    })();
-
     const CITIES = {
       cuttack:     { name: 'Cuttack',     state: 'Odisha',        factor: 1.0000 },
       mumbai:      { name: 'Mumbai',      state: 'Maharashtra',   factor: 1.0000 },
@@ -2432,26 +2093,8 @@
       marketAnyOpen: true,
       history: [],
       prices: null,
-      exchanges: {
-        metal: 'gold',
-        search: '',
-        sortBy: 'diff'
-      },
       statutory: null, // validated overrides loaded from catalog/statutory-rates.json
       statutoryMeta: { loadedAt: 0, source: '', error: '' },
-      marketAccuracy: {
-        metal: 'gold',
-        feeds: [],
-        consensus: null,
-        consensusUsd: null,
-        shopBase: null,
-        variancePct: 0,
-        calibPctGold: 0,
-        calibPctSilver: 0,
-        loading: false,
-        lastFetch: null,
-        liveCount: 0
-      },
       ai: {
         apiKey: lsGet(STORAGE_KEYS.geminiKey, ''),
         isTyping: false
@@ -2614,15 +2257,8 @@
 
     function computeCityPrices(cityId, spotGold, spotSilver, usdInr) {
       const city = CITIES[cityId] || CITIES.cuttack;
-      // Optional market-accuracy calibration: nudges spot so the shop price tracks the
-      // exchange consensus while keeping import duty + local premium intact. Defaults to 0%.
-      const ma = (typeof state !== 'undefined' && state && state.marketAccuracy) || null;
-      const calGold = 1 + (ma && ma.calibPctGold != null ? ma.calibPctGold : 0) / 100;
-      const calSilver = 1 + (ma && ma.calibPctSilver != null ? ma.calibPctSilver : 0) / 100;
-      spotGold = spotGold * calGold;
-      spotSilver = spotSilver * calSilver;
       // Statutory landing factors come from the shared statutory model (per metal), so a duty or
-      // GST change flows through every ₹ figure — board, tools, exchange and accuracy views alike.
+      // GST change flows through every ₹ figure — board and tools views alike.
       const goldDuty = importDutyMultiplier('gold');
       const silverDuty = importDutyMultiplier('silver');
       const goldGst = gstMultiplier('gold');
@@ -3268,8 +2904,6 @@
           : (nextPrices.spotSilver === prevPrices.spotSilver ? null : (nextPrices.spotSilver > prevPrices.spotSilver ? 1 : -1)));
       renderPriceCards({ gold: goldFlashDir, silver: silverFlashDir }, false);
       updateRatesUpdatedLabel();
-      if (state.activeView === 'exchanges') renderExchangeComparison();
-      if (state.activeView === 'accuracy') renderMarketAccuracy();
       if (state.activeView === 'charts') renderChart();
       if (state.activeView === 'tools') updateAllTools();
       if (state.activeView === 'news') renderNewsTicker();
@@ -3337,8 +2971,6 @@
             gold: metal === 'silver' ? null : goldDir,
             silver: metal === 'gold' ? null : silverDir
           }, firstPaint);
-      if (state.activeView === 'exchanges') renderExchangeComparison();
-      if (state.activeView === 'accuracy') renderMarketAccuracy();
     }
 
     async function syncLiveAPIs(isManual = false, isInitialConnect = false) {
@@ -3891,7 +3523,6 @@
         state.statutoryMeta = { loadedAt: Date.now(), source: 'network', error: '' };
         lsSet(STORAGE_KEYS.statutoryRates, JSON.stringify({ fetchedAt: Date.now(), rates }));
         repriceEverything();
-        renderStatutoryNotice();
         return rates;
       } catch (err) {
         state.statutoryMeta.error = err && err.message ? err.message : 'unavailable';
@@ -3899,7 +3530,6 @@
           state.statutory = cached.rates;
           state.statutoryMeta.source = 'cache';
         }
-        renderStatutoryNotice();
         return state.statutory;
       }
     }
@@ -3912,34 +3542,11 @@
       renderPriceCards(null, false);
       updateAllTools();
       updateRatesUpdatedLabel();
-      if (state.activeView === 'exchanges') renderExchangeComparison();
-      if (state.activeView === 'accuracy') renderMarketAccuracy();
       if (state.activeView === 'charts') renderChart();
     }
 
     // Show, in plain language, exactly which duty/GST the board is priced with — and prompt the
     // owner to re-verify once the regime is old enough that a change is plausible.
-    function renderStatutoryNotice() {
-      const g = statutoryRatesFor('gold');
-      // Keep the prose copy in step with the data, so the page never states a duty it is not using.
-      const exDuty = document.getElementById('ex-duty-pct');
-      if (exDuty) exDuty.textContent = String(g.importDutyPct);
-      const accDuty = document.getElementById('acc-duty-pct');
-      if (accDuty) accDuty.textContent = String(g.importDutyPct);
-      const notice = document.getElementById('statutory-notice');
-      if (!notice) return;
-      const stale = statutoryIsStale();
-      if (stale) {
-        notice.classList.remove('hidden');
-        const txt = document.getElementById('statutory-notice-text');
-        if (txt) {
-          txt.textContent = `Duty/GST was last verified on ${g.verifiedOn || 'an unknown date'} (current regime effective ${g.effectiveFrom || 'unknown'}). Budgets, customs notifications and GST Council meetings can change these rates — re-verify and update catalog/statutory-rates.json so every price stays exact.`;
-        }
-      } else {
-        notice.classList.add('hidden');
-      }
-    }
-
     // =========================================================================
     // HEADER & KPI LIVE STATUS UI
     // =========================================================================
@@ -3972,374 +3579,6 @@
       if (state.activeView === 'charts') renderChart();
       if (state.activeView === 'news' || animateReveal) renderNewsTicker();
       if (state.activeView === 'tools' || animateReveal) updateAllTools();
-    }
-
-    // =========================================================================
-    // EXCHANGE COMPARISON — SATYANARAYAN vs ~100 GLOBAL BULLION MARKETS
-    // =========================================================================
-    function fmtLocalNumber(v) {
-      return Number.isFinite(v) ? Number(v).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '–';
-    }
-
-    function computeExchangeRows() {
-      const p = state.prices;
-      if (!p || !Number.isFinite(p.spotGold) || !Number.isFinite(p.spotSilver) || !Number.isFinite(p.usdInr)) return null;
-      const filterMetal = state.exchanges.metal === 'silver' || state.exchanges.metal === 'both' ? state.exchanges.metal : 'gold';
-      // Quote bracket never becomes 'both': the 'Both' filter lists every venue but quotes in gold.
-      const metal = filterMetal === 'silver' ? 'silver' : 'gold';
-      const usdInr = p.usdInr;
-      // Shop's comparable bases: ex-GST per 10g (gold) / per kg (silver), already including ~15% import duty.
-      const goldBase = p.gold999ExGst;
-      const silverBase = p.silver999ExGst;
-      const shopBase = metal === 'silver' ? silverBase : goldBase;
-      const rows = [];
-      for (const m of EXCHANGE_MARKETS) {
-        if (m.isShop) continue;
-        // 'both' lists every venue; the specific filters keep only venues that trade that metal.
-        if (filterMetal !== 'both' && m.metal !== 'both' && m.metal !== filterMetal) continue;
-        // Each row is quoted in the selected bracket; a 'both' venue trades both metals.
-        const quoteMetal = metal;
-        const base = quoteMetal === 'gold' ? goldBase : silverBase;
-        // `cpu` is local currency per USD, so one unit of local currency buys (usdInr / cpu) rupees.
-        // Spot is quoted in USD, so this conversion applies to *every* market — INR included, where
-        // cpu = 1 and the factor is the plain USD→INR rate. Forcing 1 for INR markets previously
-        // priced MCX/IBJA gold at ~₹1,300 per 10g instead of ~₹1,33,000.
-        const cpu = CURRENCY_PER_USD[m.currency] || 1;
-        const inrPerUnit = usdInr / cpu;
-        const premium = 1 + m.basisPct / 100;
-        // Every market is modeled from duty-free global spot, so India's import duty is added to all
-        // of them (MCX/IBJA included) — only then are they comparable with our landed shop price.
-        // The duty follows the metal being quoted (gold and silver can carry different rates).
-        const duty = importDutyMultiplier(quoteMetal);
-        let theirInr, local;
-        if (quoteMetal === 'gold') {
-          const usdPerGram = (p.spotGold / TROY_OZ_TO_GRAMS) * premium;
-          theirInr = usdPerGram * cpu * inrPerUnit * 10 * duty; // INR per 10g (landed)
-          local = usdPerGram * cpu; // local currency per gram
-        } else {
-          const usdPerKg = (p.spotSilver / TROY_OZ_TO_GRAMS) * 1000 * premium;
-          theirInr = usdPerKg * cpu * inrPerUnit * duty; // INR per kg (landed)
-          local = usdPerKg * cpu; // local currency per kg
-        }
-        const diffAmt = theirInr - base;
-        // `quoteMetal` is the bracket the price is quoted in (never 'both'), `m.metal` stays for the badge.
-        rows.push({ ...m, quoteMetal, theirInr, local, diffAmt, diffPct: base > 0 ? (diffAmt / base) * 100 : 0 });
-      }
-      const sortBy = state.exchanges.sortBy || 'diff';
-      rows.sort(sortBy === 'az'
-        ? (a, b) => a.name.localeCompare(b.name)
-        : (a, b) => Math.abs(a.diffPct) - Math.abs(b.diffPct) || a.name.localeCompare(b.name));
-      rows.unshift({
-        id: 'x-sj', name: 'Satyanarayan Jewellers', city: 'Cuttack', state: 'Odisha', country: 'India', currency: 'INR',
-        metal, quoteMetal: metal, basisPct: 0, isShop: true,
-        theirInr: shopBase,
-        local: metal === 'gold' ? shopBase / 10 : shopBase,
-        diffAmt: 0, diffPct: 0
-      });
-      return rows;
-    }
-
-    function renderExchangeComparison() {
-      const body = document.getElementById('exchange-comparison-body');
-      const empty = document.getElementById('exchange-comparison-empty');
-      const statTotal = document.getElementById('exchange-stat-total');
-      const statCheaper = document.getElementById('exchange-stat-cheaper');
-      const statPricier = document.getElementById('exchange-stat-pricier');
-      const stamp = document.getElementById('exchange-updated-at');
-      if (!body) return;
-      if (!state.prices) {
-        body.innerHTML = '';
-        if (empty) empty.hidden = false;
-        [statTotal, statCheaper, statPricier, stamp].forEach((el) => { if (el) el.textContent = '—'; });
-        return;
-      }
-      if (empty) empty.hidden = true;
-      const rows = computeExchangeRows();
-      const search = (state.exchanges.search || '').toLowerCase();
-      const filtered = search ? rows.filter((r) => (r.name + ' | ' + (r.city || '') + ' | ' + (r.state || '') + ' | ' + r.country).toLowerCase().includes(search)) : rows;
-      let cheaper = 0, pricier = 0;
-      for (const r of filtered) {
-        if (r.isShop) continue;
-        // Anything inside ₹1 is "at par" — floating-point noise must not be counted as a difference.
-        if (r.diffAmt < -1) cheaper += 1; else if (r.diffAmt > 1) pricier += 1;
-      }
-      if (statTotal) statTotal.textContent = `Markets compared: ${Math.max(0, filtered.length - 1)} of ${EXCHANGE_MARKETS.length - 1}`;
-      if (statCheaper) statCheaper.textContent = `Cheaper than us: ${cheaper}`;
-      if (statPricier) statPricier.textContent = `Pricier than us: ${pricier}`;
-      if (stamp) stamp.textContent = `Live · ${fmtTime(new Date())} IST`;
-      let html = '';
-      for (const r of filtered) {
-        const isShop = r.isShop;
-        const atPar = !isShop && Math.abs(r.diffAmt) < 1;
-        const dir = isShop ? 'zero' : (atPar ? 'zero' : (r.diffAmt > 0 ? 'up' : 'down'));
-        const sign = dir === 'up' ? '+' : (dir === 'down' ? '−' : '');
-        const absAmt = fmtINR(Math.abs(r.diffAmt), 0);
-        const diffText = isShop ? '— reference' : (atPar ? '±0.00%' : `${sign}${Math.abs(r.diffPct).toFixed(2)}%`);
-        const status = isShop ? 'Your shop price — reference row'
-          : atPar ? 'Same as Satyanarayan Jewellers'
-          : r.diffAmt < 0 ? 'Cheaper than Satyanarayan Jewellers'
-          : 'Pricier than Satyanarayan Jewellers';
-        const cityLabel = (r.city || '') + (r.state ? ', ' + r.state : '');
-        // Local figures are quoted per gram for gold and per kg for silver; the shop reference row
-        // follows the same rule so the "local rate" column is never labelled with the wrong unit.
-        const rowMetal = r.quoteMetal || (r.metal === 'silver' ? 'silver' : 'gold');
-        const unitLabel = rowMetal === 'gold' ? '/g' : '/kg';
-        const localSymbol = r.currency === 'INR' ? '₹' : r.currency + ' ';
-        const metalLabel = r.metal === 'both' ? 'Gold & Silver' : r.metal.charAt(0).toUpperCase() + r.metal.slice(1);
-        html += `<tr class="ex-row${isShop ? ' ex-ref' : ''}">
-          <td class="ex-td-exchange">
-            <div class="ex-name">${escapeHtml(r.name)}</div>
-            <span class="ex-meta">${escapeHtml(cityLabel)} · ${escapeHtml(r.country)}</span>
-            <span class="ex-metal-badge ex-metal-${r.metal === 'both' ? 'both' : r.metal}">${escapeHtml(metalLabel)}</span>
-          </td>
-          <td>
-            <div class="ex-price">${fmtINR(r.theirInr, 0)}</div>
-            <div class="ex-price-local">${localSymbol}${fmtLocalNumber(r.local)}${unitLabel}</div>
-          </td>
-          <td class="diff-cell">
-            <div class="ex-diff ex-diff-${dir}" title="${escapeHtml(status)}">${diffText}</div>
-            <div class="ex-diff-note">${isShop ? escapeHtml(status) : (dir === 'zero' ? 'At par · ' + escapeHtml(status) : sign + absAmt + ' · ' + escapeHtml(status))}</div>
-          </td>
-        </tr>`;
-      }
-      body.innerHTML = html;
-    }
-
-    function bindExchangeControls() {
-      const search = document.getElementById('exchange-search');
-      if (search && !search.dataset.exBound) {
-        search.dataset.exBound = '1';
-        search.addEventListener('input', (e) => { state.exchanges.search = e.target.value.toLowerCase(); if (state.activeView === 'exchanges') renderExchangeComparison(); });
-      }
-      document.querySelectorAll('[data-ex-metal]').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('[data-ex-metal]').forEach((b) => b.classList.remove('is-active'));
-          btn.classList.add('is-active');
-          state.exchanges.metal = btn.dataset.exMetal;
-          if (state.activeView === 'exchanges') renderExchangeComparison();
-        });
-      });
-      const sort = document.getElementById('exchange-sort');
-      if (sort && !sort.dataset.exBound) {
-        sort.dataset.exBound = '1';
-        sort.addEventListener('change', (e) => { state.exchanges.sortBy = e.target.value; if (state.activeView === 'exchanges') renderExchangeComparison(); });
-      }
-      const refresh = document.getElementById('btn-refresh-exchanges');
-      if (refresh && !refresh.dataset.exBound) {
-        refresh.dataset.exBound = '1';
-        refresh.addEventListener('click', () => {
-          renderExchangeComparison();
-          if (state.prices) {
-            showToast(`Comparison refreshed · Gold ${fmtUSD(state.prices.spotGold)}/oz, Silver ${fmtUSD(state.prices.spotSilver)}/oz`, 'success');
-          }
-        });
-      }
-    }
-
-    // =========================================================================
-    // MARKET ACCURACY — LIVE EXCHANGE PRICE COMPARISON & CALIBRATION
-    // =========================================================================
-    function median(vals) {
-      const s = vals.slice().sort((a, b) => a - b);
-      const n = s.length;
-      if (!n) return null;
-      const mid = Math.floor(n / 2);
-      return n % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
-    }
-
-    async function fetchMarketAccuracy(isManual = false) {
-      const ma = state.marketAccuracy;
-      if (ma.loading) return;
-      ma.loading = true;
-      try {
-        const p = state.prices;
-        if (!p) return;
-        const metal = ma.metal === 'silver' ? 'silver' : 'gold';
-        const shopBase = metal === 'gold' ? p.gold999ExGst : p.silver999ExGst;
-        ma.shopBase = shopBase;
-        const results = [];
-        // FX preference: the engine-owned live rate the whole board is priced from, then the live
-        // accuracy feeds. Never let a slow accuracy fetch disagree with the visible board rate.
-        let resolvedUsdInr = Number.isFinite(state.live && state.live.usdInr) && state.live.usdInr > 0
-          ? state.live.usdInr
-          : p.usdInr;
-
-        const liveFeeds = MARKET_FEEDS.filter((f) => f.type === 'live' && (f.metal === metal || f.metal === 'fx'));
-        const fxFeeds = liveFeeds.filter((f) => f.metal === 'fx');
-        const metalFeeds = liveFeeds.filter((f) => f.metal === metal);
-
-        // Only consult the accuracy FX feeds when the engine holds no validated rate.
-        if (!Number.isFinite(resolvedUsdInr) || resolvedUsdInr <= 0) {
-          for (const f of fxFeeds) {
-            try {
-              const { json } = await fetchWithTimeout(f.url, 6000);
-              const v = validateUsdInr(f.parse(json), null);
-              if (v.ok) { resolvedUsdInr = v.value; break; }
-            } catch { /* try next feed */ }
-          }
-        }
-
-        // Fetch live metal feeds with bounded concurrency.
-        await runWithConcurrency(metalFeeds, 6, async (f) => {
-          try {
-            const { json } = await fetchWithTimeout(f.url, 6000);
-            const usdPrice = f.parse(json);
-            // Reject a quote out of the metal's domain (a bad print, not a market move).
-            const band = SPOT_BANDS[metal];
-            if (Number.isFinite(usdPrice) && usdPrice >= band.min && usdPrice <= band.max) {
-              const perGram = usdPrice / TROY_OZ_TO_GRAMS;
-              // Global feeds quote at parity; load India's import duty for THIS metal so the figure
-              // is comparable with the shop's landed (ex-GST) price instead of looking ~15% cheaper.
-              const theirInr = (metal === 'gold'
-                ? perGram * resolvedUsdInr * 10
-                : perGram * 1000 * resolvedUsdInr) * importDutyMultiplier(metal);
-              // `local` is the exchange's own quote, which is USD per troy ounce for these feeds.
-              results.push({ ...f, type: 'live', theirInr, local: usdPrice, localUnit: '/oz', valid: true, usdPrice });
-            } else {
-              results.push({ ...f, type: 'live', valid: false, theirInr: null, local: NaN, usdPrice: NaN });
-            }
-          } catch {
-            results.push({ ...f, type: 'live', valid: false, theirInr: null, local: NaN, usdPrice: NaN });
-          }
-        });
-
-        // Indicative city markets modeled from live spot + basis spread.
-        const indFeeds = MARKET_FEEDS.filter((f) => f.type === 'indicative' && (f.metal === metal || f.metal === 'both'));
-        for (const f of indFeeds) {
-          const premium = 1 + f.basisPct / 100;
-          const theirInr = shopBase * premium;
-          results.push({ ...f, type: 'indicative', theirInr, local: metal === 'gold' ? theirInr / 10 : theirInr / 1000, localUnit: metal === 'gold' ? '/g' : '/kg', valid: true, usdPrice: NaN });
-        }
-
-        // Failed feeds carry no price — sort them to the bottom instead of treating them as 0.
-        results.sort((a, b) => (Number.isFinite(b.theirInr) ? b.theirInr : -Infinity) - (Number.isFinite(a.theirInr) ? a.theirInr : -Infinity));
-
-        const liveVals = results.filter((r) => r.valid && r.type === 'live').map((r) => r.usdPrice).filter((v) => Number.isFinite(v));
-        const consensusUsd = median(liveVals);
-        const consensusInr = consensusUsd
-          ? (consensusUsd / TROY_OZ_TO_GRAMS) * (metal === 'gold' ? 10 : 1000) * resolvedUsdInr * importDutyMultiplier(metal)
-          : null;
-
-        ma.feeds = results;
-        ma.consensus = consensusInr;
-        ma.consensusUsd = consensusUsd;
-        ma.liveCount = results.filter((r) => r.valid && r.type === 'live').length;
-        ma.fxUsed = resolvedUsdInr;
-        ma.dutyPct = statutoryRatesFor(metal).importDutyPct;
-        // Positive = shop price above the market (the UI documents it this way), so compare shop → consensus.
-        ma.variancePct = consensusInr && shopBase > 0 ? ((shopBase - consensusInr) / consensusInr) * 100 : 0;
-        ma.lastFetch = new Date();
-        if (isManual) showToast(`Market accuracy refreshed · ${ma.liveCount} live feeds · ${results.length} markets`, 'success');
-      } catch { /* keep last known accuracy data */ } finally {
-        ma.loading = false;
-      }
-    }
-
-    function renderMarketAccuracy() {
-      const ma = state.marketAccuracy;
-      const body = document.getElementById('accuracy-body');
-      const empty = document.getElementById('accuracy-empty');
-      const statShop = document.getElementById('accuracy-stat-shop');
-      const statConsensus = document.getElementById('accuracy-stat-consensus');
-      const statVariance = document.getElementById('accuracy-stat-variance');
-      const statLive = document.getElementById('accuracy-stat-live');
-      const stamp = document.getElementById('accuracy-updated-at');
-      if (!body) return;
-      if (!state.prices || ma.feeds.length === 0) {
-        body.innerHTML = '';
-        if (empty) empty.hidden = false;
-        [statShop, statConsensus, statVariance, statLive, stamp].forEach((el) => { if (el) el.textContent = '—'; });
-        return;
-      }
-      if (empty) empty.hidden = true;
-      const metal = ma.metal === 'silver' ? 'silver' : 'gold';
-      const unit = metal === 'gold' ? '/10g' : '/kg';
-      if (statShop) statShop.textContent = ma.shopBase ? fmtINR(ma.shopBase, 0) : '—';
-      if (statConsensus) statConsensus.textContent = ma.consensus ? fmtINR(ma.consensus, 0) : '—';
-      if (statVariance) {
-        const v = ma.variancePct;
-        const dir = v > 0 ? 'up' : (v < 0 ? 'down' : 'zero');
-        statVariance.textContent = `${v >= 0 ? '+' : ''}${v.toFixed(2)}% vs market consensus`;
-        statVariance.className = `acc-variance acc-variance-${dir}`;
-      }
-      if (statLive) statLive.textContent = `${ma.liveCount} live feeds · ${ma.feeds.length} markets`;
-      if (stamp) stamp.textContent = ma.lastFetch ? `Live · ${fmtTime(ma.lastFetch)} IST` : '—';
-
-      let html = '';
-      for (const r of ma.feeds) {
-        const ok = r.valid !== false && Number.isFinite(r.theirInr);
-        const dir = !ok ? 'fail' : (r.theirInr > ma.shopBase ? 'up' : (r.theirInr < ma.shopBase ? 'down' : 'zero'));
-        const pct = ok && ma.shopBase > 0 ? ((r.theirInr - ma.shopBase) / ma.shopBase) * 100 : 0;
-        const chip = !ok
-          ? '<span class="acc-chip acc-chip-fail">Failed</span>'
-          : (r.type === 'live' ? '<span class="acc-chip acc-chip-live">Live</span>' : '<span class="acc-chip acc-chip-ind">Indicative</span>');
-        const localSym = r.currency === 'INR' ? '₹' : r.currency + ' ';
-        // Live exchange feeds quote per troy ounce; modeled city markets quote in the same
-        // per-unit bracket as this table (gold /g, silver /kg).
-        const localUnit = r.localUnit || unit;
-        const localVal = ok && Number.isFinite(r.local)
-          ? localSym + r.local.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ' + localUnit
-          : '';
-        const cityLabel = (r.city || '') + (r.state ? ', ' + r.state : '');
-        html += `<div class="acc-feed ${!ok ? 'failed' : (r.type === 'live' ? 'live' : 'indicative')}" title="${escapeHtml(r.name)} · ${escapeHtml(cityLabel)} · ${escapeHtml(r.country)}">
-          <div class="acc-info">
-            <div class="acc-name">${escapeHtml(r.name)}</div>
-            <div class="acc-meta">${escapeHtml(cityLabel)} · ${escapeHtml(r.country)} ${chip}</div>
-          </div>
-          <div class="acc-price">${ok ? fmtINR(r.theirInr, 0) : '—'}<span class="acc-price-local"> ${localVal}</span></div>
-          <div class="acc-variance acc-variance-${dir}">${ok ? `${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%` : '—'}</div>
-        </div>`;
-      }
-      body.innerHTML = html;
-    }
-
-    function calibrateToMarket() {
-      const ma = state.marketAccuracy;
-      if (!ma.consensusUsd || !state.prices) { showToast('No market consensus available yet — refresh first.', 'alert'); return; }
-      const metal = ma.metal === 'silver' ? 'silver' : 'gold';
-      const spot = metal === 'gold' ? state.live.spotGold : state.live.spotSilver;
-      if (!spot || spot <= 0) { showToast('No live spot price available.', 'alert'); return; }
-      let pct = ((ma.consensusUsd - spot) / spot) * 100;
-      pct = Math.max(-8, Math.min(8, pct)); // clamp ±8% so duty + local premium stay intact
-      if (metal === 'gold') ma.calibPctGold = pct; else ma.calibPctSilver = pct;
-
-      // Re-price every view with the new calibration right away — computeCityPrices applies it.
-      // Shop base / variance must be recomputed too, otherwise the accuracy panel keeps showing
-      // the pre-calibration price and a 0% variance.
-      const hasRateInputs = Number.isFinite(state.live.spotGold) && Number.isFinite(state.live.spotSilver) && Number.isFinite(state.live.usdInr);
-      if (hasRateInputs) {
-        state.prices = computeCityPrices(state.cityId, state.live.spotGold, state.live.spotSilver, state.live.usdInr);
-        ma.shopBase = metal === 'gold' ? state.prices.gold999ExGst : state.prices.silver999ExGst;
-        ma.variancePct = ma.consensus ? ((ma.shopBase - ma.consensus) / ma.consensus) * 100 : 0;
-        renderPriceCards(null, false);
-        if (state.activeView === 'tools') updateAllTools();
-        if (state.activeView === 'exchanges') renderExchangeComparison();
-      }
-      renderMarketAccuracy();
-      showToast(`Calibrated ${metal} to market consensus (${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%).`, 'success');
-    }
-
-    function bindAccuracyControls() {
-      const sel = document.getElementById('accuracy-metal');
-      if (sel && !sel.dataset.accBound) {
-        sel.dataset.accBound = '1';
-        sel.addEventListener('change', (e) => {
-          state.marketAccuracy.metal = e.target.value;
-          if (state.activeView !== 'accuracy') return;
-          renderMarketAccuracy(); // clear the stale metal's rows immediately
-          fetchMarketAccuracy(false).then(renderMarketAccuracy);
-        });
-      }
-      const calib = document.getElementById('btn-calibrate-market');
-      if (calib && !calib.dataset.accBound) {
-        calib.dataset.accBound = '1';
-        calib.addEventListener('click', calibrateToMarket);
-      }
-      const refresh = document.getElementById('btn-refresh-accuracy');
-      if (refresh && !refresh.dataset.accBound) {
-        refresh.dataset.accBound = '1';
-        refresh.addEventListener('click', () => fetchMarketAccuracy(true).then(renderMarketAccuracy));
-      }
     }
 
     // =========================================================================
@@ -6896,11 +6135,8 @@
     function switchAppView(viewName) {
       const isAgentAlias = viewName === 'agent';
       if (isAgentAlias) viewName = 'tools';
-      const views = ['charts', 'news', 'rates', 'products', 'exchanges', 'accuracy', 'tools'];
+      const views = ['charts', 'news', 'rates', 'products', 'tools'];
       if (!views.includes(viewName)) return;
-      const ownerOnlyView = viewName === 'exchanges' || viewName === 'accuracy';
-      const isOwnerActive = Boolean(productOwner.unlocked && productOwner.ghConnected);
-      if (ownerOnlyView && !isOwnerActive) viewName = 'rates';
       state.activeView = viewName;
 
       // Show brand + city + INR/USD header bar ONLY on the Rates screen
@@ -6948,8 +6184,8 @@
         const ind = btn.querySelector('.nav-indicator');
         if (ind) ind.classList.toggle('hidden', !active);
         const lbl = btn.querySelector('.nav-label');
-        // Toggle only the weight: the label markup owns its own size (9px, 8px for the long
-        // "Accuracy" word) and rewriting className used to inflate every tab to 10px.
+        // Toggle only the weight: the label markup owns its own size and rewriting
+        // className used to inflate every tab to 10px.
         if (lbl) {
           lbl.classList.toggle('font-semibold', active);
           lbl.classList.toggle('font-medium', !active);
@@ -6969,17 +6205,6 @@
         ensureNewsLoaded();
       } else if (viewName === 'products') {
         ensureProductsLoaded();
-      } else if (viewName === 'exchanges') {
-        renderExchangeComparison();
-      } else if (viewName === 'accuracy') {
-        // Paint immediately (empty state), then repaint once the feeds land — otherwise the panel
-        // stays blank on first open because the fetch resolves after this synchronous render.
-        renderMarketAccuracy();
-        if (!state.marketAccuracy.feeds.length && state.prices) {
-          fetchMarketAccuracy(false).then(() => {
-            if (state.activeView === 'accuracy') renderMarketAccuracy();
-          });
-        }
       } else if (viewName === 'tools') {
         if (isAgentAlias) switchToolTab('mintu');
         updateAllTools();
@@ -7652,12 +6877,6 @@
       const isOwnerActive = Boolean(productOwner.unlocked && productOwner.ghConnected);
       if (studio) studio.classList.toggle('hidden', !isOwnerActive);
       if (pill) pill.classList.toggle('hidden', !isOwnerActive);
-      (document.querySelectorAll?.('[data-owner-view-nav]') || []).forEach((nav) => { nav.hidden = !isOwnerActive; });
-      const mobileNavGrid = document.getElementById('mobile-nav-grid');
-      if (mobileNavGrid) {
-        mobileNavGrid.classList.toggle('grid-cols-5', !isOwnerActive);
-        mobileNavGrid.classList.toggle('grid-cols-7', isOwnerActive);
-      }
       // Owner entry button stays hidden for customers until Owner Mode is live or the secret reveal fired
       if (accessBtn) accessBtn.classList.toggle('hidden', !(isOwnerActive || productOwner.accessRevealed));
       if (btnLabel) btnLabel.textContent = isOwnerActive ? 'Token Settings' : 'Owner';
@@ -8232,7 +7451,6 @@
         concealOwnerAccess();
         closeOwnerAuthModal();
         renderProducts();
-        if (state.activeView === 'exchanges' || state.activeView === 'accuracy') switchAppView('rates');
         showToast('GitHub token removed and Owner Mode locked.', 'info');
       });
 
@@ -8241,7 +7459,6 @@
         concealOwnerAccess();
         clearPendingMedia();
         renderProducts();
-        if (state.activeView === 'exchanges' || state.activeView === 'accuracy') switchAppView('rates');
         showToast('Owner Mode locked. Showing customer gallery view.', 'info');
       });
 
@@ -8780,12 +7997,11 @@
       setInterval(() => { if (state.live && state.live.lastSync && Date.now() - new Date(state.live.lastSync).getTime() < 20000) announceRates(); }, 30000);
 
       updateRatesUpdatedLabel();
-      renderStatutoryNotice();
       // Statutory rates are cheap static data: revalidate on the same slow cadence as FX so a
       // published duty/GST change reaches an already-open desk without a reload.
       if (!initToolsExtras._statutoryTimer) {
         initToolsExtras._statutoryTimer = setInterval(() => {
-          loadStatutoryRates(false).then(() => renderStatutoryNotice()).catch(() => {});
+          loadStatutoryRates(false).catch(() => {});
         }, STATUTORY_MIN_REFRESH_MS);
       }
     }
@@ -8800,7 +8016,7 @@
       renderMarketHoursUI();
       // Statutory duty/GST first: it is a data source (catalog/statutory-rates.json) and every
       // ₹ price below depends on it. The cached copy paints instantly; the fetch revalidates.
-      loadStatutoryRates().then(() => { renderStatutoryNotice(); });
+      loadStatutoryRates();
       hydrateCachedRates();
       renderRateOfDay(state.prices);
       connectLiveWebSocket();
@@ -8809,8 +8025,6 @@
 
       // 2. Bind UI events immediately so taps work at T=0ms
       bindEvents();
-      bindExchangeControls();
-      bindAccuracyControls();
       initToolsExtras();
       // Paint the IST date/time in the header immediately and keep it ticking.
       renderHeaderDateTime();
