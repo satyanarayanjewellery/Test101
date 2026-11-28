@@ -5,6 +5,7 @@
   // CONSTANTS & SHARED REPO CONFIGURATION
   // =========================================================================
   const SHOP_GSTIN = '21AFNPP7926E1ZC';
+  const ADMIN_APP_VERSION = 'v1.0.0 Beta';
   const CATALOG_REPO_ADMIN = 'satyanarayanjewellery';
   const CATALOG_REPO_NAME = 'shop';
   const CATALOG_REPO_BRANCH = 'main';
@@ -3286,6 +3287,7 @@
     const swStatus = state.pwa.swReg
       ? (state.pwa.swReg.active ? 'Active (offline ready · scope /admin/)' : 'Installing…')
       : ('serviceWorker' in navigator ? 'Not registered' : 'Unsupported');
+    set('diag-version', ADMIN_APP_VERSION);
     set('diag-sw', swStatus);
     set('diag-display', isStandaloneMode() ? 'Installed Standalone PWA' : 'Browser Tab');
     set('diag-net', navigator.onLine ? 'Online' : 'Offline');
@@ -4325,6 +4327,7 @@
   // Expose pure helpers for automated unit tests without affecting browser behavior.
   if (typeof globalThis !== 'undefined') {
     globalThis.__ADMIN_PWA_API__ = {
+      ADMIN_APP_VERSION,
       computeCityPrices,
       computeExchangeRows,
       computeQuoteMath,
@@ -4357,6 +4360,9 @@
   }
 
   if (typeof document !== 'undefined') {
+    document.querySelectorAll('[data-admin-version]').forEach((el) => {
+      el.textContent = ADMIN_APP_VERSION;
+    });
     bindEvents();
     registerAdminServiceWorker();
     updateInstallUI();

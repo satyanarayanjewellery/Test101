@@ -405,3 +405,47 @@ test('13. Customer Storefront syncs Featured Showroom Picks, Stock Status badges
   assert.match(adminJs, /satyanarayan_admin_bill_seq_v1/);
 });
 
+test('14. Version numbers: Customer displays normal version (v1.0.0) and all Admin surfaces display Beta version (v1.0.0 Beta)', () => {
+  const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
+  const expectedNormal = `v${pkg.version}`;
+  const expectedBeta = `v${pkg.version} Beta`;
+
+  const api = loadAdminApi();
+  assert.equal(api.ADMIN_APP_VERSION, expectedBeta);
+
+  // Customer app constants & customer-visible header/footer version badges (normal version, never Beta)
+  assert.ok(customerHtml.includes(`const APP_VERSION = '${expectedNormal}';`));
+  assert.ok(customerHtml.includes(`const ADMIN_APP_VERSION = '${expectedBeta}';`));
+  const customerBadges = [...customerHtml.matchAll(/<span[^>]*data-customer-version[^>]*>([^<]+)<\/span>/g)].map((m) => m[1]);
+  assert.ok(customerBadges.length >= 2, 'Customer header and footer must display version number');
+  for (const text of customerBadges) {
+    assert.equal(text, expectedNormal);
+    assert.ok(!/beta/i.test(text), 'Customer version must be normal (non-Beta)');
+  }
+  assert.match(customerHtml, /id="customer-version-badge"[^>]*>v1\.0\.0<\/span>/);
+  assert.match(customerHtml, /id="customer-footer-version"[^>]*>v1\.0\.0<\/span>/);
+
+  // Inline Admin surfaces inside index.html must all show Beta version
+  const inlineAdminBadges = [...customerHtml.matchAll(/<span[^>]*data-admin-version[^>]*>([^<]+)<\/span>/g)].map((m) => m[1]);
+  assert.ok(inlineAdminBadges.length >= 5, 'All inline admin pills, studio, and modals must display Beta version');
+  for (const text of inlineAdminBadges) {
+    assert.equal(text, expectedBeta);
+  }
+  for (const containerId of ['admin-mode-pill', 'admin-studio', 'admin-auth-modal', 'admin-edit-item-modal', 'admin-qr-tag-modal']) {
+    const idx = customerHtml.indexOf(`id="${containerId}"`);
+    assert.ok(idx > 0, `Expected #${containerId} in customerHtml`);
+    assert.ok(customerHtml.slice(idx, idx + 800).includes(expectedBeta), `#${containerId} must include ${expectedBeta}`);
+  }
+
+  // Standalone Admin PWA (/admin/) auth gate, header, footer, diagnostics, and modals must all show Beta version
+  const adminBadges = [...adminHtml.matchAll(/<span[^>]*data-admin-version[^>]*>([^<]+)<\/span>/g)].map((m) => m[1]);
+  assert.ok(adminBadges.length >= 6, 'Admin auth gate, header, footer, diagnostics, and modals must display Beta version');
+  for (const text of adminBadges) {
+    assert.equal(text, expectedBeta);
+  }
+  for (const id of ['auth-version-pill', 'admin-version-pill', 'diag-version', 'admin-footer-version']) {
+    assert.ok(adminHtml.includes(`id="${id}"`), `Missing #${id} in admin/index.html`);
+  }
+});
+
+

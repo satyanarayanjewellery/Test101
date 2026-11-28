@@ -148,7 +148,7 @@ test('manifest and service worker are valid, referenced, and prevent cache poiso
   assert.ok(manifest.icons.some(i => i.sizes === '192x192'));
   assert.ok(manifest.icons.some(i => i.sizes === '512x512'));
   const sw = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
-  assert.match(sw, /sj-price-desk-v15/);
+  assert.match(sw, /sj-price-desk-v16/);
   assert.match(sw, /index\.html/);
   assert.match(sw, /skipWaiting/);
   assert.match(sw, /client\.navigate\(client\.url\)/,

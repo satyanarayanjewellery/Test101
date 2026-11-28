@@ -280,6 +280,18 @@ img, svg { display: block; max-width: 100%; }
   line-height: 1.2;
 }
 .auth-sub { font-size: 0.77rem; color: var(--text-muted); margin-top: 0.2rem; }
+.auth-version-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.9rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.7rem;
+  color: var(--text-dim);
+}
+.auth-version-row .mono { color: var(--gold-soft); font-weight: 600; }
 
 .info-box {
   border-radius: 0.8rem;
@@ -1028,6 +1040,18 @@ img, svg { display: block; max-width: 100%; }
   color: #5C4722;
   border-top: 1px solid #D4AF37;
   border-bottom: 1.5px solid #D4AF37;
+}
+.admin-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.15rem;
+  padding: 0.85rem 0.2rem 0;
+  border-top: 1px solid var(--border);
+  font-size: 0.72rem;
+  color: var(--text-dim);
 }
 .print-slip-sheet { display: none; }
 
