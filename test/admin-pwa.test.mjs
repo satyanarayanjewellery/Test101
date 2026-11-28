@@ -1,8 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import vm from 'node:vm';
+import {
+  incrementTrailingVersion,
+  verifyRepoVersions,
+  bumpRepoVersion,
+  checkUpdatedAgainstBase
+} from '../scripts/bump-version.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const ADMIN_DIR = path.join(ROOT, 'admin');
@@ -405,10 +413,12 @@ test('13. Customer Storefront syncs Featured Showroom Picks, Stock Status badges
   assert.match(adminJs, /satyanarayan_admin_bill_seq_v1/);
 });
 
-test('14. Version numbers: Customer displays normal version (v1.0.0) and all Admin surfaces display Beta version (v1.0.0 Beta)', () => {
+test('14. Version numbers: Customer displays normal version (vX.Y.Z) and all Admin surfaces display Beta version (vX.Y.Z Beta)', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
+  assert.match(pkg.version, /^\d+\.\d+\.\d+$/);
   const expectedNormal = `v${pkg.version}`;
   const expectedBeta = `v${pkg.version} Beta`;
+  const escapedNormal = expectedNormal.replace(/\./g, '\\.');
 
   const api = loadAdminApi();
   assert.equal(api.ADMIN_APP_VERSION, expectedBeta);
@@ -422,8 +432,8 @@ test('14. Version numbers: Customer displays normal version (v1.0.0) and all Adm
     assert.equal(text, expectedNormal);
     assert.ok(!/beta/i.test(text), 'Customer version must be normal (non-Beta)');
   }
-  assert.match(customerHtml, /id="customer-version-badge"[^>]*>v1\.0\.0<\/span>/);
-  assert.match(customerHtml, /id="customer-footer-version"[^>]*>v1\.0\.0<\/span>/);
+  assert.match(customerHtml, new RegExp(`id="customer-version-badge"[^>]*>${escapedNormal}<\\/span>`));
+  assert.match(customerHtml, new RegExp(`id="customer-footer-version"[^>]*>${escapedNormal}<\\/span>`));
 
   // Inline Admin surfaces inside index.html must all show Beta version
   const inlineAdminBadges = [...customerHtml.matchAll(/<span[^>]*data-admin-version[^>]*>([^<]+)<\/span>/g)].map((m) => m[1]);
@@ -445,6 +455,59 @@ test('14. Version numbers: Customer displays normal version (v1.0.0) and all Adm
   }
   for (const id of ['auth-version-pill', 'admin-version-pill', 'diag-version', 'admin-footer-version']) {
     assert.ok(adminHtml.includes(`id="${id}"`), `Missing #${id} in admin/index.html`);
+  }
+});
+
+test('15. Version bumper always adds +1 at the end across Customer (normal), Admin (Beta), and Service Workers', () => {
+  assert.equal(incrementTrailingVersion('1.0.0'), '1.0.1');
+  assert.equal(incrementTrailingVersion('v1.0.1'), '1.0.2');
+  assert.equal(incrementTrailingVersion('v1.0.9 Beta'), '1.0.10');
+  assert.equal(incrementTrailingVersion('2.4.99'), '2.4.100');
+
+  const liveState = verifyRepoVersions(ROOT);
+  assert.equal(liveState.normalLabel, `v${liveState.version}`);
+  assert.equal(liveState.betaLabel, `v${liveState.version} Beta`);
+
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sj-version-bump-'));
+  try {
+    fs.mkdirSync(path.join(tmpDir, 'admin'), { recursive: true });
+    for (const rel of ['package.json', 'index.html', 'sw.js', 'admin/index.html', 'admin/app.js', 'admin/sw.js']) {
+      fs.copyFileSync(path.join(ROOT, rel), path.join(tmpDir, rel));
+    }
+
+    const before = verifyRepoVersions(tmpDir);
+    execFileSync('git', ['init', '-b', 'main'], { cwd: tmpDir });
+    execFileSync('git', ['config', 'user.email', 'test@example.com'], { cwd: tmpDir });
+    execFileSync('git', ['config', 'user.name', 'Test'], { cwd: tmpDir });
+    execFileSync('git', ['add', '.'], { cwd: tmpDir });
+    execFileSync('git', ['commit', '-m', 'base'], { cwd: tmpDir });
+    execFileSync('git', ['checkout', '-b', 'update-branch'], { cwd: tmpDir });
+
+    // Updating an app file without bumping must fail checkUpdatedAgainstBase
+    fs.writeFileSync(path.join(tmpDir, 'notes.txt'), 'updated\n', 'utf8');
+    execFileSync('git', ['add', 'notes.txt'], { cwd: tmpDir });
+    execFileSync('git', ['commit', '-m', 'update without bump'], { cwd: tmpDir });
+    assert.throws(() => checkUpdatedAgainstBase(tmpDir, 'main'), /must add 1 at the end/);
+
+    // Bumping (+1 at end) satisfies checkUpdatedAgainstBase
+    const bumped1 = bumpRepoVersion(tmpDir);
+    assert.equal(bumped1.version, incrementTrailingVersion(before.version));
+    assert.equal(bumped1.normalLabel, `v${bumped1.version}`);
+    assert.equal(bumped1.betaLabel, `v${bumped1.version} Beta`);
+    assert.equal(bumped1.customerSwCache, before.customerSwCache + 1);
+    assert.equal(bumped1.adminSwCache, before.adminSwCache + 1);
+    execFileSync('git', ['add', '.'], { cwd: tmpDir });
+    execFileSync('git', ['commit', '-m', 'bump +1'], { cwd: tmpDir });
+    const checked = checkUpdatedAgainstBase(tmpDir, 'main');
+    assert.equal(checked.skipped, false);
+    assert.equal(checked.current.version, bumped1.version);
+
+    const bumped2 = bumpRepoVersion(tmpDir);
+    assert.equal(bumped2.version, incrementTrailingVersion(bumped1.version));
+    assert.equal(bumped2.customerSwCache, before.customerSwCache + 2);
+    assert.equal(bumped2.adminSwCache, before.adminSwCache + 2);
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
   }
 });
 

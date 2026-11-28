@@ -5,7 +5,7 @@
   // CONSTANTS & SHARED REPO CONFIGURATION
   // =========================================================================
   const SHOP_GSTIN = '21AFNPP7926E1ZC';
-  const ADMIN_APP_VERSION = 'v1.0.0 Beta';
+  const ADMIN_APP_VERSION = 'v1.0.1 Beta';
   const CATALOG_REPO_ADMIN = 'satyanarayanjewellery';
   const CATALOG_REPO_NAME = 'shop';
   const CATALOG_REPO_BRANCH = 'main';
