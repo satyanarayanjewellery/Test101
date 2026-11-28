@@ -1,7 +1,7 @@
 // Offline-ready Service Worker for the Satyanarayan Jewellers Admin PWA (/admin/).
 // Scoped independently to ./ so the Admin PWA installs side-by-side with the customer
 // Price Desk PWA without interfering with customer caching or live GitHub API calls.
-const CACHE = 'sj-admin-desk-v7';
+const CACHE = 'sj-admin-desk-v8';
 const SHELL = [
   './index.html',
   './styles.css',

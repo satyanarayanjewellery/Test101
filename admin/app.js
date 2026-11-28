@@ -5,7 +5,7 @@
   // CONSTANTS & SHARED REPO CONFIGURATION
   // =========================================================================
   const SHOP_GSTIN = '21AFNPP7926E1ZC';
-  const ADMIN_APP_VERSION = 'v1.0.2 Beta';
+  const ADMIN_APP_VERSION = 'v1.0.3 Beta';
   const CATALOG_REPO_ADMIN = 'satyanarayanjewellery';
   const CATALOG_REPO_NAME = 'shop';
   const CATALOG_REPO_BRANCH = 'main';
@@ -22,7 +22,10 @@
     rateOfDay: 'satyanarayan_rate_of_day_v1',
     statutoryRates: 'satyanarayan_statutory_rates_v1',
     orderBook: 'satyanarayan_admin_orders_v1',
-    billSeq: 'satyanarayan_admin_bill_seq_v1'
+    billSeq: 'satyanarayan_admin_bill_seq_v1',
+    // City is a shared choice: both PWAs are same-origin, so switching city on one desk switches
+    // both — otherwise the admin prices Cuttack while the customer board shows Delhi.
+    city: 'satyanarayan_city_v1'
   };
 
   const MAX_MEDIA_PER_ITEM = 6;
@@ -46,6 +49,11 @@
     }
   };
   const STATUTORY_REVIEW_DAYS = 180;
+  // Retail/landing premiums — kept identical to the Customer Desk constants of the same name so the
+  // two PWAs price off the exact same model (see computeCityPrices below).
+  const GOLD_RETAIL_PREMIUM = 1.0000; // Official landed parity (no arbitrary retail markup)
+  const SILVER_MCX_PREMIUM = 1.0000; // Official landed parity (no arbitrary MCX markup)
+  const SILVER_RETAIL_PREMIUM = 1.0000; // Official landed parity (no arbitrary retail markup)
   const SPOT_BANDS = { gold: { min: 200, max: 30000 }, silver: { min: 2, max: 1000 } };
   const MAX_SPOT_MOVE_PCT = 0.12;
   const USD_INR_MIN = 60;
@@ -376,8 +384,10 @@
       variancePct: 0,
       liveCount: 0,
       lastFetch: null,
-      calibPctGold: 0,
-      calibPctSilver: 0
+      // NOTE: there is deliberately NO per-device price calibration here. The Admin Desk and the
+      // Customer Desk publish one price; an admin-only multiplier silently quoted a different ₹
+      // than customers saw. Market deviation is now measured and displayed only (see the
+      // "Price Parity" strip) and any real change goes through catalog/statutory-rates.json.
     },
     pwa: {
       deferredPrompt: null,
@@ -576,35 +586,38 @@
     return { ok: true, payload: sanitizeStatutoryPayload(draft) };
   }
 
+  // ONE PRICING MODEL FOR BOTH PWAs. computeCityPrices() below is a line-for-line twin of the
+  // Customer Desk (`index.html`) version — same premiums, same city factors, same duty/GST, same
+  // rounding — so the Admin Desk can never quote a different ₹ than the customer sees. Anything
+  // that belongs to the *display* of a price (e.g. an audit deviation) is applied when the number
+  // is shown, never inside this function.
   function computeCityPrices(cityId, spotGold, spotSilver, usdInr, opts = {}) {
     const city = CITIES[cityId] || CITIES.cuttack;
-    const calGold = 1 + (Number(opts.calibPctGold != null ? opts.calibPctGold : state.accuracy.calibPctGold) || 0) / 100;
-    const calSilver = 1 + (Number(opts.calibPctSilver != null ? opts.calibPctSilver : state.accuracy.calibPctSilver) || 0) / 100;
-    const effGold = spotGold * calGold;
-    const effSilver = spotSilver * calSilver;
     const goldDuty = importDutyMultiplier('gold', opts.statutory);
     const silverDuty = importDutyMultiplier('silver', opts.statutory);
     const goldGst = gstMultiplier('gold', opts.statutory);
     const silverGst = gstMultiplier('silver', opts.statutory);
 
-    const goldPerGramLanded = ((effGold * usdInr) / TROY_OZ_TO_GRAMS) * goldDuty;
-    const silverPerGramLanded = ((effSilver * usdInr) / TROY_OZ_TO_GRAMS) * silverDuty;
+    const goldPerGramLanded = ((spotGold * usdInr) / TROY_OZ_TO_GRAMS) * goldDuty;
+    const silverPerGramLanded = ((spotSilver * usdInr) / TROY_OZ_TO_GRAMS) * silverDuty;
 
-    const gold24ExGstRaw = goldPerGramLanded * 10 * city.factor;
+    const gold24ExGstRaw = goldPerGramLanded * 10 * GOLD_RETAIL_PREMIUM * city.factor;
     const gold24GstRaw = gold24ExGstRaw * goldGst;
-    const silverMCXRaw = silverPerGramLanded * 1000;
+    const silverMCXRaw = silverPerGramLanded * 1000 * SILVER_MCX_PREMIUM;
     const silverMCXGstRaw = silverMCXRaw * silverGst;
-    const silver999ExGstRaw = silverMCXRaw * city.factor;
+    const silver999ExGstRaw = silverMCXRaw * SILVER_RETAIL_PREMIUM * city.factor;
     const silver999GstRaw = silver999ExGstRaw * silverGst;
 
     return {
-      spotGold: effGold,
-      spotSilver: effSilver,
+      spotGold,
+      spotSilver,
       usdInr,
+      cityId: city && city.id ? city.id : (cityId || 'cuttack'),
       gold999ExGst: Math.round(gold24ExGstRaw),
       gold995ExGst: Math.round(gold24ExGstRaw * (995 / 999)),
       gold916ExGst: Math.round(gold24ExGstRaw * (916 / 999)),
       gold18ExGst: Math.round(gold24ExGstRaw * (750 / 999)),
+      gold24: Math.round(gold24GstRaw),
       gold999: Math.round(gold24GstRaw),
       gold995: Math.round(gold24GstRaw * (995 / 999)),
       gold916: Math.round(gold24GstRaw * (916 / 999)),
@@ -628,6 +641,8 @@
       silver999Gram: silver999GstRaw / 1000,
       silver925Gram: (silver999GstRaw * (925 / 999)) / 1000,
       silver750Gram: (silver999GstRaw * (750 / 999)) / 1000,
+      silverMCXGram: silverMCXRaw / 1000,
+      silverMCXGstGram: silverMCXGstRaw / 1000,
       silver999ExGstGram: silver999ExGstRaw / 1000,
       silver925ExGstGram: (silver999ExGstRaw * (925 / 999)) / 1000,
       silver750ExGstGram: (silver999ExGstRaw * (750 / 999)) / 1000
@@ -660,6 +675,8 @@
     return 'jpg';
   }
 
+  // NOTE: the exchange comparison is computed from the SAME `prices` object the customer board is
+  // rendered from, so a market row can never be based on an admin-only adjusted spot.
   function computeExchangeRows(prices = state.prices, filterMetal = state.exchanges.metal, sortBy = state.exchanges.sortBy, overrideStatutory = null) {
     if (!prices || !Number.isFinite(prices.spotGold) || !Number.isFinite(prices.spotSilver) || !Number.isFinite(prices.usdInr)) return null;
     const mode = filterMetal === 'silver' || filterMetal === 'both' ? filterMetal : 'gold';
@@ -842,7 +859,11 @@
       makingType: 'pct',
       includeGst: includeGst !== false
     }, prices, overrideStatutory);
-    return quote ? { ...quote, metal } : null;
+    // `exGstTotal` is what this piece costs without the 3% GST — i.e. the rate the Customer PWA's
+    // Jewellery Calculator shows for the same metal/weight/making — so the two apps can be compared
+    // line for line instead of one showing a +GST total and the other an ex-GST one.
+    const exGstTotal = quote ? quote.baseValue + quote.makingCharges : null;
+    return quote ? { ...quote, metal, exGstTotal } : null;
   }
 
   function computeBillTotals(billDraft = {}, prices = state.prices, overrideStatutory = null) {
@@ -1566,6 +1587,90 @@
     } catch { return null; }
   }
 
+  // ---------------------------------------------------------------------------
+  // CROSS-PWA PRICE PARITY
+  // Both PWAs are served from the same origin, so the city choice and the last accepted
+  // spot/FX snapshot live in the same localStorage. Reading the shared snapshot lets the admin
+  // see (and prove) that the board they are quoting is bit-for-bit the one customers get.
+  // ---------------------------------------------------------------------------
+  function cityFromStorage() {
+    const stored = lsGet(STORAGE_KEYS.city, '');
+    return CITIES[stored] ? stored : '';
+  }
+
+  function rememberCity(cityId) {
+    if (CITIES[cityId]) lsSet(STORAGE_KEYS.city, cityId);
+  }
+
+  // Compare this desk's board against the shared snapshot the Customer PWA reprices from.
+  // The customer side is always RECOMPUTED from that snapshot (never assumed equal), so a city
+  // switch or a half-received tick cannot be reported as "identical" when the two boards differ.
+  function computeCustomerParity(prices = state.prices, cached = readCachedRates()) {
+    if (!prices || !cached) return null;
+    if (!Number.isFinite(cached.spotGold) || !Number.isFinite(cached.spotSilver) || !Number.isFinite(cached.usdInr)) return null;
+    const customerCity = CITIES[cached.cityId] ? cached.cityId : state.cityId;
+    const other = computeCityPrices(customerCity, cached.spotGold, cached.spotSilver, cached.usdInr);
+    const pct = (a, b) => (b > 0 ? ((a - b) / b) * 100 : 0);
+    const goldDiffPct = pct(prices.gold916, other.gold916);
+    const silverDiffPct = pct(prices.silver999, other.silver999);
+    const sameCity = (prices.cityId || state.cityId) === customerCity;
+    const exact = sameCity
+      && cached.spotGold === prices.spotGold
+      && cached.spotSilver === prices.spotSilver
+      && cached.usdInr === prices.usdInr;
+    return {
+      exact,
+      sameCity,
+      cityId: customerCity,
+      cachedAt: Number(cached.ts) || 0,
+      goldDiffPct, silverDiffPct,
+      customer: { gold916: other.gold916, silver999: other.silver999 }
+    };
+  }
+
+  function parityIsAlarmed(p = computeCustomerParity()) {
+    if (!p || p.exact) return false;
+    return Math.abs(p.goldDiffPct) > 0.01 || Math.abs(p.silverDiffPct) > 0.01;
+  }
+
+  function renderParityCard() {
+    const box = $('parity-card');
+    if (!box) return;
+    const p = computeCustomerParity();
+    const badge = $('parity-badge');
+    const detail = $('parity-detail');
+    const gold = $('parity-gold');
+    const silver = $('parity-silver');
+    const cityNote = $('parity-city');
+    if (!p) {
+      if (badge) { badge.textContent = 'No saved snapshot'; badge.className = 'pill'; }
+      if (detail) detail.textContent = 'Open the Customer PWA once on this device to seed the shared snapshot, or wait for the next live tick.';
+      if (gold) gold.textContent = '—';
+      if (silver) silver.textContent = '—';
+      if (cityNote) cityNote.textContent = '';
+      return;
+    }
+    const city = CITIES[p.cityId] || CITIES.cuttack;
+    const pct = (v) => `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`;
+    if (gold) gold.textContent = `${fmtINR(p.customer.gold916)} · ${pct(p.goldDiffPct)}`;
+    if (silver) silver.textContent = `${fmtINR(p.customer.silver999)} · ${pct(p.silverDiffPct)}`;
+    if (cityNote) cityNote.textContent = `Customer side: ${city.name}, ${city.state}`;
+    if (badge) {
+      badge.textContent = p.exact ? 'Identical' : (parityIsAlarmed(p) ? 'Different' : 'Within rounding');
+      badge.className = `pill ${p.exact ? 'pill-green' : parityIsAlarmed(p) ? 'pill-red' : 'pill-gold'}`;
+    }
+    if (detail) {
+      const age = p.cachedAt ? formatRelativeAge(Date.now() - p.cachedAt) : 'unknown age';
+      if (p.exact) {
+        detail.textContent = `Admin and Customer are pricing off the same live snapshot (${age}). Same spot, same USD/INR, same duty/GST, same rounding.`;
+      } else if (!p.sameCity) {
+        detail.textContent = `You are viewing ${(CITIES[state.cityId] || CITIES.cuttack).name}, but the last customer snapshot was priced for ${city.name}. Both PWAs share one city choice — switch back so a customer is never shown a different city's rate.`;
+      } else {
+        detail.textContent = `Customer snapshot is ${age}; the boards differ because the admin desk has a fresher tick. The customer board converges on its next live refresh — tap ↻ Sync to force it now.`;
+      }
+    }
+  }
+
   function persistCachedRates() {
     if (!spotInBand(state.live.spotGold, 'gold') || !spotInBand(state.live.spotSilver, 'silver')) return;
     if (!validateUsdInr(state.live.usdInr, null).ok) return;
@@ -1577,6 +1682,7 @@
       fxLive: Boolean(state.live.fxLive),
       usdInrAsOf: state.live.usdInrAsOf || null,
       goldSource: state.live.goldSource || '',
+      cityId: state.cityId,
       ts: Date.now()
     }));
   }
@@ -1584,6 +1690,13 @@
   function hydrateCachedRates() {
     const cached = readCachedRates();
     if (!cached) return;
+    // Adopt the city the snapshot was priced for, so an admin who left the desk on Cuttack does
+    // not silently show different ₹ from a customer board that was saved for Delhi.
+    if (cached.cityId && CITIES[cached.cityId] && cached.cityId !== state.cityId) {
+      state.cityId = cached.cityId;
+      const sel = $('desk-city');
+      if (sel && sel.value !== state.cityId) sel.value = state.cityId;
+    }
     state.live.spotGold = cached.spotGold;
     state.live.spotSilver = cached.spotSilver;
     state.live.usdInr = cached.usdInr;
@@ -1815,6 +1928,7 @@
     captureRateOfDay(state.prices);
     if (saveCache && state.live.connected) persistCachedRates();
     renderDeskRates(prev);
+    renderParityCard();
     if (state.activeView === 'catalog') updateAutoPriceHint();
     if (state.activeView === 'exchanges') renderExchangeComparison();
     if (state.activeView === 'settings' && state.activeSubtab === 'calc') updateCalculators();
@@ -1847,29 +1961,30 @@
       }
     };
 
+    // The sub-line under each tile is the GST-INCLUSIVE per-gram price — exactly the figure the
+    // Customer Desk prints in its "GST" row (p.gold916Gram, p.silver999Gram ...). It used to print
+    // the ex-GST gram rate here, so the admin saw ₹9,610/g where customers saw ₹9,899/g (a 3% gap).
     setVal('r-g999-ex', fmtINR(p.gold999ExGst), gDiff);
-    setVal('r-g999-gst', `Incl. GST: ${fmtINR(p.gold999)} · 1g: ${fmtINR(p.gold999ExGstGram, 0)}`);
+    setVal('r-g999-gst', `Incl. GST: ${fmtINR(p.gold999)} · 1g: ${fmtINR(p.gold999Gram, 2)}`);
     setVal('r-g995-ex', fmtINR(p.gold995ExGst), gDiff);
-    setVal('r-g995-gst', `Incl. GST: ${fmtINR(p.gold995)} · 1g: ${fmtINR(p.gold995ExGstGram, 0)}`);
+    setVal('r-g995-gst', `Incl. GST: ${fmtINR(p.gold995)} · 1g: ${fmtINR(p.gold995Gram, 2)}`);
     setVal('r-g916-ex', fmtINR(p.gold916ExGst), gDiff);
-    setVal('r-g916-gst', `Incl. GST: ${fmtINR(p.gold916)} · 1g: ${fmtINR(p.gold916ExGstGram, 0)}`);
+    setVal('r-g916-gst', `Incl. GST: ${fmtINR(p.gold916)} · 1g: ${fmtINR(p.gold916Gram, 2)}`);
     setVal('r-g750-ex', fmtINR(p.gold18ExGst), gDiff);
-    setVal('r-g750-gst', `Incl. GST: ${fmtINR(p.gold18)} · 1g: ${fmtINR(p.gold18ExGstGram, 0)}`);
+    setVal('r-g750-gst', `Incl. GST: ${fmtINR(p.gold18)} · 1g: ${fmtINR(p.gold18Gram, 2)}`);
 
     setVal('r-s999-ex', fmtINR(p.silver999ExGst), sDiff);
-    setVal('r-s999-gst', `Incl. GST: ${fmtINR(p.silver999)} · 1g: ${fmtINR(p.silver999ExGstGram, 2)}`);
+    setVal('r-s999-gst', `Incl. GST: ${fmtINR(p.silver999)} · 1g: ${fmtINR(p.silver999Gram, 2)}`);
     setVal('r-s925-ex', fmtINR(p.silver925ExGst), sDiff);
-    setVal('r-s925-gst', `Incl. GST: ${fmtINR(p.silver925)} · 1g: ${fmtINR(p.silver925ExGstGram, 2)}`);
+    setVal('r-s925-gst', `Incl. GST: ${fmtINR(p.silver925)} · 1g: ${fmtINR(p.silver925Gram, 2)}`);
     setVal('r-s750-ex', fmtINR(p.silver750ExGst), sDiff);
-    setVal('r-s750-gst', `Incl. GST: ${fmtINR(p.silver750)} · 1g: ${fmtINR(p.silver750ExGstGram, 2)}`);
+    setVal('r-s750-gst', `Incl. GST: ${fmtINR(p.silver750)} · 1g: ${fmtINR(p.silver750Gram, 2)}`);
 
     setVal('silver-mcx-badge', `MCX: ${fmtINR(p.silverMCX)}`);
     setVal('gold-source-badge', state.live.goldSource || 'Live');
 
-    const calG = state.accuracy.calibPctGold;
-    const calS = state.accuracy.calibPctSilver;
-    setVal('gold-calib-note', calG ? `Calibrated ${calG >= 0 ? '+' : ''}${calG.toFixed(2)}% vs spot` : `Landed parity · ${statutoryLabel('gold')}`);
-    setVal('silver-calib-note', calS ? `Calibrated ${calS >= 0 ? '+' : ''}${calS.toFixed(2)}% vs spot` : `Landed parity · ${statutoryLabel('silver')}`);
+    setVal('gold-calib-note', `Landed parity · ${statutoryLabel('gold')}`);
+    setVal('silver-calib-note', `Landed parity · ${statutoryLabel('silver')}`);
 
     setVal('r-spot-gold', `${fmtUSD(p.spotGold)}/oz`, gDiff);
     setVal('r-spot-gold-g', `Per gram: ${fmtUSD(p.spotGold / TROY_OZ_TO_GRAMS)}`);
@@ -2366,6 +2481,10 @@
       weight: Number(item.weight) || 0,
       makingPct: Math.max(0, Number(item.makingPct) || 0),
       price: Number(item.price) || 0,
+      // The storefront prints this number with "incl. GST · making charges extra". The live
+      // auto-price estimate already includes making + GST, so stamp which basis the published
+      // price is on — otherwise the admin's Auto ₹ figure and the storefront's claim disagree.
+      priceBasis: Number(item.price) > 0 ? (item.priceBasis === 'metal' ? 'metal' : 'metal_making_gst') : '',
       sku: item.sku || '',
       stockStatus: normalizeStockStatus(item.stockStatus),
       featured: Boolean(item.featured),
@@ -2405,6 +2524,9 @@
         weight: updatedFields.weight,
         makingPct: Math.max(0, Number(updatedFields.makingPct ?? x.makingPct) || 0),
         price: updatedFields.price,
+        priceBasis: Number(updatedFields.price) > 0
+          ? (updatedFields.priceBasis || x.priceBasis || 'metal_making_gst')
+          : '',
         sku: updatedFields.sku,
         stockStatus: normalizeStockStatus(updatedFields.stockStatus ?? x.stockStatus),
         featured: updatedFields.featured !== undefined ? Boolean(updatedFields.featured) : Boolean(x.featured),
@@ -2440,7 +2562,9 @@
       });
       if (!est) return x;
       count += 1;
-      return { ...x, price: est.grandTotal, makingPct: Number(x.makingPct) > 0 ? Number(x.makingPct) : 10 };
+      // Batch reprice always produces metal + making + GST; stamp that basis so the storefront
+      // note ("incl. GST · making charges extra") stays truthful for these items too.
+      return { ...x, price: est.grandTotal, makingPct: Number(x.makingPct) > 0 ? Number(x.makingPct) : 10, priceBasis: 'metal_making_gst' };
     });
     if (!count) throw new Error('No weighted items found in published inventory to reprice.');
     const putPayload = {
@@ -2452,7 +2576,7 @@
     await ghContentsRequest('PUT', CATALOG_MANIFEST_REPO_PATH, putPayload);
     state.admin.publishedItems = state.admin.publishedItems.map((x) => {
       const match = updatedList.find((u) => u && u.id === x.id);
-      return match ? { ...x, price: match.price, makingPct: match.makingPct } : x;
+      return match ? { ...x, price: match.price, makingPct: match.makingPct, priceBasis: match.priceBasis } : x;
     });
     return count;
   }
@@ -2502,6 +2626,7 @@
       weight: Math.max(0, Number($('f-weight')?.value) || 0),
       makingPct: Math.max(0, Number($('f-making')?.value) || 0),
       price,
+      priceBasis: price > 0 ? ($('f-price')?.dataset.basis === 'metal' ? 'metal' : 'metal_making_gst') : '',
       sku: ($('f-sku')?.value || '').trim(),
       stockStatus: normalizeStockStatus($('f-stock')?.value),
       featured: Boolean($('f-featured')?.checked),
@@ -2531,7 +2656,8 @@
       return;
     }
     bar.classList.remove('hidden');
-    txt.textContent = `Live ${est.metal} estimate (${w}g): Metal ${fmtINR(est.baseValue)} + Making ${fmtINR(est.makingCharges)} + ${est.gstPct}% GST = ${fmtINR(est.grandTotal)} (tap "Auto ₹" to fill)`;
+    // Show both bases: ex-GST matches the Customer PWA's calculator, the total is what gets saved.
+    txt.textContent = `Live ${est.metal} estimate (${w}g): Metal ${fmtINR(est.baseValue)} + Making ${fmtINR(est.makingCharges)} = ${fmtINR(est.exGstTotal)} ex-GST · +${est.gstPct}% GST = ${fmtINR(est.grandTotal)} (tap "Auto ₹" to fill)`;
   }
 
   function revokeItemObjectUrls() {
@@ -2627,7 +2753,15 @@
       if (stock === 'made_to_order') specs.push('<span class="pill pill-blue" style="padding:0.1rem 0.42rem;font-size:0.62rem;">Made to Order</span>');
       else if (isSoldOut) specs.push('<span class="pill pill-red" style="padding:0.1rem 0.42rem;font-size:0.62rem;">Sold Out</span>');
 
-      const priceHtml = Number(item.price) > 0 ? fmtINR(Number(item.price)) : 'Price on request';
+      // Render the stored ₹ exactly as the storefront does (formatShopPrice) and state the same
+      // basis the customer card claims, so the admin never reads a price the customer cannot see.
+      const priceNum = Number(item.price) || 0;
+      const priceBasisNote = item.priceBasis === 'metal'
+        ? 'metal value · GST/making extra'
+        : (Number(item.weight) > 0 ? `${fmtINR(priceNum / Number(item.weight))}/g · making charges extra` : 'making charges extra');
+      const priceHtml = priceNum > 0
+        ? `${fmtINR(priceNum)} <span style="font-size:0.62rem;font-weight:500;color:var(--text-muted);display:block;">incl. GST · ${escapeHtml(priceBasisNote)}</span>`
+        : 'Price on request';
 
       return `
         <article class="item-card${isSoldOut ? ' is-sold-out' : ''}${isFeatured ? ' is-featured' : ''}">
@@ -2829,8 +2963,6 @@
     renderStatutoryNotice();
 
     const metal = ma.metal === 'silver' ? 'silver' : 'gold';
-    const cal = metal === 'gold' ? ma.calibPctGold : ma.calibPctSilver;
-    $('btn-reset-calib')?.classList.toggle('hidden', !cal);
     if ($('acc-stat-unit')) $('acc-stat-unit').textContent = metal === 'gold' ? 'Per 10g' : 'Per 1 kg';
 
     if (!state.prices || !ma.feeds.length) {
@@ -2873,24 +3005,23 @@
     }).join('');
   }
 
-  function calibrateToConsensus() {
+  // AUDIT-ONLY parity check. This used to apply an admin-only spot calibration ("nudge") that was
+  // never published to the customer PWA, so the two desks could disagree by that percentage
+  // forever. Any real variance must now be fixed at the source (live feed / statutory rates);
+  // the desk simply reports it against the same numbers customers see.
+  function auditPriceParity() {
     const ma = state.accuracy;
-    if (!ma.consensusUsd || !state.prices) {
+    if (!ma.consensus || !state.prices) {
       showToast('Run "Audit Feeds" first to compute live consensus.', 'alert');
-      return;
+      return null;
     }
     const metal = ma.metal === 'silver' ? 'silver' : 'gold';
-    const spot = metal === 'gold' ? state.live.spotGold : state.live.spotSilver;
-    if (!spot || spot <= 0) return;
-    let pct = ((ma.consensusUsd - spot) / spot) * 100;
-    pct = Math.max(-8, Math.min(8, pct));
-    if (metal === 'gold') ma.calibPctGold = pct;
-    else ma.calibPctSilver = pct;
-    repriceAndRender(false);
-    ma.shopBase = metal === 'gold' ? state.prices.gold999ExGst : state.prices.silver999ExGst;
-    ma.variancePct = ma.consensus ? ((ma.shopBase - ma.consensus) / ma.consensus) * 100 : 0;
+    const shopBase = metal === 'gold' ? state.prices.gold999ExGst : state.prices.silver999ExGst;
+    const variancePct = ma.consensus > 0 ? ((shopBase - ma.consensus) / ma.consensus) * 100 : 0;
+    ma.shopBase = shopBase;
+    ma.variancePct = variancePct;
     renderMarketAccuracy();
-    showToast(`Calibrated ${metal} by ${pct >= 0 ? '+' : ''}${pct.toFixed(2)}% to match exchange consensus.`, 'success');
+    return { metal, shopBase, consensus: ma.consensus, variancePct };
   }
 
   // =========================================================================
@@ -3358,6 +3489,12 @@
     if (!liveStarted) {
       liveStarted = true;
       loadStatutoryRates(true);
+      const sharedCity = cityFromStorage();
+      if (sharedCity) {
+        state.cityId = sharedCity;
+        const citySel = $('desk-city');
+        if (citySel) citySel.value = sharedCity;
+      }
       hydrateCachedRates();
       loadOrderBook();
       connectLiveWebSockets();
@@ -3366,6 +3503,7 @@
       renderClockAndMarket();
       setInterval(renderClockAndMarket, 1000);
       setInterval(renderLiveStatusBadge, 10000);
+      setInterval(renderParityCard, 15000);
     } else {
       loadOrderBook();
     }
@@ -3498,9 +3636,15 @@
     $('desk-city')?.addEventListener('change', (e) => {
       if (CITIES[e.target.value]) {
         state.cityId = e.target.value;
+        rememberCity(state.cityId);
         repriceAndRender(false);
-        showToast(`Location set to ${CITIES[state.cityId].name}.`, 'success');
+        renderParityCard();
+        showToast(`Location set to ${CITIES[state.cityId].name} — Customer PWA follows on its next refresh.`, 'success');
       }
+    });
+    $('btn-refresh-parity')?.addEventListener('click', () => {
+      renderParityCard();
+      showToast('Rechecked Admin vs Customer price parity.', 'info');
     });
     $('btn-mode-inr')?.addEventListener('click', () => {
       state.marketMode = 'INR';
@@ -3593,6 +3737,7 @@
       $(id)?.addEventListener('change', updateAutoPriceHint);
     });
 
+    $('f-price')?.addEventListener('input', () => { delete $('f-price').dataset.basis; });
     $('btn-f-autoprice')?.addEventListener('click', () => {
       if (!state.prices) return showToast('Waiting for live bullion rates…', 'alert');
       const w = Math.max(0, Number($('f-weight')?.value) || 0);
@@ -3605,7 +3750,11 @@
         includeGst: true
       });
       if (!est) return showToast('Could not calculate live estimate.', 'alert');
-      if ($('f-price')) $('f-price').value = String(est.grandTotal);
+      if ($('f-price')) {
+        $('f-price').value = String(est.grandTotal);
+        // Auto ₹ = metal + making + GST, which is the basis the storefront prints.
+        $('f-price').dataset.basis = 'metal_making_gst';
+      }
       updateAutoPriceHint();
       showToast(`Filled live ${est.metal} price: ${fmtINR(est.grandTotal)}`, 'success');
     });
@@ -3950,15 +4099,15 @@
       fetchMarketAccuracy(false).then(renderMarketAccuracy);
     });
     $('btn-refresh-acc')?.addEventListener('click', () => fetchMarketAccuracy(true).then(renderMarketAccuracy));
-    $('btn-calibrate')?.addEventListener('click', calibrateToConsensus);
-    $('btn-reset-calib')?.addEventListener('click', () => {
-      const m = state.accuracy.metal === 'silver' ? 'silver' : 'gold';
-      if (m === 'gold') state.accuracy.calibPctGold = 0; else state.accuracy.calibPctSilver = 0;
-      repriceAndRender(false);
-      state.accuracy.shopBase = m === 'gold' ? state.prices.gold999ExGst : state.prices.silver999ExGst;
-      state.accuracy.variancePct = state.accuracy.consensus ? ((state.accuracy.shopBase - state.accuracy.consensus) / state.accuracy.consensus) * 100 : 0;
-      renderMarketAccuracy();
-      showToast(`Reset ${m} calibration to 0.00%.`, 'info');
+    $('btn-calibrate')?.addEventListener('click', () => {
+      const res = auditPriceParity();
+      if (!res) return;
+      const dir = res.variancePct > 0 ? 'above' : res.variancePct < 0 ? 'below' : 'level with';
+      showToast(
+        `${res.metal === 'gold' ? 'Gold' : 'Silver'} board is ${dir} live consensus by ` +
+        `${Math.abs(res.variancePct).toFixed(2)}%. Board prices are never nudged — they match the Customer PWA exactly.`,
+        res.variancePct === 0 ? 'success' : 'info'
+      );
     });
 
     // Calculators
@@ -4340,6 +4489,9 @@
       toAdminMediaSrc,
       sanitizeStatutoryPayload,
       validateStatutoryDraft,
+      computeCustomerParity,
+      parityIsAlarmed,
+      cityFromStorage,
       statutoryRatesFor,
       statutoryIsStale,
       verifyGitHubToken,

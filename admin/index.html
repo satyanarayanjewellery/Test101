@@ -50,7 +50,7 @@
         <div>
           <div style="display:flex;align-items:center;gap:0.45rem;flex-wrap:wrap;">
             <p class="auth-eyebrow">Private Admin App</p>
-            <span id="auth-version-pill" data-admin-version class="pill pill-gold mono">v1.0.2 Beta</span>
+            <span id="auth-version-pill" data-admin-version class="pill pill-gold mono">v1.0.3 Beta</span>
           </div>
           <h1 id="auth-title" class="auth-title">Satyanarayan Jewellers</h1>
           <p class="auth-sub">Cuttack · GSTIN 21AFNPP7926E1ZC</p>
@@ -112,7 +112,7 @@
 
       <div class="auth-version-row">
         <span>SJ Admin Desk</span>
-        <span data-admin-version class="mono">v1.0.2 Beta</span>
+        <span data-admin-version class="mono">v1.0.3 Beta</span>
       </div>
     </div>
   </section>
@@ -130,7 +130,7 @@
           <div style="min-width:0;">
             <div class="brand-name-row">
               <span class="brand-name">SJ Admin Desk</span>
-              <span id="admin-version-pill" data-admin-version class="pill pill-gold mono">v1.0.2 Beta</span>
+              <span id="admin-version-pill" data-admin-version class="pill pill-gold mono">v1.0.3 Beta</span>
               <span id="admin-user-pill" class="pill pill-green"><span class="dot dot-green"></span><span id="admin-user-label">@admin</span></span>
               <span id="live-status-pill" class="pill"><span class="dot"></span>Connecting…</span>
             </div>
@@ -346,6 +346,37 @@
               <span class="pill">XAG / USD · GLOBAL SPOT</span>
               <div id="r-spot-silver" class="tile-main tabular" style="font-size:1.8rem;margin-top:0.55rem;">$--</div>
               <div id="r-spot-silver-g" class="tile-sub tabular">Per gram: $--</div>
+            </div>
+          </div>
+
+          <!-- CROSS-PWA PRICE PARITY (Admin vs Customer Desk) -->
+          <div id="parity-card" class="card no-print">
+            <div class="section-head" style="margin-bottom:0.55rem;">
+              <div>
+                <h3 class="section-title" style="display:flex;align-items:center;gap:0.45rem;flex-wrap:wrap;">
+                  Price Parity — Admin vs Customer
+                  <span id="parity-badge" class="pill">Checking…</span>
+                </h3>
+                <p id="parity-detail" class="section-sub">Comparing this desk with the snapshot the Customer PWA is pricing from…</p>
+              </div>
+              <button id="btn-refresh-parity" type="button" class="btn btn-ghost btn-sm no-print">↻ Recheck</button>
+            </div>
+            <div class="kpi-grid" style="margin-bottom:0;">
+              <div class="kpi-card">
+                <span class="kpi-label">Gold 916 (22K) Incl. GST · 10g</span>
+                <span id="parity-gold" class="kpi-val tabular">—</span>
+                <span class="kpi-sub">Customer board figure · admin gap</span>
+              </div>
+              <div class="kpi-card">
+                <span class="kpi-label">Silver 999 Incl. GST · 1kg</span>
+                <span id="parity-silver" class="kpi-val tabular">—</span>
+                <span class="kpi-sub">Customer board figure · admin gap</span>
+              </div>
+              <div class="kpi-card">
+                <span class="kpi-label">Shared City</span>
+                <span id="parity-city" class="kpi-val tabular" style="font-size:0.95rem;">—</span>
+                <span class="kpi-sub">Used by both PWAs</span>
+              </div>
             </div>
           </div>
 
@@ -617,8 +648,8 @@
         <div class="card">
           <div class="section-head">
             <div>
-              <h2 class="section-title">Market Accuracy &amp; Calibration</h2>
-              <p class="section-sub">Audit live direct exchange feeds vs Satyanarayan Jewellers and nudge spot calibration if needed.</p>
+              <h2 class="section-title">Market Accuracy &amp; Price Parity</h2>
+              <p class="section-sub">Audit live exchange feeds against the exact board price customers see. Variance is reported, never applied — one price list, both PWAs.</p>
             </div>
             <div style="display:flex;align-items:center;gap:0.45rem;flex-wrap:wrap;">
               <select id="acc-metal" class="select" style="width:auto;padding:0.42rem 0.65rem;font-size:0.78rem;">
@@ -626,8 +657,7 @@
                 <option value="silver">Silver</option>
               </select>
               <button id="btn-refresh-acc" type="button" class="btn btn-gold btn-sm">↻ Audit Feeds</button>
-              <button id="btn-calibrate" type="button" class="btn btn-green btn-sm">Calibrate to Consensus</button>
-              <button id="btn-reset-calib" type="button" class="btn btn-ghost btn-sm hidden">Reset (0%)</button>
+              <button id="btn-calibrate" type="button" class="btn btn-green btn-sm">Check Price Parity</button>
             </div>
           </div>
 
@@ -1131,7 +1161,7 @@
               <h3 class="section-title" style="margin-bottom:0.2rem;">Admin Session &amp; GitHub Access</h3>
               <p id="sec-session-meta" class="section-sub" style="margin-bottom:0.85rem;">Connected to satyanarayanjewellery/shop (branch: main)</p>
               <div class="info-box" style="margin-bottom:0.85rem;">
-                <p><strong>App Version:</strong> <span id="diag-version" data-admin-version class="mono" style="color:var(--gold-soft);">v1.0.2 Beta</span></p>
+                <p><strong>App Version:</strong> <span id="diag-version" data-admin-version class="mono" style="color:var(--gold-soft);">v1.0.3 Beta</span></p>
                 <p style="margin-top:0.25rem;"><strong>Service Worker:</strong> <span id="diag-sw">Checking…</span></p>
                 <p style="margin-top:0.25rem;"><strong>Display Mode:</strong> <span id="diag-display">Browser Tab</span></p>
                 <p style="margin-top:0.25rem;"><strong>Network:</strong> <span id="diag-net">Online</span></p>
@@ -1149,7 +1179,7 @@
 
       <footer id="admin-app-footer" class="admin-footer no-print">
         <span>Satyanarayan Jewellers · SJ Admin Desk</span>
-        <span id="admin-footer-version" data-admin-version class="pill pill-gold mono">v1.0.2 Beta</span>
+        <span id="admin-footer-version" data-admin-version class="pill pill-gold mono">v1.0.3 Beta</span>
       </footer>
     </main>
 
@@ -1190,7 +1220,7 @@
         <div>
           <div style="display:flex;align-items:center;gap:0.45rem;flex-wrap:wrap;">
             <h3 id="edit-modal-title" class="section-title">Edit Jewellery Item</h3>
-            <span data-admin-version class="pill pill-gold mono">v1.0.2 Beta</span>
+            <span data-admin-version class="pill pill-gold mono">v1.0.3 Beta</span>
           </div>
           <p id="edit-modal-sub" class="section-sub">Update details and sync.</p>
         </div>
@@ -1304,7 +1334,7 @@
         <div>
           <div style="display:flex;align-items:center;gap:0.45rem;flex-wrap:wrap;">
             <h3 id="tag-modal-title" class="section-title">Showroom QR Price Tag</h3>
-            <span data-admin-version class="pill pill-gold mono">v1.0.2 Beta</span>
+            <span data-admin-version class="pill pill-gold mono">v1.0.3 Beta</span>
           </div>
           <p class="section-sub">Scan opens item enquiry on Customer Storefront.</p>
         </div>

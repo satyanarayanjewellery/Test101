@@ -147,10 +147,12 @@ test('4. Admin app.js parses cleanly and matches Customer Desk bullion pricing m
   assert.equal(prices.silver999, Math.round(expectedSilverPerG * 1000 * 1.03));
   assert.equal(prices.silver925ExGst, Math.round(expectedSilverPerG * 1000 * (925 / 999)));
 
-  // Calibration offset scales spot properly.
-  const calPrices = api.computeCityPrices('cuttack', 3200, 34.5, 86.5, { calibPctGold: 1 });
-  assert.ok(calPrices.gold999ExGst > prices.gold999ExGst);
+  // There is no admin-only spot calibration any more: an offset that the Customer PWA never
+  // applies is exactly how the two desks ended up quoting different ₹. Passing one must be inert.
+  const calPrices = api.computeCityPrices('cuttack', 3200, 34.5, 86.5, { calibPctGold: 1, calibPctSilver: 1 });
+  assert.equal(calPrices.gold999ExGst, prices.gold999ExGst);
   assert.equal(calPrices.silver999ExGst, prices.silver999ExGst);
+  assert.equal(api.state.accuracy.calibPctGold, undefined, 'Admin accuracy state must not hold a price multiplier');
 });
 
 test('5. Admin media resolver translates canonical catalog/media paths safely for /admin/ display', () => {
