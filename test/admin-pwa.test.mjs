@@ -5,18 +5,18 @@ import path from 'node:path';
 import vm from 'node:vm';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
-const OWNER_DIR = path.join(ROOT, 'owner');
+const ADMIN_DIR = path.join(ROOT, 'admin');
 
-const ownerHtml = fs.readFileSync(path.join(OWNER_DIR, 'index.html'), 'utf8');
-const ownerCss = fs.readFileSync(path.join(OWNER_DIR, 'styles.css'), 'utf8');
-const ownerJs = fs.readFileSync(path.join(OWNER_DIR, 'app.js'), 'utf8');
-const ownerSw = fs.readFileSync(path.join(OWNER_DIR, 'sw.js'), 'utf8');
-const ownerManifestRaw = fs.readFileSync(path.join(OWNER_DIR, 'manifest.webmanifest'), 'utf8');
+const adminHtml = fs.readFileSync(path.join(ADMIN_DIR, 'index.html'), 'utf8');
+const adminCss = fs.readFileSync(path.join(ADMIN_DIR, 'styles.css'), 'utf8');
+const adminJs = fs.readFileSync(path.join(ADMIN_DIR, 'app.js'), 'utf8');
+const adminSw = fs.readFileSync(path.join(ADMIN_DIR, 'sw.js'), 'utf8');
+const adminManifestRaw = fs.readFileSync(path.join(ADMIN_DIR, 'manifest.webmanifest'), 'utf8');
 const rootSw = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
 const rootManifest = JSON.parse(fs.readFileSync(path.join(ROOT, 'manifest.webmanifest'), 'utf8'));
 const customerHtml = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
 
-function loadOwnerApi() {
+function loadAdminApi() {
   const sandbox = {
     console,
     Date,
@@ -41,18 +41,18 @@ function loadOwnerApi() {
     clearInterval
   };
   sandbox.globalThis = sandbox;
-  vm.runInNewContext(ownerJs, sandbox, { filename: 'owner/app.js' });
-  return sandbox.__OWNER_PWA_API__;
+  vm.runInNewContext(adminJs, sandbox, { filename: 'admin/app.js' });
+  return sandbox.__ADMIN_PWA_API__;
 }
 
-test('1. Owner manifest is valid, independent from customer PWA, and references existing icons & views', () => {
-  const manifest = JSON.parse(ownerManifestRaw);
-  assert.equal(manifest.short_name, 'SJ Owner');
+test('1. Admin manifest is valid, independent from customer PWA, and references existing icons & views', () => {
+  const manifest = JSON.parse(adminManifestRaw);
+  assert.equal(manifest.short_name, 'SJ Admin');
   assert.notEqual(manifest.name, rootManifest.name);
   assert.equal(manifest.display, 'standalone');
   assert.equal(manifest.scope, './');
   assert.equal(manifest.start_url, './index.html');
-  assert.equal(manifest.id, '/shop/owner/index.html');
+  assert.equal(manifest.id, '/shop/admin/index.html');
   assert.ok(Array.isArray(manifest.icons) && manifest.icons.length >= 3);
 
   const sizes = new Set(manifest.icons.map((i) => i.sizes));
@@ -61,71 +61,71 @@ test('1. Owner manifest is valid, independent from customer PWA, and references 
   assert.ok(manifest.icons.some((i) => String(i.purpose || '').includes('maskable')), 'Expected maskable icon');
 
   for (const icon of manifest.icons) {
-    const abs = path.join(OWNER_DIR, icon.src);
+    const abs = path.join(ADMIN_DIR, icon.src);
     assert.ok(fs.existsSync(abs), `Missing icon file ${icon.src}`);
     assert.ok(fs.statSync(abs).size > 2000, `Icon file ${icon.src} unexpectedly small`);
   }
-  assert.ok(fs.existsSync(path.join(OWNER_DIR, 'icons/apple-touch-icon.png')));
+  assert.ok(fs.existsSync(path.join(ADMIN_DIR, 'icons/apple-touch-icon.png')));
 
   assert.ok(Array.isArray(manifest.shortcuts) && manifest.shortcuts.length >= 3);
   for (const sc of manifest.shortcuts) {
     const match = String(sc.url || '').match(/#([a-z]+)$/);
     assert.ok(match, `Shortcut ${sc.name} should target a view hash`);
-    assert.ok(ownerHtml.includes(`id="view-${match[1]}"`), `Missing view container for shortcut #${match[1]}`);
+    assert.ok(adminHtml.includes(`id="view-${match[1]}"`), `Missing view container for shortcut #${match[1]}`);
   }
 });
 
-test('2. Owner Service Worker and Customer Service Worker have isolated scopes and cache namespaces', () => {
-  assert.doesNotThrow(() => new vm.Script(ownerSw, { filename: 'owner/sw.js' }));
+test('2. Admin Service Worker and Customer Service Worker have isolated scopes and cache namespaces', () => {
+  assert.doesNotThrow(() => new vm.Script(adminSw, { filename: 'admin/sw.js' }));
   assert.doesNotThrow(() => new vm.Script(rootSw, { filename: 'sw.js' }));
 
-  assert.match(ownerSw, /const CACHE = 'sj-owner-desk-v\d+'/);
-  assert.match(ownerSw, /self\.skipWaiting\(\)/, 'Owner SW install must skipWaiting so installed Owner PWAs upgrade immediately');
-  assert.match(ownerSw, /client\.navigate\(client\.url\)/, 'Owner SW activate must refresh open /owner/ windows');
-  assert.match(ownerSw, /isCoreShellAsset/, 'Owner SW must fetch styles.css and app.js network-first');
-  assert.match(ownerSw, /key\.startsWith\('sj-owner-desk-'\)/, 'Owner SW should only delete its own cache namespace');
-  assert.match(ownerSw, /SKIP_WAITING/, 'Owner SW should support controlled update reload');
-  assert.match(ownerSw, /catalog\/products\.json/);
-  assert.match(ownerSw, /catalog\/statutory-rates\.json/);
-  assert.match(ownerSw, /\/manifest\.webmanifest/);
+  assert.match(adminSw, /const CACHE = 'sj-admin-desk-v\d+'/);
+  assert.match(adminSw, /self\.skipWaiting\(\)/, 'Admin SW install must skipWaiting so installed Admin PWAs upgrade immediately');
+  assert.match(adminSw, /client\.navigate\(client\.url\)/, 'Admin SW activate must refresh open /admin/ windows');
+  assert.match(adminSw, /isCoreShellAsset/, 'Admin SW must fetch styles.css and app.js network-first');
+  assert.match(adminSw, /key\.startsWith\('sj-admin-desk-'\)/, 'Admin SW should only delete its own cache namespace');
+  assert.match(adminSw, /SKIP_WAITING/, 'Admin SW should support controlled update reload');
+  assert.match(adminSw, /catalog\/products\.json/);
+  assert.match(adminSw, /catalog\/statutory-rates\.json/);
+  assert.match(adminSw, /\/manifest\.webmanifest/);
 
-  assert.match(rootSw, /url\.pathname\.includes\('\/owner\/'\)/, 'Customer SW must bypass /owner/ routes');
-  assert.match(rootSw, /!key\.startsWith\('sj-owner-desk-'\)/, 'Customer SW must preserve owner caches');
+  assert.match(rootSw, /url\.pathname\.includes\('\/admin\/'\)/, 'Customer SW must bypass /admin/ routes');
+  assert.match(rootSw, /!key\.startsWith\('sj-admin-desk-'\)/, 'Customer SW must preserve admin caches');
   assert.match(rootSw, /\/manifest\.webmanifest/);
 });
 
-test('3. Owner HTML locks workspace behind auth gate by default and includes PWA + noindex metadata', () => {
-  assert.match(ownerHtml, /<meta name="robots" content="noindex, nofollow"/);
-  assert.match(ownerHtml, /<link rel="manifest" href="manifest\.webmanifest"/);
-  assert.match(ownerHtml, /<link rel="apple-touch-icon" href="icons\/apple-touch-icon\.png"/);
-  assert.match(ownerHtml, /<link rel="stylesheet" href="styles\.css"/);
-  assert.match(ownerHtml, /<script src="app\.js" defer><\/script>/);
+test('3. Admin HTML locks workspace behind auth gate by default and includes PWA + noindex metadata', () => {
+  assert.match(adminHtml, /<meta name="robots" content="noindex, nofollow"/);
+  assert.match(adminHtml, /<link rel="manifest" href="manifest\.webmanifest"/);
+  assert.match(adminHtml, /<link rel="apple-touch-icon" href="icons\/apple-touch-icon\.png"/);
+  assert.match(adminHtml, /<link rel="stylesheet" href="styles\.css"/);
+  assert.match(adminHtml, /<script src="app\.js" defer><\/script>/);
 
-  // Auth gate is visible by default; owner app shell is hidden until GitHub PAT verification.
-  assert.match(ownerHtml, /<section id="auth-gate" class="auth-gate"/);
-  assert.match(ownerHtml, /<div id="owner-app" class="hidden">/);
+  // Auth gate is visible by default; admin app shell is hidden until GitHub PAT verification.
+  assert.match(adminHtml, /<section id="auth-gate" class="auth-gate"/);
+  assert.match(adminHtml, /<div id="admin-app" class="hidden">/);
 
-  // Every static DOM element referenced via $('...') in owner/app.js must exist in owner/index.html.
-  const idsInHtml = new Set([...ownerHtml.matchAll(/\bid="([^"]+)"/g)].map((m) => m[1]));
-  const idsInJs = new Set([...ownerJs.matchAll(/\$\('([^']+)'\)/g)].map((m) => m[1]));
+  // Every static DOM element referenced via $('...') in admin/app.js must exist in admin/index.html.
+  const idsInHtml = new Set([...adminHtml.matchAll(/\bid="([^"]+)"/g)].map((m) => m[1]));
+  const idsInJs = new Set([...adminJs.matchAll(/\$\('([^']+)'\)/g)].map((m) => m[1]));
   const missingIds = [...idsInJs].filter((id) => !idsInHtml.has(id));
-  assert.deepEqual(missingIds, [], `DOM IDs referenced in owner/app.js missing from owner/index.html: ${missingIds.join(', ')}`);
+  assert.deepEqual(missingIds, [], `DOM IDs referenced in admin/app.js missing from admin/index.html: ${missingIds.join(', ')}`);
 
   // All five workspace views exist.
   for (const view of ['desk', 'catalog', 'exchanges', 'accuracy', 'settings']) {
-    assert.ok(ownerHtml.includes(`id="view-${view}"`), `Missing #view-${view}`);
+    assert.ok(adminHtml.includes(`id="view-${view}"`), `Missing #view-${view}`);
   }
 
   // Stylesheet is non-trivial and includes safe-area + print + reduced-motion rules.
-  assert.ok(ownerCss.includes('safe-area-inset-bottom'));
-  assert.ok(ownerCss.includes('@media print'));
-  assert.ok(ownerCss.includes('prefers-reduced-motion'));
+  assert.ok(adminCss.includes('safe-area-inset-bottom'));
+  assert.ok(adminCss.includes('@media print'));
+  assert.ok(adminCss.includes('prefers-reduced-motion'));
 });
 
-test('4. Owner app.js parses cleanly and matches Customer Desk bullion pricing math exactly', () => {
-  assert.doesNotThrow(() => new vm.Script(ownerJs, { filename: 'owner/app.js' }));
-  const api = loadOwnerApi();
-  assert.ok(api, 'Expected __OWNER_PWA_API__ to be exposed');
+test('4. Admin app.js parses cleanly and matches Customer Desk bullion pricing math exactly', () => {
+  assert.doesNotThrow(() => new vm.Script(adminJs, { filename: 'admin/app.js' }));
+  const api = loadAdminApi();
+  assert.ok(api, 'Expected __ADMIN_PWA_API__ to be exposed');
 
   const prices = api.computeCityPrices('cuttack', 3200, 34.5, 86.5);
   const expectedGoldPerG = ((3200 * 86.5) / 31.1034768) * 1.15;
@@ -145,21 +145,21 @@ test('4. Owner app.js parses cleanly and matches Customer Desk bullion pricing m
   assert.equal(calPrices.silver999ExGst, prices.silver999ExGst);
 });
 
-test('5. Owner media resolver translates canonical catalog/media paths safely for /owner/ display', () => {
-  const api = loadOwnerApi();
+test('5. Admin media resolver translates canonical catalog/media paths safely for /admin/ display', () => {
+  const api = loadAdminApi();
   assert.equal(api.sanitizeCatalogMediaUrl('catalog/media/prod-1-0.webp'), 'catalog/media/prod-1-0.webp');
-  assert.equal(api.toOwnerMediaSrc('catalog/media/prod-1-0.webp'), '../catalog/media/prod-1-0.webp');
-  assert.equal(api.toOwnerMediaSrc('blob:https://satyanarayanjewellery.github.io/abc'), 'blob:https://satyanarayanjewellery.github.io/abc');
+  assert.equal(api.toAdminMediaSrc('catalog/media/prod-1-0.webp'), '../catalog/media/prod-1-0.webp');
+  assert.equal(api.toAdminMediaSrc('blob:https://satyanarayanjewellery.github.io/abc'), 'blob:https://satyanarayanjewellery.github.io/abc');
 
   // Block path traversal, XSS, or external URLs.
-  assert.equal(api.toOwnerMediaSrc('javascript:alert(1)'), '');
-  assert.equal(api.toOwnerMediaSrc('../etc/passwd'), '');
-  assert.equal(api.toOwnerMediaSrc('https://evil.example/img.jpg'), '');
-  assert.equal(api.toOwnerMediaSrc('catalog/media/../../secret.json'), '');
+  assert.equal(api.toAdminMediaSrc('javascript:alert(1)'), '');
+  assert.equal(api.toAdminMediaSrc('../etc/passwd'), '');
+  assert.equal(api.toAdminMediaSrc('https://evil.example/img.jpg'), '');
+  assert.equal(api.toAdminMediaSrc('catalog/media/../../secret.json'), '');
 });
 
 test('6. Statutory duty/GST validator enforces safe ranges & ISO dates and previews live impact', () => {
-  const api = loadOwnerApi();
+  const api = loadAdminApi();
 
   const ok = api.validateStatutoryDraft({
     gold: { importDutyPct: 6, gstPct: 3, effectiveFrom: '2026-12-01', verifiedOn: '2026-12-01', note: 'Test budget cut' },
@@ -186,7 +186,7 @@ test('6. Statutory duty/GST validator enforces safe ranges & ISO dates and previ
 });
 
 test('7. Counter Quote, Old Exchange, Exchange Comparison & Share Broadcast formulas work accurately', () => {
-  const api = loadOwnerApi();
+  const api = loadAdminApi();
   const prices = api.computeCityPrices('cuttack', 3200, 34.5, 86.5);
 
   const quote = api.computeQuoteMath({
@@ -224,7 +224,7 @@ test('7. Counter Quote, Old Exchange, Exchange Comparison & Share Broadcast form
 });
 
 test('8. GitHub token verification strictly enforces write permission to satyanarayanjewellery/shop', async () => {
-  const api = loadOwnerApi();
+  const api = loadAdminApi();
 
   // Rejects empty token
   await assert.rejects(() => api.verifyGitHubToken('   ', async () => { throw new Error('should not fetch'); }));
@@ -248,60 +248,60 @@ test('8. GitHub token verification strictly enforces write permission to satyana
   // Accepts write-capable token and reads user login
   const verified = await api.verifyGitHubToken('Bearer github_pat_valid_123', async (url) => {
     if (url.endsWith('/user')) {
-      return { ok: true, status: 200, json: async () => ({ login: 'satyanarayan-owner' }) };
+      return { ok: true, status: 200, json: async () => ({ login: 'satyanarayan-admin' }) };
     }
     return { ok: true, status: 200, json: async () => ({ permissions: { pull: true, push: true } }) };
   });
   assert.equal(verified.token, 'github_pat_valid_123');
-  assert.equal(verified.login, 'satyanarayan-owner');
+  assert.equal(verified.login, 'satyanarayan-admin');
 });
 
-test('9. Customer index.html keeps Owner PWA link strictly hidden inside #owner-studio', () => {
-  const studioStart = customerHtml.indexOf('<section id="owner-studio"');
+test('9. Customer index.html keeps Admin PWA link strictly hidden inside #admin-studio', () => {
+  const studioStart = customerHtml.indexOf('<section id="admin-studio"');
   const studioEnd = customerHtml.indexOf('</section>', studioStart);
   assert.ok(studioStart > 0 && studioEnd > studioStart);
-  const linkPos = customerHtml.indexOf('id="link-owner-pwa"');
-  assert.ok(linkPos > studioStart && linkPos < studioEnd, 'Owner PWA link must remain strictly inside hidden #owner-studio');
-  assert.equal(customerHtml.indexOf('href="owner/"', studioEnd), -1, 'No customer-visible link to owner/ outside #owner-studio');
+  const linkPos = customerHtml.indexOf('id="link-admin-pwa"');
+  assert.ok(linkPos > studioStart && linkPos < studioEnd, 'Admin PWA link must remain strictly inside hidden #admin-studio');
+  assert.equal(customerHtml.indexOf('href="admin/"', studioEnd), -1, 'No customer-visible link to admin/ outside #admin-studio');
 });
 
-test('10. Customer PWA and Owner PWA have disjoint resolved IDs, non-overlapping scopes, and in-app install buttons', () => {
-  const ownerManifest = JSON.parse(ownerManifestRaw);
+test('10. Customer PWA and Admin PWA have disjoint resolved IDs, non-overlapping scopes, and in-app install buttons', () => {
+  const adminManifest = JSON.parse(adminManifestRaw);
   const origin = 'https://satyanarayanjewellery.github.io';
   const customerManifestUrl = `${origin}/shop/manifest.webmanifest`;
-  const ownerManifestUrl = `${origin}/shop/owner/manifest.webmanifest`;
+  const adminManifestUrl = `${origin}/shop/admin/manifest.webmanifest`;
 
   // Per W3C Web App Manifest spec: start_url & scope resolve against manifest URL; id resolves against origin.
   const customerStart = new URL(rootManifest.start_url, customerManifestUrl).href;
   const customerScope = new URL(rootManifest.scope, customerManifestUrl).href;
   const customerId = new URL(rootManifest.id, `${origin}/`).href;
 
-  const ownerStart = new URL(ownerManifest.start_url, ownerManifestUrl).href;
-  const ownerScope = new URL(ownerManifest.scope, ownerManifestUrl).href;
-  const ownerId = new URL(ownerManifest.id, `${origin}/`).href;
+  const adminStart = new URL(adminManifest.start_url, adminManifestUrl).href;
+  const adminScope = new URL(adminManifest.scope, adminManifestUrl).href;
+  const adminId = new URL(adminManifest.id, `${origin}/`).href;
 
-  assert.notEqual(customerId, ownerId, 'Customer and Owner PWAs must resolve to distinct manifest IDs');
+  assert.notEqual(customerId, adminId, 'Customer and Admin PWAs must resolve to distinct manifest IDs');
   assert.ok(customerStart.startsWith(customerScope), 'Customer start_url must lie inside Customer scope');
-  assert.ok(ownerStart.startsWith(ownerScope), 'Owner start_url must lie inside Owner scope');
+  assert.ok(adminStart.startsWith(adminScope), 'Admin start_url must lie inside Admin scope');
 
   // Critical for Android Chrome WebAPK side-by-side install: neither app scope may cover the other's start_url.
-  assert.equal(ownerStart.startsWith(customerScope), false, 'Customer scope must not swallow Owner start_url');
-  assert.equal(customerStart.startsWith(ownerScope), false, 'Owner scope must not swallow Customer start_url');
+  assert.equal(adminStart.startsWith(customerScope), false, 'Customer scope must not swallow Admin start_url');
+  assert.equal(customerStart.startsWith(adminScope), false, 'Admin scope must not swallow Customer start_url');
 
-  // Every Owner shortcut must stay inside Owner scope.
-  for (const sc of ownerManifest.shortcuts) {
-    const scUrl = new URL(sc.url, ownerManifestUrl).href;
-    assert.ok(scUrl.startsWith(ownerScope), `Shortcut ${sc.name} (${scUrl}) must be inside Owner scope (${ownerScope})`);
+  // Every Admin shortcut must stay inside Admin scope.
+  for (const sc of adminManifest.shortcuts) {
+    const scUrl = new URL(sc.url, adminManifestUrl).href;
+    assert.ok(scUrl.startsWith(adminScope), `Shortcut ${sc.name} (${scUrl}) must be inside Admin scope (${adminScope})`);
   }
 
-  // Both Customer and Owner PWAs expose in-app beforeinstallprompt handlers (avoids Android menu origin-conflict).
+  // Both Customer and Admin PWAs expose in-app beforeinstallprompt handlers (avoids Android menu origin-conflict).
   assert.match(customerHtml, /id="btn-install-customer-pwa"/);
   assert.match(customerHtml, /addEventListener\('beforeinstallprompt'/);
-  assert.match(ownerJs, /addEventListener\('beforeinstallprompt'/);
+  assert.match(adminJs, /addEventListener\('beforeinstallprompt'/);
 });
 
-test('11. Owner Suite: Smart Inventory auto-pricing, stock status normalization, CSV formula-injection guard, and QR SVG generator', () => {
-  const api = loadOwnerApi();
+test('11. Admin Suite: Smart Inventory auto-pricing, stock status normalization, CSV formula-injection guard, and QR SVG generator', () => {
+  const api = loadAdminApi();
   const prices = api.computeCityPrices('cuttack', 2900, 33.5, 86.5);
 
   // Metal inference & live auto-pricing math
@@ -333,8 +333,8 @@ test('11. Owner Suite: Smart Inventory auto-pricing, stock status normalization,
   assert.match(svg, /<path d="M/);
 });
 
-test('12. Owner Suite: GST Estimate & Bill Slip Maker and Customer Orders & Advance Rate-Lock Book', () => {
-  const api = loadOwnerApi();
+test('12. Admin Suite: GST Estimate & Bill Slip Maker and Customer Orders & Advance Rate-Lock Book', () => {
+  const api = loadAdminApi();
   const prices = api.computeCityPrices('cuttack', 2900, 33.5, 86.5);
 
   // Multi-line GST Bill Slip calculation with CGST + SGST split, old gold exchange & advance paid
@@ -386,22 +386,22 @@ test('12. Owner Suite: GST Estimate & Bill Slip Maker and Customer Orders & Adva
   assert.match(waMsg, /21AFNPP7926E1ZC/);
 });
 
-test('13. Customer Storefront syncs Featured Showroom Picks, Stock Status badges, and Inline Owner Suite tabs & modals', () => {
-  // Inline Owner Studio exposes Upload, GST Bill Slip, and Order Book sub-tabs + Batch Reprice & Export
-  assert.match(customerHtml, /id="owner-tab-upload"/);
-  assert.match(customerHtml, /id="owner-tab-bill"/);
-  assert.match(customerHtml, /id="owner-tab-orders"/);
+test('13. Customer Storefront syncs Featured Showroom Picks, Stock Status badges, and Inline Admin Suite tabs & modals', () => {
+  // Inline Admin Studio exposes Upload, GST Bill Slip, and Order Book sub-tabs + Batch Reprice & Export
+  assert.match(customerHtml, /id="admin-tab-upload"/);
+  assert.match(customerHtml, /id="admin-tab-bill"/);
+  assert.match(customerHtml, /id="admin-tab-orders"/);
   assert.match(customerHtml, /id="btn-inline-reprice"/);
   assert.match(customerHtml, /id="btn-inline-export-csv"/);
   assert.match(customerHtml, /id="btn-inline-export-json"/);
-  assert.match(customerHtml, /id="owner-edit-item-modal"/);
-  assert.match(customerHtml, /id="owner-qr-tag-modal"/);
-  assert.match(customerHtml, /id="owner-print-sheet"/);
+  assert.match(customerHtml, /id="admin-edit-item-modal"/);
+  assert.match(customerHtml, /id="admin-qr-tag-modal"/);
+  assert.match(customerHtml, /id="admin-print-sheet"/);
 
-  // Shared localStorage keys so inline Owner Mode and standalone /owner/ share orders & bill sequence on same browser
-  assert.match(customerHtml, /satyanarayan_owner_orders_v1/);
-  assert.match(ownerJs, /satyanarayan_owner_orders_v1/);
-  assert.match(customerHtml, /satyanarayan_owner_bill_seq_v1/);
-  assert.match(ownerJs, /satyanarayan_owner_bill_seq_v1/);
+  // Shared localStorage keys so inline Admin Mode and standalone /admin/ share orders & bill sequence on same browser
+  assert.match(customerHtml, /satyanarayan_admin_orders_v1/);
+  assert.match(adminJs, /satyanarayan_admin_orders_v1/);
+  assert.match(customerHtml, /satyanarayan_admin_bill_seq_v1/);
+  assert.match(adminJs, /satyanarayan_admin_bill_seq_v1/);
 });
 

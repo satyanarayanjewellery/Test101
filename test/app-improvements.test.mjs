@@ -153,8 +153,8 @@ test('manifest and service worker are valid, referenced, and prevent cache poiso
   assert.match(sw, /skipWaiting/);
   assert.match(sw, /client\.navigate\(client\.url\)/,
     'a worker update must refresh already-open customer apps, including legacy shells without update listeners');
-  assert.match(sw, /!url\.pathname\.includes\('\/owner\/'\)/,
-    'customer worker updates must not navigate the separately-scoped Owner PWA');
+  assert.match(sw, /!url\.pathname\.includes\('\/admin\/'\)/,
+    'customer worker updates must not navigate the separately-scoped Admin PWA');
   const html = await loadHtml();
   assert.ok(html.includes("navigator.serviceWorker.register('sw.js')"));
 
@@ -169,7 +169,7 @@ test('manifest and service worker are valid, referenced, and prevent cache poiso
   const navigatedClients = [];
   const windowClients = [
     { url: 'https://example.com/shop/', navigate: async (url) => { navigatedClients.push(url); } },
-    { url: 'https://example.com/shop/owner/', navigate: async (url) => { navigatedClients.push(url); } }
+    { url: 'https://example.com/shop/admin/', navigate: async (url) => { navigatedClients.push(url); } }
   ];
   const swContext = {
     URL,
@@ -189,7 +189,7 @@ test('manifest and service worker are valid, referenced, and prevent cache poiso
   };
   vm.runInNewContext(sw, swContext);
 
-  // A newly activated customer worker refreshes stale customer windows, but leaves Owner PWA open.
+  // A newly activated customer worker refreshes stale customer windows, but leaves Admin PWA open.
   let activation;
   listeners.activate({ waitUntil: (promise) => { activation = promise; } });
   await activation;
@@ -464,22 +464,22 @@ test('computeCityPrices computes Cuttack and city-adjusted gold & silver rates a
   assert.ok(delhi.gold999ExGst > cuttack.gold999ExGst);
 });
 
-test('jewellery collection supports image/video uploads with owner-only access and safe media URLs', async () => {
+test('jewellery collection supports image/video uploads with admin-only access and safe media URLs', async () => {
   const html = await loadHtml();
   const catalogJson = JSON.parse(await readFile(new URL('../catalog/products.json', import.meta.url), 'utf8'));
   assert.ok(Array.isArray(catalogJson), 'catalog/products.json must be a JSON array');
 
-  // Upload studio and owner modal stay hidden by default for regular visitors,
-  // owner login is strictly GitHub token only (no device PIN bypass), and
+  // Upload studio and admin modal stay hidden by default for regular visitors,
+  // admin login is strictly GitHub token only (no device PIN bypass), and
   // fixed modals live outside </main> so .app-view transforms never trap/clip them.
-  assert.match(html, /<section id="owner-studio" class="hidden /);
-  assert.match(html, /<div id="owner-auth-modal" class="jewel-modal-backdrop hidden"/);
+  assert.match(html, /<section id="admin-studio" class="hidden /);
+  assert.match(html, /<div id="admin-auth-modal" class="jewel-modal-backdrop hidden"/);
   assert.match(html, /<div id="product-lightbox" class="jewel-modal-backdrop hidden"/);
-  assert.ok(!html.includes('owner-panel-pin'), 'PIN login panel should be removed (token-only owner access)');
-  assert.ok(!html.includes('owner-tab-pin'), 'PIN login tab should be removed (token-only owner access)');
+  assert.ok(!html.includes('admin-panel-pin'), 'PIN login panel should be removed (token-only admin access)');
+  assert.ok(!html.includes('admin-tab-pin'), 'PIN login tab should be removed (token-only admin access)');
   const mainEndIdx = html.indexOf('</main>');
   assert.ok(mainEndIdx > 0);
-  assert.ok(html.indexOf('id="owner-auth-modal"') > mainEndIdx, 'owner-auth-modal must be outside <main>/.app-view');
+  assert.ok(html.indexOf('id="admin-auth-modal"') > mainEndIdx, 'admin-auth-modal must be outside <main>/.app-view');
   assert.ok(html.indexOf('id="product-lightbox"') > mainEndIdx, 'product-lightbox must be outside <main>/.app-view');
   assert.ok(html.includes('accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime"'));
 
@@ -501,7 +501,7 @@ test('jewellery collection supports image/video uploads with owner-only access a
   const verEnd = html.indexOf('    function blobToBase64(', verStart);
   assert.ok(verStart >= 0 && verEnd > verStart);
   const makeVerify = (mockFetch) => vm.runInNewContext(
-    `const CATALOG_REPO_OWNER = 'satyanarayanjewellery'; const CATALOG_REPO_NAME = 'shop';\n${html.slice(verStart, verEnd)}\nverifyGitHubToken`,
+    `const CATALOG_REPO_ADMIN = 'satyanarayanjewellery'; const CATALOG_REPO_NAME = 'shop';\n${html.slice(verStart, verEnd)}\nverifyGitHubToken`,
     { fetch: mockFetch }
   );
   const verifyPush = makeVerify(async (url) => {
@@ -523,39 +523,39 @@ test('jewellery collection supports image/video uploads with owner-only access a
   const visEnd = html.indexOf('    function renderProducts()', visStart);
   assert.ok(visStart >= 0 && visEnd > visStart);
   const lockedItems = vm.runInNewContext(`${html.slice(visStart, visEnd)}\ngetVisibleCatalogItems()`, {
-    productOwner: { unlocked: false, publishedItems: [{ id: 'pub-1' }], localItems: [{ id: 'loc-1' }] }
+    productAdmin: { unlocked: false, publishedItems: [{ id: 'pub-1' }], localItems: [{ id: 'loc-1' }] }
   });
   assert.deepEqual(Array.from(lockedItems, (x) => x.id), ['pub-1']);
   const unlockedItems = vm.runInNewContext(`${html.slice(visStart, visEnd)}\ngetVisibleCatalogItems()`, {
-    productOwner: { unlocked: true, publishedItems: [{ id: 'pub-1' }], localItems: [{ id: 'loc-1' }] }
+    productAdmin: { unlocked: true, publishedItems: [{ id: 'pub-1' }], localItems: [{ id: 'loc-1' }] }
   });
   assert.deepEqual(Array.from(unlockedItems, (x) => x.id), ['loc-1', 'pub-1']);
 
-  // Owner entry button stays hidden for customers until a secret reveal
-  assert.match(html, /<button id="btn-owner-access" type="button" class="shop-owner-btn hidden"/);
-  assert.ok(html.includes('.shop-owner-btn.hidden{display:none}'),
-    'hidden rule must beat .shop-owner-btn display:inline-flex');
-  assert.ok(html.includes('OWNER_ACCESS_REVEAL_KEY'), 'reveal state must persist per tab');
-  assert.ok(html.includes("'#owner'"), 'secret #owner URL hash must reveal owner access');
-  assert.ok(html.includes('OWNER_ACCESS_SECRET'), 'secret "owner" key sequence must reveal owner access');
-  const lockIdx = html.indexOf("document.getElementById('btn-owner-lock')");
-  assert.ok(lockIdx > 0 && html.slice(lockIdx, lockIdx + 400).includes('concealOwnerAccess()'),
-    'Lock must re-hide owner access');
+  // Admin entry button stays hidden for customers until a secret reveal
+  assert.match(html, /<button id="btn-admin-access" type="button" class="shop-admin-btn hidden"/);
+  assert.ok(html.includes('.shop-admin-btn.hidden{display:none}'),
+    'hidden rule must beat .shop-admin-btn display:inline-flex');
+  assert.ok(html.includes('ADMIN_ACCESS_REVEAL_KEY'), 'reveal state must persist per tab');
+  assert.ok(html.includes("'#admin'"), 'secret #admin URL hash must reveal admin access');
+  assert.ok(html.includes('ADMIN_ACCESS_SECRET'), 'secret "admin" key sequence must reveal admin access');
+  const lockIdx = html.indexOf("document.getElementById('btn-admin-lock')");
+  assert.ok(lockIdx > 0 && html.slice(lockIdx, lockIdx + 400).includes('concealAdminAccess()'),
+    'Lock must re-hide admin access');
 
-  // updateOwnerStudioUI() drives the owner button visibility
-  const uiStart = html.indexOf('    function updateOwnerStudioUI()');
-  const uiEnd = html.indexOf('    function revealOwnerAccess()', uiStart);
+  // updateAdminStudioUI() drives the admin button visibility
+  const uiStart = html.indexOf('    function updateAdminStudioUI()');
+  const uiEnd = html.indexOf('    function revealAdminAccess()', uiStart);
   assert.ok(uiStart >= 0 && uiEnd > uiStart);
-  const runOwnerUi = (ownerState) => {
+  const runAdminUi = (adminState) => {
     const dom = makeFakeDom();
-    const run = vm.runInNewContext(`${html.slice(uiStart, uiEnd)}\nupdateOwnerStudioUI`, {
+    const run = vm.runInNewContext(`${html.slice(uiStart, uiEnd)}\nupdateAdminStudioUI`, {
       document: dom.document,
-      productOwner: ownerState
+      productAdmin: adminState
     });
     run();
     return dom;
   };
-  const baseOwnerState = () => ({
+  const baseAdminState = () => ({
     unlocked: false,
     ghConnected: false,
     ghLogin: '',
@@ -564,52 +564,52 @@ test('jewellery collection supports image/video uploads with owner-only access a
     localItems: []
   });
 
-  const lockedDom = runOwnerUi(baseOwnerState());
-  assert.equal(lockedDom.getNode('btn-owner-access').classList.hidden, true,
-    'owner button must be hidden for regular visitors');
-  assert.equal(lockedDom.getNode('owner-studio').classList.hidden, true);
-  assert.equal(lockedDom.getNode('owner-mode-pill').classList.hidden, true);
-  assert.equal(lockedDom.getNode('btn-owner-access-label').textContent, 'Owner');
+  const lockedDom = runAdminUi(baseAdminState());
+  assert.equal(lockedDom.getNode('btn-admin-access').classList.hidden, true,
+    'admin button must be hidden for regular visitors');
+  assert.equal(lockedDom.getNode('admin-studio').classList.hidden, true);
+  assert.equal(lockedDom.getNode('admin-mode-pill').classList.hidden, true);
+  assert.equal(lockedDom.getNode('btn-admin-access-label').textContent, 'Admin');
 
-  const revealedDom = runOwnerUi({ ...baseOwnerState(), accessRevealed: true });
-  assert.equal(revealedDom.getNode('btn-owner-access').classList.hidden, false,
-    'owner button must appear after the secret reveal');
-  assert.equal(revealedDom.getNode('owner-studio').classList.hidden, true,
-    'upload studio must stay hidden until owner mode is unlocked');
+  const revealedDom = runAdminUi({ ...baseAdminState(), accessRevealed: true });
+  assert.equal(revealedDom.getNode('btn-admin-access').classList.hidden, false,
+    'admin button must appear after the secret reveal');
+  assert.equal(revealedDom.getNode('admin-studio').classList.hidden, true,
+    'upload studio must stay hidden until admin mode is unlocked');
 
-  const activeDom = runOwnerUi({ ...baseOwnerState(), unlocked: true, ghConnected: true });
-  assert.equal(activeDom.getNode('btn-owner-access').classList.hidden, false,
-    'owner button must stay visible while owner mode is active');
-  assert.equal(activeDom.getNode('owner-mode-pill').classList.hidden, false);
-  assert.equal(activeDom.getNode('btn-owner-access-label').textContent, 'Token Settings');
+  const activeDom = runAdminUi({ ...baseAdminState(), unlocked: true, ghConnected: true });
+  assert.equal(activeDom.getNode('btn-admin-access').classList.hidden, false,
+    'admin button must stay visible while admin mode is active');
+  assert.equal(activeDom.getNode('admin-mode-pill').classList.hidden, false);
+  assert.equal(activeDom.getNode('btn-admin-access-label').textContent, 'Token Settings');
 
-  // revealOwnerAccess()/concealOwnerAccess() flip the flag and persist it per tab
-  const recStart = html.indexOf('    function revealOwnerAccess()');
+  // revealAdminAccess()/concealAdminAccess() flip the flag and persist it per tab
+  const recStart = html.indexOf('    function revealAdminAccess()');
   const recEnd = html.indexOf('    function renderPendingMediaPreviews(', recStart);
   assert.ok(recStart >= 0 && recEnd > recStart);
   const recStore = new Map();
-  const recProductOwner = { accessRevealed: false };
+  const recProductAdmin = { accessRevealed: false };
   const recSessionStorage = {
     getItem: (k) => (recStore.has(k) ? recStore.get(k) : null),
     setItem: (k, v) => { recStore.set(k, String(v)); },
     removeItem: (k) => { recStore.delete(k); }
   };
-  const { revealOwnerAccess, concealOwnerAccess } = vm.runInNewContext(
-    `${html.slice(recStart, recEnd)}\n({ revealOwnerAccess, concealOwnerAccess })`,
+  const { revealAdminAccess, concealAdminAccess } = vm.runInNewContext(
+    `${html.slice(recStart, recEnd)}\n({ revealAdminAccess, concealAdminAccess })`,
     {
-      productOwner: recProductOwner,
+      productAdmin: recProductAdmin,
       sessionStorage: recSessionStorage,
-      OWNER_ACCESS_REVEAL_KEY: 'sj_owner_access_revealed_v1',
+      ADMIN_ACCESS_REVEAL_KEY: 'sj_admin_access_revealed_v1',
       document: makeFakeDom().document,
-      updateOwnerStudioUI: () => {}
+      updateAdminStudioUI: () => {}
     }
   );
-  revealOwnerAccess();
-  assert.equal(recProductOwner.accessRevealed, true);
-  assert.equal(recSessionStorage.getItem('sj_owner_access_revealed_v1'), '1');
-  concealOwnerAccess();
-  assert.equal(recProductOwner.accessRevealed, false);
-  assert.equal(recSessionStorage.getItem('sj_owner_access_revealed_v1'), null);
+  revealAdminAccess();
+  assert.equal(recProductAdmin.accessRevealed, true);
+  assert.equal(recSessionStorage.getItem('sj_admin_access_revealed_v1'), '1');
+  concealAdminAccess();
+  assert.equal(recProductAdmin.accessRevealed, false);
+  assert.equal(recSessionStorage.getItem('sj_admin_access_revealed_v1'), null);
 });
 
 test('shop drops the shopping bag and Gemstone/Platinum/Diamond; rates gain a Rate of the Day', async () => {
@@ -627,7 +627,7 @@ test('shop drops the shopping bag and Gemstone/Platinum/Diamond; rates gain a Ra
   assert.ok(html.includes('saved-count-pill'), 'saved count pill must stay');
   assert.ok(html.includes('product-wa-enquire'), 'per-product WhatsApp enquiry must stay');
 
-  // Gemstone / Platinum / Diamond removed from shop filters and owner upload form
+  // Gemstone / Platinum / Diamond removed from shop filters and admin upload form
   for (const cat of ['Diamond', 'Platinum', 'Gemstone']) {
     assert.ok(!html.includes(`data-prod-cat="${cat}"`), `${cat} filter pill must be removed`);
     assert.ok(!html.includes(`<option>${cat}</option>`), `${cat} upload option must be removed`);
@@ -1434,9 +1434,9 @@ test('the price board cannot sit on stale numbers when the frame clock stalls', 
   assert.match(html, /const PRICE_PAINT_STALL_MS = \d+;/);
 });
 
-test('exchange comparison and accuracy checker live only in the owner desk', async () => {
+test('exchange comparison and accuracy checker live only in the admin desk', async () => {
   const html = await loadHtml();
-  // The customer storefront must not ship the owner views or their machinery at all.
+  // The customer storefront must not ship the admin views or their machinery at all.
   for (const marker of [
     'id="view-exchanges"', 'id="view-accuracy"', 'data-app-view="exchanges"', 'data-app-view="accuracy"',
     'renderExchangeComparison', 'renderMarketAccuracy', 'fetchMarketAccuracy', 'computeExchangeRows',
@@ -1444,15 +1444,15 @@ test('exchange comparison and accuracy checker live only in the owner desk', asy
   ]) {
     assert.ok(!html.includes(marker), `customer app must not contain ${marker}`);
   }
-  assert.ok(!html.includes('data-owner-view-nav'), 'no owner-only nav hooks should remain');
+  assert.ok(!html.includes('data-admin-view-nav'), 'no admin-only nav hooks should remain');
   assert.ok(html.includes('id="mobile-nav-grid" class="grid grid-cols-5'));
-  // The private owner desk still offers both sections.
-  const ownerHtml = await readFile(new URL('../owner/index.html', import.meta.url), 'utf8');
-  assert.ok(ownerHtml.includes('data-view="exchanges"'), 'owner desk keeps Exchanges');
-  assert.ok(ownerHtml.includes('data-view="accuracy"'), 'owner desk keeps Accuracy');
-  const ownerJs = await readFile(new URL('../owner/app.js', import.meta.url), 'utf8');
-  assert.ok(ownerJs.includes('function renderExchangeComparison()'));
-  assert.ok(ownerJs.includes('function renderMarketAccuracy()'));
+  // The private admin desk still offers both sections.
+  const adminHtml = await readFile(new URL('../admin/index.html', import.meta.url), 'utf8');
+  assert.ok(adminHtml.includes('data-view="exchanges"'), 'admin desk keeps Exchanges');
+  assert.ok(adminHtml.includes('data-view="accuracy"'), 'admin desk keeps Accuracy');
+  const adminJs = await readFile(new URL('../admin/app.js', import.meta.url), 'utf8');
+  assert.ok(adminJs.includes('function renderExchangeComparison()'));
+  assert.ok(adminJs.includes('function renderMarketAccuracy()'));
 });
 
 

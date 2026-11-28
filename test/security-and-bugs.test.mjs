@@ -4,13 +4,13 @@ import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
 
 const indexHtmlUrl = new URL('../index.html', import.meta.url);
-const ownerHtmlUrl = new URL('../owner/index.html', import.meta.url);
-const ownerCssUrl = new URL('../owner/styles.css', import.meta.url);
-const ownerJsUrl = new URL('../owner/app.js', import.meta.url);
+const adminHtmlUrl = new URL('../admin/index.html', import.meta.url);
+const adminCssUrl = new URL('../admin/styles.css', import.meta.url);
+const adminJsUrl = new URL('../admin/app.js', import.meta.url);
 const customerSwUrl = new URL('../sw.js', import.meta.url);
-const ownerSwUrl = new URL('../owner/sw.js', import.meta.url);
+const adminSwUrl = new URL('../admin/sw.js', import.meta.url);
 
-function loadOwnerApi(overrides = {}) {
+function loadAdminApi(overrides = {}) {
   const ctx = vm.createContext({
     URL,
     Date,
@@ -41,21 +41,21 @@ function loadOwnerApi(overrides = {}) {
 
 test('Security 1: GitHub token verification strictly requires explicit push === true (no public-repo bypass)', async () => {
   const html = await readFile(indexHtmlUrl, 'utf8');
-  const ownerJs = await readFile(ownerJsUrl, 'utf8');
+  const adminJs = await readFile(adminJsUrl, 'utf8');
 
   // Extract customer verifyGitHubToken
   const verStart = html.indexOf('    async function verifyGitHubToken(');
   const verEnd = html.indexOf('    function blobToBase64(', verStart);
   assert.ok(verStart >= 0 && verEnd > verStart);
   const makeCustomerVerify = (mockFetch) => vm.runInNewContext(
-    `const CATALOG_REPO_OWNER = 'satyanarayanjewellery'; const CATALOG_REPO_NAME = 'shop';\n${html.slice(verStart, verEnd)}\nverifyGitHubToken`,
+    `const CATALOG_REPO_ADMIN = 'satyanarayanjewellery'; const CATALOG_REPO_NAME = 'shop';\n${html.slice(verStart, verEnd)}\nverifyGitHubToken`,
     { fetch: mockFetch }
   );
 
-  // Load owner verifyGitHubToken
-  const { ctx } = loadOwnerApi();
-  vm.runInContext(ownerJs, ctx);
-  const ownerVerify = ctx.__OWNER_PWA_API__.verifyGitHubToken;
+  // Load admin verifyGitHubToken
+  const { ctx } = loadAdminApi();
+  vm.runInContext(adminJs, ctx);
+  const adminVerify = ctx.__ADMIN_PWA_API__.verifyGitHubToken;
 
   const maliciousResponses = [
     { label: 'missing permissions object (public repo)', payload: { full_name: 'satyanarayanjewellery/shop' } },
@@ -76,9 +76,9 @@ test('Security 1: GitHub token verification strictly requires explicit push === 
       `Customer verifyGitHubToken must reject ${label}`
     );
     await assert.rejects(
-      ownerVerify('ghp_attacker_token', mockFetch),
+      adminVerify('ghp_attacker_token', mockFetch),
       (e) => e.authError === true,
-      `Owner verifyGitHubToken must reject ${label}`
+      `Admin verifyGitHubToken must reject ${label}`
     );
   }
 
@@ -87,71 +87,71 @@ test('Security 1: GitHub token verification strictly requires explicit push === 
     if (url.includes('/repos/')) return { ok: true, status: 200, json: async () => ({ permissions: { pull: true, push: true } }) };
     return { ok: true, status: 200, json: async () => ({ login: 'satyanarayanjewellery' }) };
   };
-  const custOk = await makeCustomerVerify(validFetch)('github_pat_owner');
+  const custOk = await makeCustomerVerify(validFetch)('github_pat_admin');
   assert.equal(custOk.login, 'satyanarayanjewellery');
-  const ownOk = await ownerVerify('github_pat_owner', validFetch);
+  const ownOk = await adminVerify('github_pat_admin', validFetch);
   assert.equal(ownOk.login, 'satyanarayanjewellery');
 });
 
 test('Security 2: Saved GitHub PAT is never prefilled into visible inputs and is cleared on lock/revocation', async () => {
   const html = await readFile(indexHtmlUrl, 'utf8');
-  const ownerJs = await readFile(ownerJsUrl, 'utf8');
+  const adminJs = await readFile(adminJsUrl, 'utf8');
 
-  // Customer modal must not prefill stored PAT into #owner-gh-token
-  const openModalStart = html.indexOf('    function openOwnerAuthModal()');
-  const openModalEnd = html.indexOf('    function closeOwnerAuthModal()', openModalStart);
+  // Customer modal must not prefill stored PAT into #admin-gh-token
+  const openModalStart = html.indexOf('    function openAdminAuthModal()');
+  const openModalEnd = html.indexOf('    function closeAdminAuthModal()', openModalStart);
   assert.ok(openModalStart >= 0 && openModalEnd > openModalStart);
   const openModalSrc = html.slice(openModalStart, openModalEnd);
-  assert.ok(!openModalSrc.includes('productOwner.ghToken || getStoredGitHubToken()'), 'openOwnerAuthModal must not prefill PAT');
-  assert.ok(openModalSrc.includes("tokenInput.value = '';"), 'openOwnerAuthModal must clear token input');
+  assert.ok(!openModalSrc.includes('productAdmin.ghToken || getStoredGitHubToken()'), 'openAdminAuthModal must not prefill PAT');
+  assert.ok(openModalSrc.includes("tokenInput.value = '';"), 'openAdminAuthModal must clear token input');
 
   // Customer lock must clear in-memory token and reset password input
-  const lockStart = html.indexOf("document.getElementById('btn-owner-lock')?.addEventListener");
+  const lockStart = html.indexOf("document.getElementById('btn-admin-lock')?.addEventListener");
   const lockEnd = html.indexOf("const dropzone = document.getElementById('product-dropzone');", lockStart);
   assert.ok(lockStart >= 0 && lockEnd > lockStart);
   const lockSrc = html.slice(lockStart, lockEnd);
-  assert.ok(lockSrc.includes("productOwner.ghToken = '';"), 'Customer lock must clear in-memory PAT');
+  assert.ok(lockSrc.includes("productAdmin.ghToken = '';"), 'Customer lock must clear in-memory PAT');
   assert.ok(lockSrc.includes("tokenInput.type = 'password';"), 'Customer lock must reset input to password');
 
-  // Owner app tryAutoRestoreSession must not prefill #auth-token-input
-  const restoreStart = ownerJs.indexOf('  async function tryAutoRestoreSession()');
-  const restoreEnd = ownerJs.indexOf('  function bindEvents()', restoreStart);
+  // Admin app tryAutoRestoreSession must not prefill #auth-token-input
+  const restoreStart = adminJs.indexOf('  async function tryAutoRestoreSession()');
+  const restoreEnd = adminJs.indexOf('  function bindEvents()', restoreStart);
   assert.ok(restoreStart >= 0 && restoreEnd > restoreStart);
-  const restoreSrc = ownerJs.slice(restoreStart, restoreEnd);
+  const restoreSrc = adminJs.slice(restoreStart, restoreEnd);
   assert.ok(!restoreSrc.includes("$('auth-token-input').value = saved"), 'tryAutoRestoreSession must not prefill PAT into DOM');
 
-  // Owner lockWorkspace must clear input, reset type=password, and clear in-memory token
-  const ownLockStart = ownerJs.indexOf('  function lockWorkspace(');
-  const ownLockEnd = ownerJs.indexOf('  async function tryAutoRestoreSession()', ownLockStart);
+  // Admin lockWorkspace must clear input, reset type=password, and clear in-memory token
+  const ownLockStart = adminJs.indexOf('  function lockWorkspace(');
+  const ownLockEnd = adminJs.indexOf('  async function tryAutoRestoreSession()', ownLockStart);
   assert.ok(ownLockStart >= 0 && ownLockEnd > ownLockStart);
-  const ownLockSrc = ownerJs.slice(ownLockStart, ownLockEnd);
+  const ownLockSrc = adminJs.slice(ownLockStart, ownLockEnd);
   assert.ok(ownLockSrc.includes("tokenInp.value = '';"));
   assert.ok(ownLockSrc.includes("tokenInp.type = 'password';"));
-  assert.ok(ownLockSrc.includes("state.owner.token = '';"));
+  assert.ok(ownLockSrc.includes("state.admin.token = '';"));
 
-  // Owner online handler must lock out revoked tokens on authError
-  const onlineStart = ownerJs.indexOf("window.addEventListener('online'");
-  const onlineEnd = ownerJs.indexOf("window.addEventListener('offline'", onlineStart);
+  // Admin online handler must lock out revoked tokens on authError
+  const onlineStart = adminJs.indexOf("window.addEventListener('online'");
+  const onlineEnd = adminJs.indexOf("window.addEventListener('offline'", onlineStart);
   assert.ok(onlineStart >= 0 && onlineEnd > onlineStart);
-  const onlineSrc = ownerJs.slice(onlineStart, onlineEnd);
+  const onlineSrc = adminJs.slice(onlineStart, onlineEnd);
   assert.ok(onlineSrc.includes('if (err && err.authError)'), 'online re-check must detect authError');
   assert.ok(onlineSrc.includes('lockWorkspace(true)'), 'online re-check must lock out revoked token');
 });
 
 test('Security 3: Zero inline event handlers, external URL sanitization, referrer policy, and strict remote catalog media', async () => {
   const html = await readFile(indexHtmlUrl, 'utf8');
-  const ownerHtml = await readFile(ownerHtmlUrl, 'utf8');
-  const ownerJs = await readFile(ownerJsUrl, 'utf8');
+  const adminHtml = await readFile(adminHtmlUrl, 'utf8');
+  const adminJs = await readFile(adminJsUrl, 'utf8');
 
   // Referrer policies in both PWAs
   assert.ok(html.includes('<meta name="referrer" content="strict-origin-when-cross-origin" />'));
-  assert.ok(ownerHtml.includes('<meta name="referrer" content="no-referrer" />'));
+  assert.ok(adminHtml.includes('<meta name="referrer" content="no-referrer" />'));
 
   // Zero inline on*= event handler attributes in HTML & templates
   const inlineHandlerRe = /\son(?:error|click|load|mouseover|focus|blur|submit|change|input)\s*=/i;
   assert.equal(inlineHandlerRe.test(html), false, 'index.html must not contain inline on*= event handlers');
-  assert.equal(inlineHandlerRe.test(ownerHtml), false, 'owner/index.html must not contain inline on*= event handlers');
-  assert.equal(inlineHandlerRe.test(ownerJs), false, 'owner/app.js must not contain inline on*= event handlers');
+  assert.equal(inlineHandlerRe.test(adminHtml), false, 'admin/index.html must not contain inline on*= event handlers');
+  assert.equal(inlineHandlerRe.test(adminJs), false, 'admin/app.js must not contain inline on*= event handlers');
 
   // Test sanitizeExternalUrl from index.html
   const sanStart = html.indexOf('    function sanitizeExternalUrl(');
@@ -173,9 +173,9 @@ test('Security 3: Zero inline event handlers, external URL sanitization, referre
   const custLoadEnd = html.indexOf('    async function ensureProductsLoaded(', custLoadStart);
   assert.ok(html.slice(custLoadStart, custLoadEnd).includes('clean.startsWith(CATALOG_MEDIA_PREFIX)'));
 
-  const ownLoadStart = ownerJs.indexOf('  async function loadPublishedCatalog()');
-  const ownLoadEnd = ownerJs.indexOf('  async function refreshAllCatalog()', ownLoadStart);
-  assert.ok(ownerJs.slice(ownLoadStart, ownLoadEnd).includes('clean.startsWith(CATALOG_MEDIA_PREFIX)'));
+  const ownLoadStart = adminJs.indexOf('  async function loadPublishedCatalog()');
+  const ownLoadEnd = adminJs.indexOf('  async function refreshAllCatalog()', ownLoadStart);
+  assert.ok(adminJs.slice(ownLoadStart, ownLoadEnd).includes('clean.startsWith(CATALOG_MEDIA_PREFIX)'));
 });
 
 test('Bug Fix 1: Cold-load FX hedges in both PWAs always settle even when daily fails before live rejects', async () => {
@@ -205,62 +205,62 @@ test('Bug Fix 1: Cold-load FX hedges in both PWAs always settle even when daily 
   ]);
   assert.equal(custNull, null, 'Customer fetchFxWithHedge must settle to null when daily fails before live fails');
 
-  // 2. Owner owner/app.js refreshLiveFx
-  const ownerJs = await readFile(ownerJsUrl, 'utf8');
-  const fastOwnerJs = ownerJs.replace('const FX_DAILY_HEDGE_MS = 700;', 'const FX_DAILY_HEDGE_MS = 20;');
-  const { ctx } = loadOwnerApi({
+  // 2. Admin admin/app.js refreshLiveFx
+  const adminJs = await readFile(adminJsUrl, 'utf8');
+  const fastAdminJs = adminJs.replace('const FX_DAILY_HEDGE_MS = 700;', 'const FX_DAILY_HEDGE_MS = 20;');
+  const { ctx } = loadAdminApi({
     fetch: (url) => new Promise((_, reject) => {
       const isLive = /currency-converter\.live|fxapi\.app/.test(url);
       setTimeout(() => reject(new Error('offline')), isLive ? 60 : 5);
     })
   });
-  vm.runInContext(fastOwnerJs, ctx);
-  const api = ctx.__OWNER_PWA_API__;
+  vm.runInContext(fastAdminJs, ctx);
+  const api = ctx.__ADMIN_PWA_API__;
   const ownRes = await Promise.race([
     api.refreshLiveFx(true),
-    new Promise((_, reject) => setTimeout(() => reject(new Error('Owner refreshLiveFx hung!')), 500))
+    new Promise((_, reject) => setTimeout(() => reject(new Error('Admin refreshLiveFx hung!')), 500))
   ]);
-  assert.equal(ownRes, null, 'Owner refreshLiveFx must settle cleanly when offline');
-  assert.equal(api.state.live.fxInFlight, null, 'Owner fxInFlight lock must be released after failure');
+  assert.equal(ownRes, null, 'Admin refreshLiveFx must settle cleanly when offline');
+  assert.equal(api.state.live.fxInFlight, null, 'Admin fxInFlight lock must be released after failure');
 });
 
-test('Bug Fix 2: Owner silver accuracy unit, statutory preview city parity, IST date stamping, and h23 midnight clock', async () => {
+test('Bug Fix 2: Admin silver accuracy unit, statutory preview city parity, IST date stamping, and h23 midnight clock', async () => {
   const html = await readFile(indexHtmlUrl, 'utf8');
-  const ownerJs = await readFile(ownerJsUrl, 'utf8');
+  const adminJs = await readFile(adminJsUrl, 'utf8');
 
   // Silver indicative row in fetchMarketAccuracy uses /g (matching theirInr / 1000)
-  const accStart = ownerJs.indexOf('  async function fetchMarketAccuracy(');
-  const accEnd = ownerJs.indexOf('  function renderMarketAccuracy()', accStart);
+  const accStart = adminJs.indexOf('  async function fetchMarketAccuracy(');
+  const accEnd = adminJs.indexOf('  function renderMarketAccuracy()', accStart);
   assert.ok(accStart >= 0 && accEnd > accStart);
-  const accSrc = ownerJs.slice(accStart, accEnd);
+  const accSrc = adminJs.slice(accStart, accEnd);
   assert.ok(accSrc.includes("localUnit: '/g'"), 'Silver indicative per-gram row must use /g, not /kg');
   assert.ok(!accSrc.includes("localUnit: metal === 'gold' ? '/g' : '/kg'"));
 
   // Statutory preview compares Cuttack current vs Cuttack preview (no city mismatch)
-  const prevStart = ownerJs.indexOf('  function renderStatutoryPreview()');
-  const prevEnd = ownerJs.indexOf('  function renderStatutoryNotice()', prevStart);
+  const prevStart = adminJs.indexOf('  function renderStatutoryPreview()');
+  const prevEnd = adminJs.indexOf('  function renderStatutoryNotice()', prevStart);
   assert.ok(prevStart >= 0 && prevEnd > prevStart);
-  const prevSrc = ownerJs.slice(prevStart, prevEnd);
+  const prevSrc = adminJs.slice(prevStart, prevEnd);
   assert.ok(prevSrc.includes("const current = computeCityPrices('cuttack'"), 'Statutory preview must compare Cuttack current vs Cuttack preview');
 
   // IST date stamp rolls over at 00:00 IST (18:30 UTC), not 00:00 UTC
-  const { ctx } = loadOwnerApi();
-  vm.runInContext(ownerJs, ctx);
-  const todayIstIso = ctx.__OWNER_PWA_API__.todayIstIso;
+  const { ctx } = loadAdminApi();
+  vm.runInContext(adminJs, ctx);
+  const todayIstIso = ctx.__ADMIN_PWA_API__.todayIstIso;
   // 2026-11-27T20:00:00Z is 2026-11-28 01:30 AM IST
   assert.equal(todayIstIso(new Date('2026-11-27T20:00:00Z')), '2026-11-28');
   // 2026-11-27T18:00:00Z is 2026-11-27 11:30 PM IST
   assert.equal(todayIstIso(new Date('2026-11-27T18:00:00Z')), '2026-11-27');
 
   // Midnight hour handling uses hourCycle: 'h23' and % 24
-  assert.ok(ownerJs.includes("hourCycle: 'h23'"));
-  assert.ok(ownerJs.includes('% 24'));
+  assert.ok(adminJs.includes("hourCycle: 'h23'"));
+  assert.ok(adminJs.includes('% 24'));
   assert.ok(html.includes("hourCycle: 'h23'"));
 });
 
 test('Bug Fix 3: Dynamic statutory GST in Calculator, Lightbox & Mintu; empty catalog count; lightbox ObjectURL isolation; HTTP 422 retry', async () => {
   const html = await readFile(indexHtmlUrl, 'utf8');
-  const ownerJs = await readFile(ownerJsUrl, 'utf8');
+  const adminJs = await readFile(adminJsUrl, 'utf8');
 
   // Calculator uses statutoryRatesFor dynamically when available
   const calcStart = html.indexOf('    function getPerGramPrice(');
@@ -291,23 +291,23 @@ test('Bug Fix 3: Dynamic statutory GST in Calculator, Lightbox & Mintu; empty ca
   assert.equal(qDynamic.gstAmount, Math.round((100000 + 10000) * 0.05));
 
   // Empty catalog shows "0 pieces" once loaded instead of "Collection loading…" forever
-  assert.ok(html.includes("resultsEl.textContent = productOwner.catalogLoaded ? '0 pieces' : 'Collection loading…';"));
+  assert.ok(html.includes("resultsEl.textContent = productAdmin.catalogLoaded ? '0 pieces' : 'Collection loading…';"));
 
   // Lightbox ObjectURL pools are isolated and revoked on close in both PWAs
   assert.ok(html.includes('lightboxObjectUrls: []'));
   assert.ok(html.includes('function revokeLightboxObjectUrls()'));
-  assert.ok(html.includes('resolveItemMediaList(item, productOwner.lightboxObjectUrls)'));
-  assert.ok(ownerJs.includes('lightboxObjectUrls: []'));
-  assert.ok(ownerJs.includes('function revokeLightboxObjectUrls()'));
-  assert.ok(ownerJs.includes('resolveDisplayMedia(item, state.owner.lightboxObjectUrls)'));
+  assert.ok(html.includes('resolveItemMediaList(item, productAdmin.lightboxObjectUrls)'));
+  assert.ok(adminJs.includes('lightboxObjectUrls: []'));
+  assert.ok(adminJs.includes('function revokeLightboxObjectUrls()'));
+  assert.ok(adminJs.includes('resolveDisplayMedia(item, state.admin.lightboxObjectUrls)'));
 
   // Media PUT retries with existing sha on HTTP 422 in both PWAs
   assert.ok(html.includes('/HTTP 422|"sha" wasn\'t supplied/i'));
-  assert.ok(ownerJs.includes('/HTTP 422|"sha" wasn\'t supplied/i'));
+  assert.ok(adminJs.includes('/HTTP 422|"sha" wasn\'t supplied/i'));
 });
 
 test('Bug Fix 4: Both Service Workers normalize ?t= cache keys and never return undefined offline', async () => {
-  for (const [label, swUrl] of [['customer sw.js', customerSwUrl], ['owner/sw.js', ownerSwUrl]]) {
+  for (const [label, swUrl] of [['customer sw.js', customerSwUrl], ['admin/sw.js', adminSwUrl]]) {
     const swCode = await readFile(swUrl, 'utf8');
     const listeners = {};
     const cacheStore = new Map();
@@ -408,22 +408,22 @@ test('Bug Fix 4: Both Service Workers normalize ?t= cache keys and never return 
   }
 });
 
-test('Bug Fix 5: Owner HTML/CSS have zero undefined CSS variables and all md-span grid utilities are defined', async () => {
-  const ownerHtml = await readFile(ownerHtmlUrl, 'utf8');
-  const ownerCss = await readFile(ownerCssUrl, 'utf8');
+test('Bug Fix 5: Admin HTML/CSS have zero undefined CSS variables and all md-span grid utilities are defined', async () => {
+  const adminHtml = await readFile(adminHtmlUrl, 'utf8');
+  const adminCss = await readFile(adminCssUrl, 'utf8');
 
-  // Every var(--foo) used in owner/index.html and owner/styles.css must be defined in owner/styles.css
-  const definedVars = new Set([...ownerCss.matchAll(/(--[a-z0-9-]+)\s*:/gi)].map((m) => m[1]));
+  // Every var(--foo) used in admin/index.html and admin/styles.css must be defined in admin/styles.css
+  const definedVars = new Set([...adminCss.matchAll(/(--[a-z0-9-]+)\s*:/gi)].map((m) => m[1]));
   const usedVars = new Set([
-    ...[...ownerHtml.matchAll(/var\((--[a-z0-9-]+)/gi)].map((m) => m[1]),
-    ...[...ownerCss.matchAll(/var\((--[a-z0-9-]+)/gi)].map((m) => m[1])
+    ...[...adminHtml.matchAll(/var\((--[a-z0-9-]+)/gi)].map((m) => m[1]),
+    ...[...adminCss.matchAll(/var\((--[a-z0-9-]+)/gi)].map((m) => m[1])
   ]);
   const missingVars = [...usedVars].filter((v) => !definedVars.has(v));
-  assert.deepEqual(missingVars, [], `Undefined CSS variables in Owner PWA: ${missingVars.join(', ')}`);
+  assert.deepEqual(missingVars, [], `Undefined CSS variables in Admin PWA: ${missingVars.join(', ')}`);
 
-  // Every md-span-* class referenced in owner/index.html must be defined in owner/styles.css
-  const usedSpans = new Set([...ownerHtml.matchAll(/\b(md-span-\d+)\b/g)].map((m) => m[1]));
+  // Every md-span-* class referenced in admin/index.html must be defined in admin/styles.css
+  const usedSpans = new Set([...adminHtml.matchAll(/\b(md-span-\d+)\b/g)].map((m) => m[1]));
   for (const cls of usedSpans) {
-    assert.ok(ownerCss.includes(`.${cls}`), `owner/styles.css must define .${cls}`);
+    assert.ok(adminCss.includes(`.${cls}`), `admin/styles.css must define .${cls}`);
   }
 });

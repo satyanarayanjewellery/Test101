@@ -231,7 +231,7 @@ img, svg { display: block; max-width: 100%; }
 @keyframes pulseDot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.42; transform: scale(0.84); } }
 .dot-pulse { animation: pulseDot 1.8s ease-in-out infinite; }
 
-/* ---- Owner Sign-In Gate ---- */
+/* ---- Admin Sign-In Gate ---- */
 .auth-gate {
   min-height: 100dvh;
   display: flex;
@@ -343,7 +343,7 @@ img, svg { display: block; max-width: 100%; }
   line-height: 1.45;
 }
 
-/* ---- Main Owner App Shell ---- */
+/* ---- Main Admin App Shell ---- */
 .app-header {
   position: sticky;
   top: 0;
@@ -972,7 +972,7 @@ img, svg { display: block; max-width: 100%; }
   }
 }
 
-/* ---- Owner Suite: Stock Badges, Auto-Price, GST Bill Slip, Orders & Print ---- */
+/* ---- Admin Suite: Stock Badges, Auto-Price, GST Bill Slip, Orders & Print ---- */
 .pill-blue { background: rgba(56, 189, 248, 0.14); border-color: rgba(56, 189, 248, 0.36); color: #7DD3FC; }
 .pill-featured { background: linear-gradient(135deg, var(--gold-soft), var(--gold)); border-color: var(--gold-hi); color: #140B02; font-weight: 800; }
 .item-card.is-sold-out { opacity: 0.78; border-color: rgba(244, 63, 94, 0.25); }
@@ -1039,7 +1039,7 @@ img, svg { display: block; max-width: 100%; }
   }
   body:not(.printing-slip) #view-desk { display: flex !important; }
   body.printing-slip #view-desk { display: none !important; }
-  body.printing-slip #owner-print-sheet {
+  body.printing-slip #admin-print-sheet {
     display: block !important;
     padding: 0.5rem !important;
     color: #111 !important;
