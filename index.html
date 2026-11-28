@@ -122,9 +122,9 @@
     @media (min-width:640px){.shop-hero-title{font-size:2.05rem}}
     .shop-hero-sub{margin:0.45rem 0 0;max-width:38rem;font-size:11.5px;line-height:1.65;color:rgba(236,229,231,0.72)}
     @media (min-width:640px){.shop-hero-sub{font-size:12.5px}}
-    .shop-owner-btn{display:inline-flex;align-items:center;gap:0.35rem;padding:0.35rem 0.6rem;border-radius:0.55rem;background:rgba(7,5,6,0.55);border:1px solid rgba(173,153,158,0.28);color:#C9BFC1;font-size:10.5px;font-weight:600}
-    .shop-owner-btn:hover{color:#F9EBB8;border-color:rgba(212,175,55,0.5)}
-    .shop-owner-btn.hidden{display:none}
+    .shop-admin-btn{display:inline-flex;align-items:center;gap:0.35rem;padding:0.35rem 0.6rem;border-radius:0.55rem;background:rgba(7,5,6,0.55);border:1px solid rgba(173,153,158,0.28);color:#C9BFC1;font-size:10.5px;font-weight:600}
+    .shop-admin-btn:hover{color:#F9EBB8;border-color:rgba(212,175,55,0.5)}
+    .shop-admin-btn.hidden{display:none}
     .shop-trust{display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.9rem}
     .shop-trust-item{display:inline-flex;align-items:center;gap:0.3rem;padding:0.24rem 0.55rem;border-radius:9999px;font-size:10px;font-weight:600;color:#F2DC88;background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.25)}
     .shop-trust-item svg{width:11px;height:11px;flex-shrink:0}
@@ -242,35 +242,35 @@
       .live-dot,.mintu-hero-avatar{animation:none!important}
     }
     .print-only{display:none}
-    /* --- Owner Suite & Storefront Stock/Featured Styles --- */
+    /* --- Admin Suite & Storefront Stock/Featured Styles --- */
     .shop-card.is-featured{border-color:rgba(212,175,55,0.55);box-shadow:0 12px 26px rgba(0,0,0,0.45),0 0 0 1px rgba(212,175,55,0.22)}
     .shop-card.is-sold-out .shop-card-media img,.shop-card.is-sold-out .shop-card-media video{opacity:0.55;filter:grayscale(0.35)}
     .shop-badge-featured{left:auto;right:2.45rem;background:linear-gradient(135deg,#F2DC88,#D4AF37);color:#12080A;border:0;font-weight:800}
     .shop-stock-pill{font-size:8.5px;font-weight:700;padding:0.1rem 0.34rem;border-radius:0.28rem;white-space:nowrap}
     .shop-stock-mto{background:rgba(56,189,248,0.14);color:#7DD3FC;border:1px solid rgba(56,189,248,0.35)}
     .shop-stock-out{background:rgba(244,63,94,0.16);color:#FDA4AF;border:1px solid rgba(244,63,94,0.38)}
-    .owner-suite-tabs{display:flex;flex-wrap:wrap;gap:0.35rem;padding:0.3rem;border-radius:0.75rem;background:rgba(12,7,9,0.75);border:1px solid rgba(58,35,42,0.85);margin-bottom:0.85rem}
-    .owner-suite-tab{padding:0.42rem 0.75rem;border-radius:0.55rem;font-size:11.5px;font-weight:700;color:#C4B8BA;background:transparent;border:1px solid transparent;cursor:pointer;transition:all 150ms ease}
-    .owner-suite-tab:hover{color:#FFF8E6}
-    .owner-suite-tab.is-active{background:rgba(212,175,55,0.18);border-color:rgba(212,175,55,0.42);color:#F9EBB8}
-    .owner-autoprice-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;padding:0.48rem 0.7rem;border-radius:0.65rem;background:rgba(212,175,55,0.08);border:1px dashed rgba(212,175,55,0.35);font-size:11px;color:#F2DC88}
-    .owner-split-grid{display:grid;grid-template-columns:1fr;gap:0.9rem}
-    @media (min-width:768px){.owner-split-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-    .owner-subcard{background:rgba(12,7,9,0.65);border:1px solid rgba(58,35,42,0.85);border-radius:0.9rem;padding:0.85rem}
-    .owner-bill-paper{background:#FFFDF7;color:#181214;border:1px solid #D4AF37;border-radius:0.75rem;padding:0.9rem;font-size:11.5px;line-height:1.45}
-    .owner-bill-paper h4{margin:0;font-size:14px;font-weight:800;color:#4A0D16}
-    .owner-bill-paper table{width:100%;border-collapse:collapse;margin:0.5rem 0;font-size:11px}
-    .owner-bill-paper th{text-align:left;padding:0.28rem 0.3rem;border-bottom:1.5px solid #4A0D16;color:#4A0D16;font-size:9.5px;text-transform:uppercase}
-    .owner-bill-paper td{padding:0.32rem 0.3rem;border-bottom:1px solid #E5DEC9;color:#181214}
-    .owner-bill-row{display:flex;justify-content:space-between;gap:0.5rem;padding:0.14rem 0;color:#2D2225}
-    .owner-bill-row.is-grand{font-size:13px;font-weight:800;color:#4A0D16;border-top:1px solid #D4AF37;margin-top:0.25rem;padding-top:0.35rem}
-    .owner-line-item{display:flex;align-items:center;justify-content:space-between;gap:0.5rem;padding:0.45rem 0.6rem;border-radius:0.55rem;background:rgba(20,12,15,0.85);border:1px solid rgba(58,35,42,0.8);margin-bottom:0.4rem}
-    .owner-order-item{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:0.5rem;padding:0.6rem 0.7rem;border-radius:0.65rem;background:rgba(20,12,15,0.85);border:1px solid rgba(58,35,42,0.85);margin-bottom:0.45rem}
-    .owner-order-item.is-overdue{border-color:rgba(244,63,94,0.5)}
-    .owner-order-item.is-delivered{opacity:0.68}
-    .owner-tag-card{background:#FFFDF7;color:#181214;border:1.5px solid #4A0D16;border-radius:0.65rem;padding:0.75rem;display:flex;align-items:center;gap:0.75rem;max-width:20rem;width:100%}
-    .owner-tag-qr{width:92px;height:92px;flex-shrink:0;background:#fff;padding:3px;border:1px solid #DDD}
-    .owner-print-sheet{display:none}
+    .admin-suite-tabs{display:flex;flex-wrap:wrap;gap:0.35rem;padding:0.3rem;border-radius:0.75rem;background:rgba(12,7,9,0.75);border:1px solid rgba(58,35,42,0.85);margin-bottom:0.85rem}
+    .admin-suite-tab{padding:0.42rem 0.75rem;border-radius:0.55rem;font-size:11.5px;font-weight:700;color:#C4B8BA;background:transparent;border:1px solid transparent;cursor:pointer;transition:all 150ms ease}
+    .admin-suite-tab:hover{color:#FFF8E6}
+    .admin-suite-tab.is-active{background:rgba(212,175,55,0.18);border-color:rgba(212,175,55,0.42);color:#F9EBB8}
+    .admin-autoprice-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;padding:0.48rem 0.7rem;border-radius:0.65rem;background:rgba(212,175,55,0.08);border:1px dashed rgba(212,175,55,0.35);font-size:11px;color:#F2DC88}
+    .admin-split-grid{display:grid;grid-template-columns:1fr;gap:0.9rem}
+    @media (min-width:768px){.admin-split-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    .admin-subcard{background:rgba(12,7,9,0.65);border:1px solid rgba(58,35,42,0.85);border-radius:0.9rem;padding:0.85rem}
+    .admin-bill-paper{background:#FFFDF7;color:#181214;border:1px solid #D4AF37;border-radius:0.75rem;padding:0.9rem;font-size:11.5px;line-height:1.45}
+    .admin-bill-paper h4{margin:0;font-size:14px;font-weight:800;color:#4A0D16}
+    .admin-bill-paper table{width:100%;border-collapse:collapse;margin:0.5rem 0;font-size:11px}
+    .admin-bill-paper th{text-align:left;padding:0.28rem 0.3rem;border-bottom:1.5px solid #4A0D16;color:#4A0D16;font-size:9.5px;text-transform:uppercase}
+    .admin-bill-paper td{padding:0.32rem 0.3rem;border-bottom:1px solid #E5DEC9;color:#181214}
+    .admin-bill-row{display:flex;justify-content:space-between;gap:0.5rem;padding:0.14rem 0;color:#2D2225}
+    .admin-bill-row.is-grand{font-size:13px;font-weight:800;color:#4A0D16;border-top:1px solid #D4AF37;margin-top:0.25rem;padding-top:0.35rem}
+    .admin-line-item{display:flex;align-items:center;justify-content:space-between;gap:0.5rem;padding:0.45rem 0.6rem;border-radius:0.55rem;background:rgba(20,12,15,0.85);border:1px solid rgba(58,35,42,0.8);margin-bottom:0.4rem}
+    .admin-order-item{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:0.5rem;padding:0.6rem 0.7rem;border-radius:0.65rem;background:rgba(20,12,15,0.85);border:1px solid rgba(58,35,42,0.85);margin-bottom:0.45rem}
+    .admin-order-item.is-overdue{border-color:rgba(244,63,94,0.5)}
+    .admin-order-item.is-delivered{opacity:0.68}
+    .admin-tag-card{background:#FFFDF7;color:#181214;border:1.5px solid #4A0D16;border-radius:0.65rem;padding:0.75rem;display:flex;align-items:center;gap:0.75rem;max-width:20rem;width:100%}
+    .admin-tag-qr{width:92px;height:92px;flex-shrink:0;background:#fff;padding:3px;border:1px solid #DDD}
+    .admin-print-sheet{display:none}
     .mb-2\.5{margin-bottom:0.625rem}
     .pt-0\.5{padding-top:0.125rem}
     .py-4{padding-top:1rem;padding-bottom:1rem}
@@ -279,8 +279,8 @@
       body{background:#fff!important;color:#111!important}
       #app-header,#desktop-nav-bar,#mobile-nav-bar,#inline-error-banner,#toast-container,.app-nav-mobile,#view-products,#view-news,#view-charts,#view-tools,.no-print{display:none!important}
       #view-rates{display:block!important}
-      body.printing-owner-slip #view-rates,body.printing-owner-slip main,body.printing-owner-slip .jewel-modal-backdrop{display:none!important}
-      body.printing-owner-slip #owner-print-sheet{display:block!important;padding:0.5rem;background:#fff!important;color:#111!important}
+      body.printing-admin-slip #view-rates,body.printing-admin-slip main,body.printing-admin-slip .jewel-modal-backdrop{display:none!important}
+      body.printing-admin-slip #admin-print-sheet{display:block!important;padding:0.5rem;background:#fff!important;color:#111!important}
       .glass-card,.rate-tile{border:1px solid #ccc!important;background:#fff!important;box-shadow:none!important;break-inside:avoid}
       .price-num{color:#111!important}
       .print-only{display:block!important}
@@ -962,7 +962,7 @@
       </footer>
     </div>
 
-    <!-- VIEW: JEWELLERY COLLECTION SHOWCASE (OWNER-ONLY UPLOAD STUDIO) -->
+    <!-- VIEW: JEWELLERY COLLECTION SHOWCASE (ADMIN-ONLY UPLOAD STUDIO) -->
     <div id="view-products" class="app-view hidden flex flex-col gap-4">
       <!-- STOREFRONT HERO -->
       <section class="shop-hero" aria-label="Shop introduction">
@@ -975,12 +975,12 @@
               <p class="shop-hero-sub">Handcrafted gold, silver, diamond &amp; gemstone pieces, hallmarked and weighed in front of you. Transparent pricing, GST invoice, showroom pickup.</p>
             </div>
             <div class="flex items-center gap-2 shrink-0">
-              <span id="owner-mode-pill" class="hidden inline-flex items-center gap-1.5 text-[10px] font-semibold rounded-full px-2.5 py-1 bg-emerald-500/15 border border-emerald-500/30 text-emerald-300">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Owner Mode
+              <span id="admin-mode-pill" class="hidden inline-flex items-center gap-1.5 text-[10px] font-semibold rounded-full px-2.5 py-1 bg-emerald-500/15 border border-emerald-500/30 text-emerald-300">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Admin Mode
               </span>
-              <button id="btn-owner-access" type="button" class="shop-owner-btn hidden" title="Shop owner upload access">
+              <button id="btn-admin-access" type="button" class="shop-admin-btn hidden" title="Shop admin upload access">
                 <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                <span id="btn-owner-access-label">Owner</span>
+                <span id="btn-admin-access-label">Admin</span>
               </button>
             </div>
           </div>
@@ -1036,33 +1036,33 @@
         </div>
       </section>
 
-      <!-- OWNER-ONLY UPLOAD STUDIO (Hidden for all customers until Owner Mode is unlocked) -->
-      <section id="owner-studio" class="hidden glass-card rounded-2xl p-4 sm:p-5 border-amber-500/35">
+      <!-- ADMIN-ONLY UPLOAD STUDIO (Hidden for all customers until Admin Mode is unlocked) -->
+      <section id="admin-studio" class="hidden glass-card rounded-2xl p-4 sm:p-5 border-amber-500/35">
         <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-3 border-b border-slate-800">
           <div>
-            <h3 class="text-sm font-semibold text-amber-200">Owner Studio &amp; Counter Suite</h3>
-            <p id="owner-sync-status" class="text-[11px] text-slate-400 mt-0.5">Verified GitHub token connected · Uploads publish live to all customers.</p>
+            <h3 class="text-sm font-semibold text-amber-200">Admin Studio &amp; Counter Suite</h3>
+            <p id="admin-sync-status" class="text-[11px] text-slate-400 mt-0.5">Verified GitHub token connected · Uploads publish live to all customers.</p>
           </div>
           <div class="flex flex-wrap items-center gap-2">
-            <span class="text-[10px] px-2 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 tabular-nums">Live: <strong id="owner-published-count" class="text-emerald-300">0</strong> · Drafts: <strong id="owner-draft-count" class="text-amber-300">0</strong></span>
+            <span class="text-[10px] px-2 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 tabular-nums">Live: <strong id="admin-published-count" class="text-emerald-300">0</strong> · Drafts: <strong id="admin-draft-count" class="text-amber-300">0</strong></span>
             <button id="btn-publish-all-drafts" type="button" class="hidden px-2.5 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-200 text-[11px] font-semibold">Publish All Drafts</button>
             <button id="btn-inline-reprice" type="button" class="px-2.5 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/40 text-amber-200 text-[11px] font-semibold" title="Recalculate prices on weighted items using today's live rate">↻ Live Reprice</button>
             <button id="btn-inline-export-csv" type="button" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-[11px] font-medium">CSV</button>
             <button id="btn-inline-export-json" type="button" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-[11px] font-medium">Backup</button>
-            <a id="link-owner-pwa" href="owner/" class="px-2.5 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/40 text-amber-200 text-[11px] font-semibold">Open Owner App ↗</a>
-            <button id="btn-owner-settings" type="button" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-[11px] font-medium">Token Settings</button>
-            <button id="btn-owner-lock" type="button" class="px-2.5 py-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-500/10 border border-rose-500/30 text-rose-200 text-[11px] font-semibold">Lock</button>
+            <a id="link-admin-pwa" href="admin/" class="px-2.5 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/40 text-amber-200 text-[11px] font-semibold">Open Admin App ↗</a>
+            <button id="btn-admin-settings" type="button" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-[11px] font-medium">Token Settings</button>
+            <button id="btn-admin-lock" type="button" class="px-2.5 py-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-500/10 border border-rose-500/30 text-rose-200 text-[11px] font-semibold">Lock</button>
           </div>
         </div>
 
-        <div class="owner-suite-tabs" role="tablist" aria-label="Owner Suite Tools">
-          <button type="button" class="owner-suite-tab is-active" data-owner-tab="upload" role="tab" aria-selected="true">Inventory &amp; Upload</button>
-          <button type="button" class="owner-suite-tab" data-owner-tab="bill" role="tab" aria-selected="false">GST Estimate &amp; Bill Slip</button>
-          <button type="button" class="owner-suite-tab" data-owner-tab="orders" role="tab" aria-selected="false">Customer Orders &amp; Rate-Lock <span id="inline-orders-badge" class="hidden px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-200 text-[10px] font-bold">0</span></button>
+        <div class="admin-suite-tabs" role="tablist" aria-label="Admin Suite Tools">
+          <button type="button" class="admin-suite-tab is-active" data-admin-tab="upload" role="tab" aria-selected="true">Inventory &amp; Upload</button>
+          <button type="button" class="admin-suite-tab" data-admin-tab="bill" role="tab" aria-selected="false">GST Estimate &amp; Bill Slip</button>
+          <button type="button" class="admin-suite-tab" data-admin-tab="orders" role="tab" aria-selected="false">Customer Orders &amp; Rate-Lock <span id="inline-orders-badge" class="hidden px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-200 text-[10px] font-bold">0</span></button>
         </div>
 
-        <!-- OWNER TAB 1: UPLOAD & SMART INVENTORY -->
-        <div id="owner-tab-upload">
+        <!-- ADMIN TAB 1: UPLOAD & SMART INVENTORY -->
+        <div id="admin-tab-upload">
           <form id="product-form" class="space-y-3">
             <div>
               <div id="product-dropzone" class="jewel-dropzone cursor-pointer">
@@ -1116,7 +1116,7 @@
                   <input id="product-featured" type="checkbox" class="accent-amber-500" />
                   ★ Feature as Showroom Pick (pins first in customer gallery)
                 </label>
-                <span id="product-autoprice-hint" class="hidden owner-autoprice-bar"></span>
+                <span id="product-autoprice-hint" class="hidden admin-autoprice-bar"></span>
               </div>
             </div>
 
@@ -1135,9 +1135,9 @@
           </form>
         </div>
 
-        <!-- OWNER TAB 2: GST ESTIMATE & COUNTER BILL SLIP MAKER -->
-        <div id="owner-tab-bill" class="hidden owner-split-grid">
-          <div class="owner-subcard space-y-3">
+        <!-- ADMIN TAB 2: GST ESTIMATE & COUNTER BILL SLIP MAKER -->
+        <div id="admin-tab-bill" class="hidden admin-split-grid">
+          <div class="admin-subcard space-y-3">
             <div class="flex items-center justify-between gap-2">
               <h4 class="text-xs font-semibold text-amber-200">Counter GST Estimate / Invoice Builder</h4>
               <button id="btn-inline-bill-reset" type="button" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-[11px] text-slate-200">New Slip</button>
@@ -1216,9 +1216,9 @@
             </label>
           </div>
 
-          <div class="owner-subcard space-y-3">
+          <div class="admin-subcard space-y-3">
             <h4 class="text-xs font-semibold text-amber-200">Printable Counter Slip Preview</h4>
-            <div id="inline-bill-preview" class="owner-bill-paper"></div>
+            <div id="inline-bill-preview" class="admin-bill-paper"></div>
             <div class="flex flex-wrap gap-2">
               <button id="btn-inline-bill-print" type="button" class="px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs">Print / Save PDF</button>
               <button id="btn-inline-bill-wa" type="button" class="px-3.5 py-2 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-200 font-semibold text-xs">Send on WhatsApp</button>
@@ -1227,9 +1227,9 @@
           </div>
         </div>
 
-        <!-- OWNER TAB 3: CUSTOMER ORDERS & ADVANCE RATE-LOCK BOOK -->
-        <div id="owner-tab-orders" class="hidden owner-split-grid">
-          <div class="owner-subcard">
+        <!-- ADMIN TAB 3: CUSTOMER ORDERS & ADVANCE RATE-LOCK BOOK -->
+        <div id="admin-tab-orders" class="hidden admin-split-grid">
+          <div class="admin-subcard">
             <h4 class="text-xs font-semibold text-amber-200 mb-2.5">Book Custom Order / Advance Rate-Lock</h4>
             <form id="inline-order-form" class="space-y-2.5" novalidate>
               <div class="grid grid-cols-2 gap-2">
@@ -1283,7 +1283,7 @@
             </form>
           </div>
 
-          <div class="owner-subcard space-y-2.5">
+          <div class="admin-subcard space-y-2.5">
             <div class="flex items-center justify-between gap-2">
               <div>
                 <h4 class="text-xs font-semibold text-amber-200">Order &amp; Advance Register</h4>
@@ -1899,38 +1899,38 @@
     </div>
   </nav>
 
-  <!-- OWNER ACCESS MODAL (GitHub Token Only · Top-level under body so fixed positioning is never trapped) -->
-  <div id="owner-auth-modal" class="jewel-modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="owner-auth-title">
+  <!-- ADMIN ACCESS MODAL (GitHub Token Only · Top-level under body so fixed positioning is never trapped) -->
+  <div id="admin-auth-modal" class="jewel-modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="admin-auth-title">
     <div class="jewel-modal-card">
       <div class="flex items-center justify-between gap-2 mb-3">
         <div>
-          <h3 id="owner-auth-title" class="text-sm sm:text-base font-semibold text-white">Shop Owner Login</h3>
-          <p class="text-[11px] text-slate-400 mt-0.5">GitHub Token required. Only the shop owner can upload or delete jewellery.</p>
+          <h3 id="admin-auth-title" class="text-sm sm:text-base font-semibold text-white">Shop Admin Login</h3>
+          <p class="text-[11px] text-slate-400 mt-0.5">GitHub Token required. Only the shop admin can upload or delete jewellery.</p>
         </div>
-        <button id="btn-close-owner-modal" type="button" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs text-slate-300" aria-label="Close">✕</button>
+        <button id="btn-close-admin-modal" type="button" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs text-slate-300" aria-label="Close">✕</button>
       </div>
 
-      <form id="owner-panel-github" class="space-y-3" novalidate>
+      <form id="admin-panel-github" class="space-y-3" novalidate>
         <div class="rounded-xl bg-slate-950/60 border border-slate-800 p-3 text-[11px] text-slate-300 space-y-1">
           <p class="font-semibold text-amber-200">GitHub Token Verification</p>
           <p class="text-slate-400">Paste your GitHub Fine-Grained Token with <span class="text-slate-200">Contents: Read and write</span> on <span class="font-mono text-amber-200">satyanarayanjewellery/shop</span>.</p>
           <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-amber-300 hover:text-amber-200 font-medium">Create token on GitHub ↗</a>
         </div>
         <div class="text-[11px] text-slate-400">
-          <label for="owner-gh-token" class="block">GitHub Personal Access Token</label>
+          <label for="admin-gh-token" class="block">GitHub Personal Access Token</label>
           <div class="flex items-center gap-1.5 mt-1">
-            <input id="owner-gh-token" type="password" autocomplete="off" spellcheck="false" autocapitalize="off" placeholder="github_pat_..." class="flex-1 min-w-0 rounded-lg bg-slate-950 border border-slate-700 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 font-mono" />
+            <input id="admin-gh-token" type="password" autocomplete="off" spellcheck="false" autocapitalize="off" placeholder="github_pat_..." class="flex-1 min-w-0 rounded-lg bg-slate-950 border border-slate-700 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 font-mono" />
             <button id="btn-toggle-gh-token" type="button" class="shrink-0 px-2.5 py-2.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs text-slate-300" aria-label="Show or hide token">Show</button>
           </div>
         </div>
         <label class="inline-flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
-          <input id="owner-gh-remember" type="checkbox" checked class="accent-amber-500" />
+          <input id="admin-gh-remember" type="checkbox" checked class="accent-amber-500" />
           Stay logged in on this device
         </label>
-        <p id="owner-gh-error" class="hidden text-xs text-rose-300 leading-relaxed"></p>
+        <p id="admin-gh-error" class="hidden text-xs text-rose-300 leading-relaxed"></p>
         <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
-          <button id="btn-owner-gh-disconnect" type="button" class="hidden px-3 py-2 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-200 text-xs font-semibold">Disconnect Token</button>
-          <button id="btn-owner-gh-verify" type="submit" class="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs ml-auto">Verify &amp; Unlock</button>
+          <button id="btn-admin-gh-disconnect" type="button" class="hidden px-3 py-2 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-200 text-xs font-semibold">Disconnect Token</button>
+          <button id="btn-admin-gh-verify" type="submit" class="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs ml-auto">Verify &amp; Unlock</button>
         </div>
       </form>
     </div>
@@ -1956,17 +1956,17 @@
     </div>
   </div>
 
-  <!-- OWNER QUICK-EDIT JEWELLERY MODAL (Top-level under body) -->
-  <div id="owner-edit-item-modal" class="jewel-modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="owner-edit-item-title">
+  <!-- ADMIN QUICK-EDIT JEWELLERY MODAL (Top-level under body) -->
+  <div id="admin-edit-item-modal" class="jewel-modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="admin-edit-item-title">
     <div class="jewel-modal-card">
       <div class="flex items-center justify-between gap-2 mb-3">
         <div>
-          <h3 id="owner-edit-item-title" class="text-sm sm:text-base font-semibold text-white">Edit Jewellery Item</h3>
-          <p id="owner-edit-item-sub" class="text-[11px] text-slate-400 mt-0.5">Update details and sync.</p>
+          <h3 id="admin-edit-item-title" class="text-sm sm:text-base font-semibold text-white">Edit Jewellery Item</h3>
+          <p id="admin-edit-item-sub" class="text-[11px] text-slate-400 mt-0.5">Update details and sync.</p>
         </div>
-        <button id="btn-close-owner-edit" type="button" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs text-slate-300" aria-label="Close">✕</button>
+        <button id="btn-close-admin-edit" type="button" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs text-slate-300" aria-label="Close">✕</button>
       </div>
-      <form id="owner-edit-item-form" class="space-y-2.5" novalidate>
+      <form id="admin-edit-item-form" class="space-y-2.5" novalidate>
         <input id="oedit-id" type="hidden" />
         <input id="oedit-source" type="hidden" />
         <div class="grid grid-cols-2 gap-2">
@@ -2010,24 +2010,24 @@
           </label>
         </div>
         <div class="flex justify-end gap-2 pt-2">
-          <button id="btn-cancel-owner-edit" type="button" class="px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-xs text-slate-200">Cancel</button>
-          <button id="btn-save-owner-edit" type="submit" class="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs">Save Changes</button>
+          <button id="btn-cancel-admin-edit" type="button" class="px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-xs text-slate-200">Cancel</button>
+          <button id="btn-save-admin-edit" type="submit" class="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs">Save Changes</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- OWNER PRINTABLE QR PRICE TAG MODAL (Top-level under body) -->
-  <div id="owner-qr-tag-modal" class="jewel-modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="owner-qr-tag-title">
+  <!-- ADMIN PRINTABLE QR PRICE TAG MODAL (Top-level under body) -->
+  <div id="admin-qr-tag-modal" class="jewel-modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="admin-qr-tag-title">
     <div class="jewel-modal-card">
       <div class="flex items-center justify-between gap-2 mb-3">
         <div>
-          <h3 id="owner-qr-tag-title" class="text-sm font-semibold text-white">Showroom QR Price Tag</h3>
+          <h3 id="admin-qr-tag-title" class="text-sm font-semibold text-white">Showroom QR Price Tag</h3>
           <p class="text-[11px] text-slate-400">Scan opens item on Satyanarayan Jewellers Storefront.</p>
         </div>
         <button id="btn-close-qr-tag" type="button" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs text-slate-300" aria-label="Close">✕</button>
       </div>
-      <div id="owner-qr-tag-stage" class="flex justify-center py-2"></div>
+      <div id="admin-qr-tag-stage" class="flex justify-center py-2"></div>
       <div class="flex justify-end gap-2 pt-2">
         <button id="btn-qr-tag-bill" type="button" class="px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-xs text-slate-200">+ Add to Bill Slip</button>
         <button id="btn-qr-tag-print" type="button" class="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs">Print Tag</button>
@@ -2036,7 +2036,7 @@
   </div>
 
   <!-- Dedicated Print Slip / Tag Container -->
-  <div id="owner-print-sheet" class="owner-print-sheet" aria-hidden="true"></div>
+  <div id="admin-print-sheet" class="admin-print-sheet" aria-hidden="true"></div>
 
   <script>
     // =========================================================================
@@ -3857,7 +3857,7 @@
     }
 
     // Show, in plain language, exactly which duty/GST the board is priced with — and prompt the
-    // owner to re-verify once the regime is old enough that a change is plausible.
+    // admin to re-verify once the regime is old enough that a change is plausible.
     // =========================================================================
     // HEADER & KPI LIVE STATUS UI
     // =========================================================================
@@ -6601,17 +6601,17 @@
     }
 
     // =========================================================================
-    // JEWELLERY COLLECTION & OWNER-ONLY MEDIA UPLOAD STUDIO (PHOTOS + VIDEOS)
+    // JEWELLERY COLLECTION & ADMIN-ONLY MEDIA UPLOAD STUDIO (PHOTOS + VIDEOS)
     // =========================================================================
-    const CATALOG_REPO_OWNER = 'satyanarayanjewellery';
+    const CATALOG_REPO_ADMIN = 'satyanarayanjewellery';
     const CATALOG_REPO_NAME = 'shop';
     const CATALOG_REPO_BRANCH = 'main';
     const CATALOG_MANIFEST_PATH = 'catalog/products.json';
     const CATALOG_MEDIA_PREFIX = 'catalog/media/';
     const PRODUCT_STORAGE_KEY = 'satyanarayan-jewellers-products-v1';
-    const OWNER_GH_TOKEN_KEY = 'sj_product_owner_gh_token_v1';
-    const OWNER_ACCESS_REVEAL_KEY = 'sj_owner_access_revealed_v1';
-    const OWNER_ACCESS_SECRET = 'owner';
+    const ADMIN_GH_TOKEN_KEY = 'sj_product_admin_gh_token_v1';
+    const ADMIN_ACCESS_REVEAL_KEY = 'sj_admin_access_revealed_v1';
+    const ADMIN_ACCESS_SECRET = 'admin';
     const MAX_MEDIA_PER_ITEM = 6;
     const MAX_IMAGE_BYTES = 12 * 1024 * 1024;
     const MAX_VIDEO_PUBLISH_BYTES = 20 * 1024 * 1024;
@@ -6622,10 +6622,10 @@
     const SHOP_WISHLIST_KEY = 'satyanarayan-shop-wishlist-v1';
     const SHOP_WHATSAPP_NUMBER = ''; // Optional: set a 10-digit showroom number to pre-address bag enquiries
 
-    const OWNER_ORDER_BOOK_KEY = 'satyanarayan_owner_orders_v1';
-    const OWNER_BILL_SEQ_KEY = 'satyanarayan_owner_bill_seq_v1';
+    const ADMIN_ORDER_BOOK_KEY = 'satyanarayan_admin_orders_v1';
+    const ADMIN_BILL_SEQ_KEY = 'satyanarayan_admin_bill_seq_v1';
 
-    const productOwner = {
+    const productAdmin = {
       unlocked: false,
       accessRevealed: false,
       ghConnected: false,
@@ -6661,9 +6661,9 @@
       orders: []
     };
 
-    // Restore the per-tab hidden owner-entry reveal (set by the #owner hash / "owner" key sequence)
+    // Restore the per-tab hidden admin-entry reveal (set by the #admin hash / "admin" key sequence)
     try {
-      productOwner.accessRevealed = sessionStorage.getItem(OWNER_ACCESS_REVEAL_KEY) === '1';
+      productAdmin.accessRevealed = sessionStorage.getItem(ADMIN_ACCESS_REVEAL_KEY) === '1';
     } catch { /* storage may be blocked */ }
 
     // --- Storefront bag & wishlist (persisted per device) ---
@@ -6684,25 +6684,25 @@
 
     function loadShopState() {
       const saved = readShopStorage(SHOP_WISHLIST_KEY, []);
-      productOwner.savedIds = new Set(Array.isArray(saved) ? saved.filter((x) => typeof x === 'string') : []);
+      productAdmin.savedIds = new Set(Array.isArray(saved) ? saved.filter((x) => typeof x === 'string') : []);
     }
 
     function saveShopState() {
-      writeShopStorage(SHOP_WISHLIST_KEY, Array.from(productOwner.savedIds));
+      writeShopStorage(SHOP_WISHLIST_KEY, Array.from(productAdmin.savedIds));
     }
 
     function findCatalogItem(id, source) {
-      const pool = source === 'local' ? productOwner.localItems : productOwner.publishedItems;
+      const pool = source === 'local' ? productAdmin.localItems : productAdmin.publishedItems;
       return pool.find((x) => x.id === id) || null;
     }
 
     function toggleProductSaved(id) {
       if (!id) return;
-      if (productOwner.savedIds.has(id)) {
-        productOwner.savedIds.delete(id);
+      if (productAdmin.savedIds.has(id)) {
+        productAdmin.savedIds.delete(id);
         showToast('Removed from saved pieces.', 'info');
       } else {
-        productOwner.savedIds.add(id);
+        productAdmin.savedIds.add(id);
         showToast('Saved to your wishlist.', 'success');
       }
       saveShopState();
@@ -6731,7 +6731,7 @@
 
     function bindShopEvents() {
       document.getElementById('product-sort')?.addEventListener('change', (e) => {
-        productOwner.sortMode = e.target.value || 'new';
+        productAdmin.sortMode = e.target.value || 'new';
         renderProducts();
       });
       document.getElementById('product-search')?.addEventListener('input', () => {
@@ -6745,8 +6745,8 @@
         renderProducts();
       });
       document.getElementById('btn-clear-filters')?.addEventListener('click', () => {
-        productOwner.activeCategory = 'all';
-        productOwner.sortMode = 'new';
+        productAdmin.activeCategory = 'all';
+        productAdmin.sortMode = 'new';
         const input = document.getElementById('product-search');
         if (input) input.value = '';
         const sort = document.getElementById('product-sort');
@@ -6762,7 +6762,7 @@
 
     function syncCategoryPillStyles() {
       document.querySelectorAll('.prod-cat-btn').forEach((btn) => {
-        const on = (btn.dataset.prodCat || 'all') === productOwner.activeCategory;
+        const on = (btn.dataset.prodCat || 'all') === productAdmin.activeCategory;
         btn.classList.toggle('is-active', on);
         btn.setAttribute('aria-pressed', on ? 'true' : 'false');
       });
@@ -6852,7 +6852,7 @@
         }
       } catch { /* ignore */ }
 
-      productOwner.localItems = items;
+      productAdmin.localItems = items;
     }
 
     async function saveLocalProductToDB(item) {
@@ -6876,13 +6876,13 @@
     }
 
     async function loadPublishedCatalog(force = false) {
-      if (productOwner.catalogLoaded && !force) return;
+      if (productAdmin.catalogLoaded && !force) return;
       try {
         const res = await fetch(`${CATALOG_MANIFEST_PATH}?t=${Date.now()}`, { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
           if (Array.isArray(data)) {
-            productOwner.publishedItems = data
+            productAdmin.publishedItems = data
               .filter((p) => p && typeof p === 'object' && typeof p.id === 'string' && typeof p.name === 'string')
               .map((p) => ({
                 ...p,
@@ -6904,7 +6904,7 @@
           }
         }
       } catch { /* offline or not published yet */ }
-      productOwner.catalogLoaded = true;
+      productAdmin.catalogLoaded = true;
     }
 
     async function ensureProductsLoaded() {
@@ -6914,7 +6914,7 @@
 
     function getStoredGitHubToken() {
       try {
-        return sessionStorage.getItem(OWNER_GH_TOKEN_KEY) || localStorage.getItem(OWNER_GH_TOKEN_KEY) || '';
+        return sessionStorage.getItem(ADMIN_GH_TOKEN_KEY) || localStorage.getItem(ADMIN_GH_TOKEN_KEY) || '';
       } catch {
         return '';
       }
@@ -6922,11 +6922,11 @@
 
     function storeGitHubToken(token, remember) {
       try {
-        sessionStorage.removeItem(OWNER_GH_TOKEN_KEY);
-        localStorage.removeItem(OWNER_GH_TOKEN_KEY);
+        sessionStorage.removeItem(ADMIN_GH_TOKEN_KEY);
+        localStorage.removeItem(ADMIN_GH_TOKEN_KEY);
         if (!token) return;
-        if (remember) localStorage.setItem(OWNER_GH_TOKEN_KEY, token);
-        else sessionStorage.setItem(OWNER_GH_TOKEN_KEY, token);
+        if (remember) localStorage.setItem(ADMIN_GH_TOKEN_KEY, token);
+        else sessionStorage.setItem(ADMIN_GH_TOKEN_KEY, token);
       } catch { /* ignore */ }
     }
 
@@ -6940,7 +6940,7 @@
       };
       let repoRes;
       try {
-        repoRes = await fetch(`https://api.github.com/repos/${CATALOG_REPO_OWNER}/${CATALOG_REPO_NAME}`, { headers, cache: 'no-store' });
+        repoRes = await fetch(`https://api.github.com/repos/${CATALOG_REPO_ADMIN}/${CATALOG_REPO_NAME}`, { headers, cache: 'no-store' });
       } catch {
         throw new Error('Could not reach GitHub API. Check your internet connection and try again.');
       }
@@ -6961,7 +6961,7 @@
         err.authError = true;
         throw err;
       }
-      let login = CATALOG_REPO_OWNER;
+      let login = CATALOG_REPO_ADMIN;
       try {
         const userRes = await fetch('https://api.github.com/user', { headers, cache: 'no-store' });
         if (userRes.ok) {
@@ -7036,11 +7036,11 @@
     }
 
     async function ghContentsRequest(method, repoPath, body = null) {
-      const url = `https://api.github.com/repos/${CATALOG_REPO_OWNER}/${CATALOG_REPO_NAME}/contents/${repoPath}`;
+      const url = `https://api.github.com/repos/${CATALOG_REPO_ADMIN}/${CATALOG_REPO_NAME}/contents/${repoPath}`;
       const options = {
         method,
         headers: {
-          Authorization: `Bearer ${productOwner.ghToken}`,
+          Authorization: `Bearer ${productAdmin.ghToken}`,
           Accept: 'application/vnd.github+json',
           'X-GitHub-Api-Version': '2022-11-28'
         },
@@ -7085,8 +7085,8 @@
     }
 
     async function publishItemToGitHub(item, mediaBlobs) {
-      if (!productOwner.ghConnected || !productOwner.ghToken) {
-        throw new Error('Connect your GitHub Owner Token first.');
+      if (!productAdmin.ghConnected || !productAdmin.ghToken) {
+        throw new Error('Connect your GitHub Admin Token first.');
       }
       const safeId = String(item.id).replace(/[^a-zA-Z0-9_-]/g, '');
       const totalSteps = mediaBlobs.length + 2;
@@ -7168,16 +7168,16 @@
         ...m,
         _previewBlob: mediaBlobs[idx]?.blob || null
       }));
-      productOwner.publishedItems = [
+      productAdmin.publishedItems = [
         { ...publishedRecord, media: immediatePreviewMedia },
-        ...productOwner.publishedItems.filter((x) => x.id !== safeId)
+        ...productAdmin.publishedItems.filter((x) => x.id !== safeId)
       ];
       return publishedRecord;
     }
 
     async function updatePublishedItemOnGitHub(updatedFields) {
-      if (!productOwner.ghConnected || !productOwner.ghToken) {
-        throw new Error('Connect your GitHub Owner Token to edit published items.');
+      if (!productAdmin.ghConnected || !productAdmin.ghToken) {
+        throw new Error('Connect your GitHub Admin Token to edit published items.');
       }
       const remote = await fetchRemoteCatalogFromGitHub();
       let found = false;
@@ -7206,13 +7206,13 @@
       };
       if (remote.sha) putPayload.sha = remote.sha;
       await ghContentsRequest('PUT', CATALOG_MANIFEST_PATH, putPayload);
-      productOwner.publishedItems = productOwner.publishedItems.map((x) => (
+      productAdmin.publishedItems = productAdmin.publishedItems.map((x) => (
         x.id === updatedFields.id ? { ...x, ...updatedFields } : x
       ));
     }
 
     async function repriceAllInlinePublishedOnGitHub() {
-      const prices = getActiveOwnerPrices();
+      const prices = getActiveAdminPrices();
       if (!prices) throw new Error('Waiting for live bullion rates before repricing.');
       const remote = await fetchRemoteCatalogFromGitHub();
       let count = 0;
@@ -7236,7 +7236,7 @@
       };
       if (remote.sha) putPayload.sha = remote.sha;
       await ghContentsRequest('PUT', CATALOG_MANIFEST_PATH, putPayload);
-      productOwner.publishedItems = productOwner.publishedItems.map((x) => {
+      productAdmin.publishedItems = productAdmin.publishedItems.map((x) => {
         const match = updatedList.find((u) => u && u.id === x.id);
         return match ? { ...x, price: match.price, makingPct: match.makingPct } : x;
       });
@@ -7244,8 +7244,8 @@
     }
 
     async function deletePublishedItemFromGitHub(item) {
-      if (!productOwner.ghConnected || !productOwner.ghToken) {
-        throw new Error('Connect your GitHub Owner Token to delete published items.');
+      if (!productAdmin.ghConnected || !productAdmin.ghToken) {
+        throw new Error('Connect your GitHub Admin Token to delete published items.');
       }
       const remote = await fetchRemoteCatalogFromGitHub();
       const target = remote.items.find((x) => x && x.id === item.id) || item;
@@ -7274,26 +7274,26 @@
           }
         } catch { /* ignore cleanup failure */ }
       }
-      productOwner.publishedItems = productOwner.publishedItems.filter((x) => x.id !== item.id);
+      productAdmin.publishedItems = productAdmin.publishedItems.filter((x) => x.id !== item.id);
     }
 
     function revokeGalleryObjectUrls() {
-      productOwner.objectUrls.forEach((u) => { try { URL.revokeObjectURL(u); } catch { /* ignore */ } });
-      productOwner.objectUrls = [];
+      productAdmin.objectUrls.forEach((u) => { try { URL.revokeObjectURL(u); } catch { /* ignore */ } });
+      productAdmin.objectUrls = [];
     }
 
     function revokeLightboxObjectUrls() {
-      productOwner.lightboxObjectUrls.forEach((u) => { try { URL.revokeObjectURL(u); } catch { /* ignore */ } });
-      productOwner.lightboxObjectUrls = [];
+      productAdmin.lightboxObjectUrls.forEach((u) => { try { URL.revokeObjectURL(u); } catch { /* ignore */ } });
+      productAdmin.lightboxObjectUrls = [];
     }
 
-    function trackObjectUrl(blob, pool = productOwner.objectUrls) {
+    function trackObjectUrl(blob, pool = productAdmin.objectUrls) {
       const url = URL.createObjectURL(blob);
       pool.push(url);
       return url;
     }
 
-    function resolveItemMediaList(item, urlPool = productOwner.objectUrls) {
+    function resolveItemMediaList(item, urlPool = productAdmin.objectUrls) {
       const list = Array.isArray(item.media) ? item.media : [];
       return list.map((m) => {
         if (m && m._previewBlob instanceof Blob) {
@@ -7307,59 +7307,59 @@
       }).filter(Boolean);
     }
 
-    function updateOwnerStudioUI() {
-      const studio = document.getElementById('owner-studio');
-      const pill = document.getElementById('owner-mode-pill');
-      const accessBtn = document.getElementById('btn-owner-access');
-      const btnLabel = document.getElementById('btn-owner-access-label');
-      const syncStatus = document.getElementById('owner-sync-status');
+    function updateAdminStudioUI() {
+      const studio = document.getElementById('admin-studio');
+      const pill = document.getElementById('admin-mode-pill');
+      const accessBtn = document.getElementById('btn-admin-access');
+      const btnLabel = document.getElementById('btn-admin-access-label');
+      const syncStatus = document.getElementById('admin-sync-status');
       const pubBtn = document.getElementById('btn-publish-product');
       const pubAllBtn = document.getElementById('btn-publish-all-drafts');
-      const pubCount = document.getElementById('owner-published-count');
-      const draftCount = document.getElementById('owner-draft-count');
+      const pubCount = document.getElementById('admin-published-count');
+      const draftCount = document.getElementById('admin-draft-count');
 
-      const isOwnerActive = Boolean(productOwner.unlocked && productOwner.ghConnected);
-      if (studio) studio.classList.toggle('hidden', !isOwnerActive);
-      if (pill) pill.classList.toggle('hidden', !isOwnerActive);
-      // Owner entry button stays hidden for customers until Owner Mode is live or the secret reveal fired
-      if (accessBtn) accessBtn.classList.toggle('hidden', !(isOwnerActive || productOwner.accessRevealed));
-      if (btnLabel) btnLabel.textContent = isOwnerActive ? 'Token Settings' : 'Owner';
-      if (pubCount) pubCount.textContent = String(productOwner.publishedItems.length);
-      if (draftCount) draftCount.textContent = String(productOwner.localItems.length);
-      if (pubBtn) pubBtn.classList.toggle('hidden', !isOwnerActive);
-      if (pubAllBtn) pubAllBtn.classList.toggle('hidden', !(isOwnerActive && productOwner.localItems.length > 0));
+      const isAdminActive = Boolean(productAdmin.unlocked && productAdmin.ghConnected);
+      if (studio) studio.classList.toggle('hidden', !isAdminActive);
+      if (pill) pill.classList.toggle('hidden', !isAdminActive);
+      // Admin entry button stays hidden for customers until Admin Mode is live or the secret reveal fired
+      if (accessBtn) accessBtn.classList.toggle('hidden', !(isAdminActive || productAdmin.accessRevealed));
+      if (btnLabel) btnLabel.textContent = isAdminActive ? 'Token Settings' : 'Admin';
+      if (pubCount) pubCount.textContent = String(productAdmin.publishedItems.length);
+      if (draftCount) draftCount.textContent = String(productAdmin.localItems.length);
+      if (pubBtn) pubBtn.classList.toggle('hidden', !isAdminActive);
+      if (pubAllBtn) pubAllBtn.classList.toggle('hidden', !(isAdminActive && productAdmin.localItems.length > 0));
       if (syncStatus) {
-        syncStatus.textContent = isOwnerActive
-          ? `Connected to live website as @${productOwner.ghLogin} · Uploads publish to all customers.`
-          : 'Owner login requires a verified GitHub token.';
+        syncStatus.textContent = isAdminActive
+          ? `Connected to live website as @${productAdmin.ghLogin} · Uploads publish to all customers.`
+          : 'Admin login requires a verified GitHub token.';
       }
     }
 
-    // --- Hidden owner entry: the Owner button is invisible to customers until revealed ---
-    function revealOwnerAccess() {
-      const firstReveal = !productOwner.accessRevealed;
-      productOwner.accessRevealed = true;
-      try { sessionStorage.setItem(OWNER_ACCESS_REVEAL_KEY, '1'); } catch { /* storage may be blocked */ }
-      updateOwnerStudioUI();
-      if (firstReveal) document.getElementById('btn-owner-access')?.focus();
+    // --- Hidden admin entry: the Admin button is invisible to customers until revealed ---
+    function revealAdminAccess() {
+      const firstReveal = !productAdmin.accessRevealed;
+      productAdmin.accessRevealed = true;
+      try { sessionStorage.setItem(ADMIN_ACCESS_REVEAL_KEY, '1'); } catch { /* storage may be blocked */ }
+      updateAdminStudioUI();
+      if (firstReveal) document.getElementById('btn-admin-access')?.focus();
     }
 
-    function concealOwnerAccess() {
-      productOwner.accessRevealed = false;
-      try { sessionStorage.removeItem(OWNER_ACCESS_REVEAL_KEY); } catch { /* storage may be blocked */ }
-      updateOwnerStudioUI();
+    function concealAdminAccess() {
+      productAdmin.accessRevealed = false;
+      try { sessionStorage.removeItem(ADMIN_ACCESS_REVEAL_KEY); } catch { /* storage may be blocked */ }
+      updateAdminStudioUI();
     }
 
     function renderPendingMediaPreviews() {
       const wrap = document.getElementById('product-media-previews');
       if (!wrap) return;
-      if (!productOwner.pendingFiles.length) {
+      if (!productAdmin.pendingFiles.length) {
         wrap.classList.add('hidden');
         wrap.innerHTML = '';
         return;
       }
       wrap.classList.remove('hidden');
-      wrap.innerHTML = productOwner.pendingFiles.map((entry, idx) => {
+      wrap.innerHTML = productAdmin.pendingFiles.map((entry, idx) => {
         const previewTag = entry.type === 'video'
           ? `<video src="${escapeHtml(entry.previewUrl)}" muted playsinline class="w-16 h-16 object-cover rounded-lg bg-slate-950"></video>`
           : `<img src="${escapeHtml(entry.previewUrl)}" alt="${escapeHtml(entry.file.name)}" class="w-16 h-16 object-cover rounded-lg bg-slate-950" />`;
@@ -7374,8 +7374,8 @@
     }
 
     function clearPendingMedia() {
-      productOwner.pendingFiles.forEach((f) => { try { URL.revokeObjectURL(f.previewUrl); } catch { /* ignore */ } });
-      productOwner.pendingFiles = [];
+      productAdmin.pendingFiles.forEach((f) => { try { URL.revokeObjectURL(f.previewUrl); } catch { /* ignore */ } });
+      productAdmin.pendingFiles = [];
       const input = document.getElementById('product-media-input');
       if (input) input.value = '';
       renderPendingMediaPreviews();
@@ -7385,7 +7385,7 @@
       const files = Array.from(fileList || []);
       if (!files.length) return;
       for (const file of files) {
-        if (productOwner.pendingFiles.length >= MAX_MEDIA_PER_ITEM) {
+        if (productAdmin.pendingFiles.length >= MAX_MEDIA_PER_ITEM) {
           showToast(`Maximum ${MAX_MEDIA_PER_ITEM} photos/videos per jewellery item.`, 'alert');
           break;
         }
@@ -7403,7 +7403,7 @@
           showToast(`Video "${file.name}" is larger than 50 MB.`, 'alert');
           continue;
         }
-        productOwner.pendingFiles.push({
+        productAdmin.pendingFiles.push({
           file,
           type: isVid ? 'video' : 'image',
           mime: file.type,
@@ -7414,19 +7414,19 @@
     }
 
     function getVisibleCatalogItems() {
-      const published = productOwner.publishedItems.map((p) => ({ ...p, _source: 'published' }));
-      if (!productOwner.unlocked) return published;
-      const drafts = productOwner.localItems.map((p) => ({ ...p, _source: 'local' }));
+      const published = productAdmin.publishedItems.map((p) => ({ ...p, _source: 'published' }));
+      if (!productAdmin.unlocked) return published;
+      const drafts = productAdmin.localItems.map((p) => ({ ...p, _source: 'local' }));
       return [...drafts, ...published];
     }
 
     function getFilteredCatalogItems() {
       const allItems = getVisibleCatalogItems();
       const query = (document.getElementById('product-search')?.value || '').trim().toLowerCase();
-      const cat = productOwner.activeCategory;
+      const cat = productAdmin.activeCategory;
       const filtered = allItems.filter((p) => {
         if (cat === 'saved') {
-          if (!productOwner.savedIds.has(p.id)) return false;
+          if (!productAdmin.savedIds.has(p.id)) return false;
         } else if (cat !== 'all' && String(p.category || 'Other') !== cat) {
           return false;
         }
@@ -7441,7 +7441,7 @@
     }
 
     function sortCatalogItems(items) {
-      const mode = productOwner.sortMode || 'new';
+      const mode = productAdmin.sortMode || 'new';
       const priceOf = (p) => Number(p.price) || 0;
       const out = items.slice();
       const byFeatured = (a, b) => (Boolean(b.featured) === Boolean(a.featured) ? 0 : (b.featured ? 1 : -1));
@@ -7476,11 +7476,11 @@
     function renderEmptyCollection(allItems) {
       const emptyText = allItems.length
         ? 'No jewellery matches these filters. Try another category or clear the search.'
-        : (productOwner.unlocked
-            ? 'No jewellery uploaded yet. Add photos or videos in the Owner Upload Studio above.'
+        : (productAdmin.unlocked
+            ? 'No jewellery uploaded yet. Add photos or videos in the Admin Upload Studio above.'
             : 'New jewellery designs are arriving shortly. Visit our showroom in Cuttack or check back soon.');
       const title = allItems.length
-        ? (productOwner.activeCategory === 'saved' ? 'No saved pieces yet' : 'Nothing matched')
+        ? (productAdmin.activeCategory === 'saved' ? 'No saved pieces yet' : 'Nothing matched')
         : 'Collection coming soon';
       return `
         <div class="shop-empty">
@@ -7492,29 +7492,29 @@
     }
 
     function renderProducts() {
-      updateOwnerStudioUI();
+      updateAdminStudioUI();
       const list = document.getElementById('product-list');
       if (!list) return;
       revokeGalleryObjectUrls();
 
       const { allItems, filtered } = getFilteredCatalogItems();
       const sorted = sortCatalogItems(filtered);
-      productOwner.lastRenderedIds = sorted.map((p) => p.id);
+      productAdmin.lastRenderedIds = sorted.map((p) => p.id);
 
       // Filter/sort chrome state
       syncCategoryPillStyles();
       const sortSelect = document.getElementById('product-sort');
-      if (sortSelect && sortSelect.value !== productOwner.sortMode) sortSelect.value = productOwner.sortMode;
+      if (sortSelect && sortSelect.value !== productAdmin.sortMode) sortSelect.value = productAdmin.sortMode;
       const savedPill = document.getElementById('saved-count-pill');
-      if (savedPill) savedPill.textContent = String(productOwner.savedIds.size);
+      if (savedPill) savedPill.textContent = String(productAdmin.savedIds.size);
       const searchInput = document.getElementById('product-search');
       document.getElementById('btn-clear-search')?.classList.toggle('hidden', !(searchInput?.value || '').trim());
       const resultsEl = document.getElementById('product-results-count');
-      const hasFilters = productOwner.activeCategory !== 'all' || Boolean((searchInput?.value || '').trim());
+      const hasFilters = productAdmin.activeCategory !== 'all' || Boolean((searchInput?.value || '').trim());
       document.getElementById('btn-clear-filters')?.classList.toggle('hidden', !hasFilters);
       if (resultsEl) {
         if (!allItems.length) {
-          resultsEl.textContent = productOwner.catalogLoaded ? '0 pieces' : 'Collection loading…';
+          resultsEl.textContent = productAdmin.catalogLoaded ? '0 pieces' : 'Collection loading…';
         } else if (!sorted.length) {
           resultsEl.innerHTML = `Showing <strong>0</strong> of ${allItems.length} pieces`;
         } else {
@@ -7523,7 +7523,7 @@
       }
 
       if (!sorted.length) {
-        if (!allItems.length && !productOwner.catalogLoaded) {
+        if (!allItems.length && !productAdmin.catalogLoaded) {
           list.innerHTML = Array.from({ length: 4 }, () => `<div class="shop-card shop-skeleton-card" aria-hidden="true"><div class="shop-skeleton-media"></div><div class="shop-skeleton-body"><span class="shop-skeleton-line"></span><span class="shop-skeleton-line short"></span><span class="shop-skeleton-line tiny"></span></div></div>`).join('');
         } else {
           list.innerHTML = renderEmptyCollection(allItems);
@@ -7534,9 +7534,9 @@
 
       list.innerHTML = sorted.map((p) => {
         const mediaList = resolveItemMediaList(p);
-        const activeIdx = Math.min(productOwner.activeMediaIndex.get(p.id) || 0, Math.max(0, mediaList.length - 1));
+        const activeIdx = Math.min(productAdmin.activeMediaIndex.get(p.id) || 0, Math.max(0, mediaList.length - 1));
         const activeMedia = mediaList[activeIdx] || null;
-        const isSaved = productOwner.savedIds.has(p.id);
+        const isSaved = productAdmin.savedIds.has(p.id);
         const priceNum = Number(p.price) || 0;
         const stock = normalizeCatalogStockStatus(p.stockStatus);
         const isSoldOut = stock === 'sold_out';
@@ -7572,14 +7572,14 @@
              ${Number(p.weight) > 0 ? `<span class="shop-price-note">≈ ${formatShopPrice(priceNum / Number(p.weight))}/g · making charges extra</span>` : '<span class="shop-price-note">making charges extra</span>'}`
           : `<span class="shop-price-request"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-8.5 8.5 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7A8.4 8.4 0 0 1 4 11.5 8.5 8.5 0 0 1 12.5 3 8.4 8.4 0 0 1 21 11.5Z"/></svg> Price on request</span>`;
 
-        const ownerBar = productOwner.unlocked
+        const adminBar = productAdmin.unlocked
           ? `<div class="shop-admin-row">
               <span class="${p._source === 'published' ? 'shop-admin-live' : 'shop-admin-draft'}">${p._source === 'published' ? 'Live' : 'Draft'}</span>
               <div class="shop-admin-btns">
-                <button type="button" class="product-owner-edit bg-slate-800 border border-slate-700 text-slate-200" data-product-id="${escapeHtml(p.id)}" data-source="${p._source}">Edit</button>
-                <button type="button" class="product-owner-qr bg-slate-800 border border-slate-700 text-amber-200" data-product-id="${escapeHtml(p.id)}" data-source="${p._source}" title="Printable QR Price Tag">QR</button>
-                <button type="button" class="product-owner-bill bg-amber-500/15 border border-amber-400/40 text-amber-200" data-product-id="${escapeHtml(p.id)}" data-source="${p._source}" title="Add to GST Bill Slip">+Bill</button>
-                ${p._source === 'local' && productOwner.ghConnected ? `<button type="button" class="product-publish-draft bg-emerald-500/20 border border-emerald-500/40 text-emerald-200" data-product-id="${escapeHtml(p.id)}">Publish</button>` : ''}
+                <button type="button" class="product-admin-edit bg-slate-800 border border-slate-700 text-slate-200" data-product-id="${escapeHtml(p.id)}" data-source="${p._source}">Edit</button>
+                <button type="button" class="product-admin-qr bg-slate-800 border border-slate-700 text-amber-200" data-product-id="${escapeHtml(p.id)}" data-source="${p._source}" title="Printable QR Price Tag">QR</button>
+                <button type="button" class="product-admin-bill bg-amber-500/15 border border-amber-400/40 text-amber-200" data-product-id="${escapeHtml(p.id)}" data-source="${p._source}" title="Add to GST Bill Slip">+Bill</button>
+                ${p._source === 'local' && productAdmin.ghConnected ? `<button type="button" class="product-publish-draft bg-emerald-500/20 border border-emerald-500/40 text-emerald-200" data-product-id="${escapeHtml(p.id)}">Publish</button>` : ''}
                 <button type="button" class="product-delete bg-rose-500/10 border border-rose-500/30 text-rose-300" data-product-id="${escapeHtml(p.id)}" data-source="${p._source}" aria-label="Delete ${escapeHtml(p.name)}">Delete</button>
               </div>
             </div>`
@@ -7605,7 +7605,7 @@
                 </button>
               </div>
               ${p.note ? `<p class="shop-price-note" style="margin:0.3rem 0 0;line-height:1.5">${escapeHtml(p.note)}</p>` : ''}
-              ${ownerBar}
+              ${adminBar}
             </div>
           </article>
         `;
@@ -7618,8 +7618,8 @@
       list.dataset.resetBound = '1';
       list.addEventListener('click', (e) => {
         if (!e.target.closest('[data-shop-reset]')) return;
-        productOwner.activeCategory = 'all';
-        productOwner.sortMode = 'new';
+        productAdmin.activeCategory = 'all';
+        productAdmin.sortMode = 'new';
         const input = document.getElementById('product-search');
         if (input) input.value = '';
         const sort = document.getElementById('product-sort');
@@ -7630,28 +7630,28 @@
     }
 
     function openProductLightbox(itemId, source, startIdx = 0) {
-      const pool = source === 'local' ? productOwner.localItems : productOwner.publishedItems;
+      const pool = source === 'local' ? productAdmin.localItems : productAdmin.publishedItems;
       const item = pool.find((x) => x.id === itemId);
       if (!item) return;
       revokeLightboxObjectUrls();
-      const media = resolveItemMediaList(item, productOwner.lightboxObjectUrls);
+      const media = resolveItemMediaList(item, productAdmin.lightboxObjectUrls);
       if (!media.length) return;
-      productOwner.lightboxItem = { item, media };
-      productOwner.lightboxIdx = Math.max(0, Math.min(startIdx, media.length - 1));
+      productAdmin.lightboxItem = { item, media };
+      productAdmin.lightboxIdx = Math.max(0, Math.min(startIdx, media.length - 1));
       renderLightboxStage();
       document.getElementById('product-lightbox')?.classList.remove('hidden');
       document.body.style.overflow = 'hidden';
     }
 
     function renderLightboxStage() {
-      const ctx = productOwner.lightboxItem;
+      const ctx = productAdmin.lightboxItem;
       if (!ctx) return;
       const stage = document.getElementById('lightbox-stage');
       const title = document.getElementById('lightbox-title');
       const meta = document.getElementById('lightbox-meta');
       const nav = document.getElementById('lightbox-nav');
       const counter = document.getElementById('lightbox-counter');
-      const m = ctx.media[productOwner.lightboxIdx];
+      const m = ctx.media[productAdmin.lightboxIdx];
       if (!stage || !m) return;
 
       if (title) title.textContent = ctx.item.name;
@@ -7662,14 +7662,14 @@
         ? `<video src="${escapeHtml(m.src)}" controls autoplay playsinline></video>`
         : `<img src="${escapeHtml(m.src)}" alt="${escapeHtml(ctx.item.name)}" />`;
       if (nav) nav.classList.toggle('hidden', ctx.media.length <= 1);
-      if (counter) counter.textContent = `${productOwner.lightboxIdx + 1} / ${ctx.media.length}`;
+      if (counter) counter.textContent = `${productAdmin.lightboxIdx + 1} / ${ctx.media.length}`;
 
       const actions = document.getElementById('lightbox-actions');
       if (actions) {
         const item = ctx.item;
-        const src = item._source || (productOwner.localItems.includes(item) ? 'local' : 'published');
+        const src = item._source || (productAdmin.localItems.includes(item) ? 'local' : 'published');
         const priceNum = Number(item.price) || 0;
-        const isSaved = productOwner.savedIds.has(item.id);
+        const isSaved = productAdmin.savedIds.has(item.id);
         const specs = [item.category, item.purity, Number(item.weight) > 0 ? `${Number(item.weight).toLocaleString('en-IN')} g` : '', item.sku ? `#${item.sku}` : ''].filter(Boolean);
         const itemGstPct = statutoryRatesFor(String(item.category || '').toLowerCase() === 'silver' ? 'silver' : 'gold').gstPct;
         actions.innerHTML = `
@@ -7691,18 +7691,18 @@
       const stage = document.getElementById('lightbox-stage');
       if (modal) modal.classList.add('hidden');
       if (stage) stage.innerHTML = '';
-      productOwner.lightboxItem = null;
+      productAdmin.lightboxItem = null;
       revokeLightboxObjectUrls();
-      if (document.getElementById('owner-auth-modal')?.classList.contains('hidden')) {
+      if (document.getElementById('admin-auth-modal')?.classList.contains('hidden')) {
         document.body.style.overflow = '';
       }
     }
 
-    function openOwnerAuthModal() {
-      const modal = document.getElementById('owner-auth-modal');
-      const errGh = document.getElementById('owner-gh-error');
-      const tokenInput = document.getElementById('owner-gh-token');
-      const disconnectBtn = document.getElementById('btn-owner-gh-disconnect');
+    function openAdminAuthModal() {
+      const modal = document.getElementById('admin-auth-modal');
+      const errGh = document.getElementById('admin-gh-error');
+      const tokenInput = document.getElementById('admin-gh-token');
+      const disconnectBtn = document.getElementById('btn-admin-gh-disconnect');
       if (errGh) { errGh.classList.add('hidden'); errGh.textContent = ''; }
       if (tokenInput) {
         tokenInput.type = 'password';
@@ -7710,14 +7710,14 @@
       }
       const toggleBtn = document.getElementById('btn-toggle-gh-token');
       if (toggleBtn) toggleBtn.textContent = 'Show';
-      if (disconnectBtn) disconnectBtn.classList.toggle('hidden', !(productOwner.ghConnected || getStoredGitHubToken()));
+      if (disconnectBtn) disconnectBtn.classList.toggle('hidden', !(productAdmin.ghConnected || getStoredGitHubToken()));
       modal?.classList.remove('hidden');
       document.body.style.overflow = 'hidden';
       setTimeout(() => tokenInput?.focus(), 40);
     }
 
-    function closeOwnerAuthModal() {
-      document.getElementById('owner-auth-modal')?.classList.add('hidden');
+    function closeAdminAuthModal() {
+      document.getElementById('admin-auth-modal')?.classList.add('hidden');
       if (document.getElementById('product-lightbox')?.classList.contains('hidden')) {
         document.body.style.overflow = '';
       }
@@ -7735,7 +7735,7 @@
         showToast('Enter a valid price or leave blank for "Price on request".', 'alert');
         return null;
       }
-      if (!productOwner.pendingFiles.length) {
+      if (!productAdmin.pendingFiles.length) {
         showToast('Please select at least one jewellery photo or video.', 'alert');
         return null;
       }
@@ -7756,9 +7756,9 @@
     }
 
     // =========================================================================
-    // INLINE OWNER SUITE: AUTO-PRICING, GST BILL SLIP, ORDER BOOK & QR TAGS
+    // INLINE ADMIN SUITE: AUTO-PRICING, GST BILL SLIP, ORDER BOOK & QR TAGS
     // =========================================================================
-    function getActiveOwnerPrices() {
+    function getActiveAdminPrices() {
       if (state.live && Number.isFinite(state.live.spotGold) && Number.isFinite(state.live.spotSilver) && Number.isFinite(state.live.usdInr)) {
         return computeCityPrices(state.cityId || 'cuttack', state.live.spotGold, state.live.spotSilver, state.live.usdInr);
       }
@@ -7790,7 +7790,7 @@
       return map[metal] || (prices.gold916ExGst / 10) || 0;
     }
 
-    function computeInlineAutoItemPrice({ category = 'Gold', purity = '', weight = 0, makingPct = 10 }, prices = getActiveOwnerPrices()) {
+    function computeInlineAutoItemPrice({ category = 'Gold', purity = '', weight = 0, makingPct = 10 }, prices = getActiveAdminPrices()) {
       const w = Math.max(0, Number(weight) || 0);
       if (!prices || !(w > 0)) return null;
       const metal = inferInlineMetalCode(category, purity);
@@ -7832,15 +7832,15 @@
     function nextInlineBillNo(bump = false) {
       const yr = todayIstIsoInline().slice(0, 4);
       let seq = 1;
-      try { seq = Math.max(1, Number(localStorage.getItem(OWNER_BILL_SEQ_KEY) || '1') || 1); } catch { /* ignore */ }
+      try { seq = Math.max(1, Number(localStorage.getItem(ADMIN_BILL_SEQ_KEY) || '1') || 1); } catch { /* ignore */ }
       if (bump) {
         seq += 1;
-        try { localStorage.setItem(OWNER_BILL_SEQ_KEY, String(seq)); } catch { /* ignore */ }
+        try { localStorage.setItem(ADMIN_BILL_SEQ_KEY, String(seq)); } catch { /* ignore */ }
       }
       return `SJ-${yr}-${String(seq).padStart(3, '0')}`;
     }
 
-    function computeInlineBillTotals(billDraft = productOwner.bill, prices = getActiveOwnerPrices()) {
+    function computeInlineBillTotals(billDraft = productAdmin.bill, prices = getActiveAdminPrices()) {
       const includeGst = billDraft.includeGst !== false;
       const lines = (Array.isArray(billDraft.lines) ? billDraft.lines : []).map((ln, idx) => {
         const metal = ['24K', '995', '22K', '18K', 'S999', 'S925'].includes(ln.metal) ? ln.metal : '22K';
@@ -7888,7 +7888,7 @@
     }
 
     function syncInlineBillInputs() {
-      const b = productOwner.bill;
+      const b = productAdmin.bill;
       const noInp = document.getElementById('inline-bill-no');
       if (noInp && !noInp.value.trim()) noInp.value = b.billNo || nextInlineBillNo(false);
       b.docType = document.getElementById('inline-bill-type')?.value || 'GST Estimate';
@@ -7932,13 +7932,13 @@
           <tbody>${rows}</tbody>
         </table>
         <div>
-          <div class="owner-bill-row"><span>Taxable Value</span><strong>${formatShopPrice(t.taxableValue)}</strong></div>
-          ${t.discount > 0 ? `<div class="owner-bill-row"><span>Special Discount</span><strong>-${formatShopPrice(t.discount)}</strong></div>` : ''}
-          <div class="owner-bill-row"><span>GST (CGST ${formatShopPrice(t.cgst)} + SGST ${formatShopPrice(t.sgst)})</span><strong>+${formatShopPrice(t.gstTotal)}</strong></div>
-          <div class="owner-bill-row"><span>Gross Total</span><strong>${formatShopPrice(t.grossTotal)}</strong></div>
-          ${t.oldExchange > 0 ? `<div class="owner-bill-row"><span>Less Old Metal Exchange</span><strong>-${formatShopPrice(t.oldExchange)}</strong></div>` : ''}
-          ${t.advance > 0 ? `<div class="owner-bill-row"><span>Less Advance Paid</span><strong>-${formatShopPrice(t.advance)}</strong></div>` : ''}
-          <div class="owner-bill-row is-grand"><span>${t.netPayable >= 0 ? 'Net Balance Payable' : 'Net Refund Due'}</span><span>${formatShopPrice(Math.abs(t.netPayable))}</span></div>
+          <div class="admin-bill-row"><span>Taxable Value</span><strong>${formatShopPrice(t.taxableValue)}</strong></div>
+          ${t.discount > 0 ? `<div class="admin-bill-row"><span>Special Discount</span><strong>-${formatShopPrice(t.discount)}</strong></div>` : ''}
+          <div class="admin-bill-row"><span>GST (CGST ${formatShopPrice(t.cgst)} + SGST ${formatShopPrice(t.sgst)})</span><strong>+${formatShopPrice(t.gstTotal)}</strong></div>
+          <div class="admin-bill-row"><span>Gross Total</span><strong>${formatShopPrice(t.grossTotal)}</strong></div>
+          ${t.oldExchange > 0 ? `<div class="admin-bill-row"><span>Less Old Metal Exchange</span><strong>-${formatShopPrice(t.oldExchange)}</strong></div>` : ''}
+          ${t.advance > 0 ? `<div class="admin-bill-row"><span>Less Advance Paid</span><strong>-${formatShopPrice(t.advance)}</strong></div>` : ''}
+          <div class="admin-bill-row is-grand"><span>${t.netPayable >= 0 ? 'Net Balance Payable' : 'Net Refund Due'}</span><span>${formatShopPrice(Math.abs(t.netPayable))}</span></div>
         </div>
       `;
     }
@@ -7964,7 +7964,7 @@
     function populateInlineBillPicker() {
       const sel = document.getElementById('inline-bill-pick');
       if (!sel) return;
-      const all = [...productOwner.publishedItems, ...productOwner.localItems];
+      const all = [...productAdmin.publishedItems, ...productAdmin.localItems];
       sel.innerHTML = '<option value="">+ Pick from Catalogue…</option>' + all.map((p) => (
         `<option value="${escapeHtml(p.id)}">${escapeHtml(p.name)} (${escapeHtml(p.purity || p.category || 'Gold')})</option>`
       )).join('');
@@ -7972,11 +7972,11 @@
 
     function renderInlineBill() {
       syncInlineBillInputs();
-      const t = computeInlineBillTotals(productOwner.bill);
+      const t = computeInlineBillTotals(productAdmin.bill);
       const linesWrap = document.getElementById('inline-bill-lines');
       if (linesWrap) {
         linesWrap.innerHTML = t.lines.map((ln) => `
-          <div class="owner-line-item">
+          <div class="admin-line-item">
             <div class="min-w-0">
               <div class="text-xs font-semibold text-white truncate">${escapeHtml(ln.desc)}</div>
               <div class="text-[10px] text-slate-400 tabular-nums">${escapeHtml(ln.metal)} · ${ln.weight.toFixed(3)}g · Making ${escapeHtml(ln.makingLabel)}</div>
@@ -7989,16 +7989,16 @@
         `).join('');
       }
       const prev = document.getElementById('inline-bill-preview');
-      if (prev) prev.innerHTML = buildInlineBillHtml(productOwner.bill, t);
+      if (prev) prev.innerHTML = buildInlineBillHtml(productAdmin.bill, t);
     }
 
-    function switchOwnerSuiteTab(tabName) {
+    function switchAdminSuiteTab(tabName) {
       const valid = ['upload', 'bill', 'orders'];
       if (!valid.includes(tabName)) return;
-      productOwner.activeTab = tabName;
-      valid.forEach((t) => document.getElementById(`owner-tab-${t}`)?.classList.toggle('hidden', t !== tabName));
-      document.querySelectorAll('[data-owner-tab]').forEach((btn) => {
-        const on = btn.dataset.ownerTab === tabName;
+      productAdmin.activeTab = tabName;
+      valid.forEach((t) => document.getElementById(`admin-tab-${t}`)?.classList.toggle('hidden', t !== tabName));
+      document.querySelectorAll('[data-admin-tab]').forEach((btn) => {
+        const on = btn.dataset.adminTab === tabName;
         btn.classList.toggle('is-active', on);
         btn.setAttribute('aria-selected', on ? 'true' : 'false');
       });
@@ -8010,18 +8010,18 @@
     }
 
     function loadInlineOrders() {
-      const raw = readShopStorage(OWNER_ORDER_BOOK_KEY, []);
-      productOwner.orders = Array.isArray(raw) ? raw.filter((o) => o && o.customerName && o.item) : [];
+      const raw = readShopStorage(ADMIN_ORDER_BOOK_KEY, []);
+      productAdmin.orders = Array.isArray(raw) ? raw.filter((o) => o && o.customerName && o.item) : [];
       renderInlineOrders();
     }
 
     function saveInlineOrders() {
-      writeShopStorage(OWNER_ORDER_BOOK_KEY, productOwner.orders);
+      writeShopStorage(ADMIN_ORDER_BOOK_KEY, productAdmin.orders);
       renderInlineOrders();
     }
 
     function renderInlineOrders() {
-      const active = productOwner.orders.filter((o) => o.status !== 'Delivered');
+      const active = productAdmin.orders.filter((o) => o.status !== 'Delivered');
       const advSum = active.reduce((a, o) => a + (Number(o.advance) || 0), 0);
       const badge = document.getElementById('inline-orders-badge');
       if (badge) {
@@ -8032,15 +8032,15 @@
       if (sumEl) sumEl.textContent = `${active.length} active order${active.length === 1 ? '' : 's'} · ${formatShopPrice(advSum)} advance held`;
       const listEl = document.getElementById('inline-ord-list');
       if (!listEl) return;
-      if (!productOwner.orders.length) {
+      if (!productAdmin.orders.length) {
         listEl.innerHTML = '<p class="text-xs text-slate-400 py-4 text-center">No custom orders recorded yet.</p>';
         return;
       }
       const today = todayIstIsoInline();
-      listEl.innerHTML = productOwner.orders.map((o) => {
+      listEl.innerHTML = productAdmin.orders.map((o) => {
         const overdue = o.status !== 'Delivered' && o.dueDate && o.dueDate < today;
         return `
-          <div class="owner-order-item${overdue ? ' is-overdue' : ''}${o.status === 'Delivered' ? ' is-delivered' : ''}">
+          <div class="admin-order-item${overdue ? ' is-overdue' : ''}${o.status === 'Delivered' ? ' is-delivered' : ''}">
             <div class="min-w-0 flex-1">
               <div class="flex items-center gap-1.5 flex-wrap">
                 <strong class="text-xs text-white">${escapeHtml(o.customerName)}</strong>
@@ -8153,8 +8153,8 @@
     function buildInlineTagHtml(item) {
       const url = `https://satyanarayanjewellery.github.io/shop/#products?sku=${encodeURIComponent(item.sku || item.id)}`;
       return `
-        <div class="owner-tag-card">
-          <div class="owner-tag-qr">${generateInlineQrSvg(url, 84)}</div>
+        <div class="admin-tag-card">
+          <div class="admin-tag-qr">${generateInlineQrSvg(url, 84)}</div>
           <div style="min-width:0;flex:1">
             <div style="font-size:9px;font-weight:800;letter-spacing:0.08em;color:#4A0D16">SATYANARAYAN JEWELLERS</div>
             <div style="font-size:12px;font-weight:800;color:#181214;margin:0.12rem 0">${escapeHtml(item.name)}</div>
@@ -8165,13 +8165,13 @@
       `;
     }
 
-    function printInlineOwnerSheet(htmlContent) {
-      const sheet = document.getElementById('owner-print-sheet');
+    function printInlineAdminSheet(htmlContent) {
+      const sheet = document.getElementById('admin-print-sheet');
       if (!sheet) { window.print(); return; }
       sheet.innerHTML = htmlContent;
-      document.body.classList.add('printing-owner-slip');
+      document.body.classList.add('printing-admin-slip');
       const done = () => {
-        document.body.classList.remove('printing-owner-slip');
+        document.body.classList.remove('printing-admin-slip');
         window.removeEventListener('afterprint', done);
       };
       window.addEventListener('afterprint', done);
@@ -8194,32 +8194,32 @@
       document.getElementById('oedit-stock').value = normalizeCatalogStockStatus(item.stockStatus);
       document.getElementById('oedit-featured').checked = Boolean(item.featured);
       document.getElementById('oedit-note').value = item.note || '';
-      document.getElementById('owner-edit-item-modal')?.classList.remove('hidden');
+      document.getElementById('admin-edit-item-modal')?.classList.remove('hidden');
     }
 
     function closeInlineEditModal() {
-      document.getElementById('owner-edit-item-modal')?.classList.add('hidden');
+      document.getElementById('admin-edit-item-modal')?.classList.add('hidden');
     }
 
     function openInlineQrModal(itemId, source) {
       const item = findCatalogItem(itemId, source);
       if (!item) return;
-      productOwner.qrTagItem = item;
-      const stage = document.getElementById('owner-qr-tag-stage');
+      productAdmin.qrTagItem = item;
+      const stage = document.getElementById('admin-qr-tag-stage');
       if (stage) stage.innerHTML = buildInlineTagHtml(item);
-      document.getElementById('owner-qr-tag-modal')?.classList.remove('hidden');
+      document.getElementById('admin-qr-tag-modal')?.classList.remove('hidden');
     }
 
     function closeInlineQrModal() {
-      document.getElementById('owner-qr-tag-modal')?.classList.add('hidden');
-      productOwner.qrTagItem = null;
+      document.getElementById('admin-qr-tag-modal')?.classList.add('hidden');
+      productAdmin.qrTagItem = null;
     }
 
     function addCatalogItemToInlineBill(item) {
       if (!item) return;
       const w = Math.max(0, Number(item.weight) || 0);
       const useFlat = !(w > 0) && Number(item.price) > 0;
-      productOwner.bill.lines.push({
+      productAdmin.bill.lines.push({
         id: `ibl-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`,
         desc: item.name || 'Jewellery Item',
         metal: inferInlineMetalCode(item.category, item.purity),
@@ -8229,8 +8229,8 @@
         makingVal: useFlat ? Math.round(Number(item.price) / 1.03) : (Number(item.makingPct) > 0 ? Number(item.makingPct) : 10),
         makingType: useFlat ? 'flat' : 'pct'
       });
-      switchOwnerSuiteTab('bill');
-      document.getElementById('owner-studio')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      switchAdminSuiteTab('bill');
+      document.getElementById('admin-studio')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       showToast(`Added "${item.name}" to GST Bill Slip.`, 'success');
     }
 
@@ -8247,19 +8247,19 @@
     }
 
     async function handleSaveLocalProduct() {
-      if (!productOwner.unlocked || !productOwner.ghConnected || productOwner.busy) return;
+      if (!productAdmin.unlocked || !productAdmin.ghConnected || productAdmin.busy) return;
       const item = collectProductFormData();
       if (!item) return;
-      productOwner.busy = true;
+      productAdmin.busy = true;
       try {
-        item.media = productOwner.pendingFiles.map((f) => ({
+        item.media = productAdmin.pendingFiles.map((f) => ({
           type: f.type,
           mime: f.mime,
           name: f.file.name,
           blob: f.file
         }));
         await saveLocalProductToDB(item);
-        productOwner.localItems.unshift(item);
+        productAdmin.localItems.unshift(item);
         document.getElementById('product-form')?.reset();
         clearPendingMedia();
         renderProducts();
@@ -8267,16 +8267,16 @@
       } catch (err) {
         showToast(err?.message || 'Could not save jewellery locally.', 'alert');
       } finally {
-        productOwner.busy = false;
+        productAdmin.busy = false;
       }
     }
 
     async function handlePublishNewProduct() {
-      if (!productOwner.unlocked || !productOwner.ghConnected || productOwner.busy) return;
+      if (!productAdmin.unlocked || !productAdmin.ghConnected || productAdmin.busy) return;
       const item = collectProductFormData();
       if (!item) return;
-      productOwner.busy = true;
-      const mediaBlobs = productOwner.pendingFiles.map((f) => ({ type: f.type, mime: f.mime, name: f.file.name, blob: f.file }));
+      productAdmin.busy = true;
+      const mediaBlobs = productAdmin.pendingFiles.map((f) => ({ type: f.type, mime: f.mime, name: f.file.name, blob: f.file }));
       try {
         await publishItemToGitHub(item, mediaBlobs);
         document.getElementById('product-form')?.reset();
@@ -8286,44 +8286,44 @@
       } catch (err) {
         showToast(err?.message || 'Could not publish jewellery to website.', 'alert');
       } finally {
-        productOwner.busy = false;
+        productAdmin.busy = false;
         setTimeout(() => setUploadProgress(false), 1200);
       }
     }
 
     async function handlePublishSingleDraft(draftId) {
-      if (!productOwner.ghConnected || productOwner.busy) return;
-      const draft = productOwner.localItems.find((x) => x.id === draftId);
+      if (!productAdmin.ghConnected || productAdmin.busy) return;
+      const draft = productAdmin.localItems.find((x) => x.id === draftId);
       if (!draft) return;
-      productOwner.busy = true;
+      productAdmin.busy = true;
       try {
         const mediaBlobs = (draft.media || [])
           .filter((m) => m && m.blob instanceof Blob)
           .map((m) => ({ type: m.type === 'video' ? 'video' : 'image', mime: m.mime || m.blob.type, name: m.name || '', blob: m.blob }));
         await publishItemToGitHub(draft, mediaBlobs);
         await deleteLocalProductFromDB(draft.id);
-        productOwner.localItems = productOwner.localItems.filter((x) => x.id !== draft.id);
+        productAdmin.localItems = productAdmin.localItems.filter((x) => x.id !== draft.id);
         renderProducts();
         showToast(`Published "${draft.name}" to the live website!`, 'success');
       } catch (err) {
         showToast(err?.message || 'Publish failed.', 'alert');
       } finally {
-        productOwner.busy = false;
+        productAdmin.busy = false;
         setTimeout(() => setUploadProgress(false), 1200);
       }
     }
 
     async function initProductsCatalog() {
       await ensureProductsLoaded();
-      // Silently restore verified GitHub Owner session if the owner previously chose to remember their token
+      // Silently restore verified GitHub Admin session if the admin previously chose to remember their token
       const savedToken = getStoredGitHubToken();
       if (savedToken) {
         try {
           const verified = await verifyGitHubToken(savedToken);
-          productOwner.ghToken = verified.token;
-          productOwner.ghLogin = verified.login;
-          productOwner.ghConnected = true;
-          productOwner.unlocked = true;
+          productAdmin.ghToken = verified.token;
+          productAdmin.ghLogin = verified.login;
+          productAdmin.ghConnected = true;
+          productAdmin.unlocked = true;
           loadInlineOrders();
           renderProducts();
         } catch (err) {
@@ -8334,19 +8334,19 @@
     }
 
     function bindEvents() {
-      // --- Jewellery Collection & Owner Upload Studio Events (GitHub Token Only) ---
-      document.getElementById('btn-owner-access')?.addEventListener('click', openOwnerAuthModal);
-      document.getElementById('btn-owner-settings')?.addEventListener('click', openOwnerAuthModal);
-      document.getElementById('btn-close-owner-modal')?.addEventListener('click', closeOwnerAuthModal);
-      document.getElementById('owner-auth-modal')?.addEventListener('click', (e) => {
-        if (e.target.id === 'owner-auth-modal') closeOwnerAuthModal();
+      // --- Jewellery Collection & Admin Upload Studio Events (GitHub Token Only) ---
+      document.getElementById('btn-admin-access')?.addEventListener('click', openAdminAuthModal);
+      document.getElementById('btn-admin-settings')?.addEventListener('click', openAdminAuthModal);
+      document.getElementById('btn-close-admin-modal')?.addEventListener('click', closeAdminAuthModal);
+      document.getElementById('admin-auth-modal')?.addEventListener('click', (e) => {
+        if (e.target.id === 'admin-auth-modal') closeAdminAuthModal();
       });
 
-      // --- Hidden owner entry: reveal only via the #owner URL hash or typing "owner" ---
-      const checkOwnerAccessHash = () => {
+      // --- Hidden admin entry: reveal only via the #admin URL hash or typing "admin" ---
+      const checkAdminAccessHash = () => {
         const rawHash = location.hash || '';
-        if (rawHash.toLowerCase() === '#owner') {
-          revealOwnerAccess();
+        if (rawHash.toLowerCase() === '#admin') {
+          revealAdminAccess();
           try { history.replaceState(null, '', `${location.pathname}${location.search}`); } catch { /* ignore */ }
           return;
         }
@@ -8359,40 +8359,40 @@
           switchAppView('products');
           const searchInp = document.getElementById('product-search');
           if (searchInp) searchInp.value = targetSku;
-          productOwner.activeCategory = 'all';
+          productAdmin.activeCategory = 'all';
           syncCategoryPillStyles();
           ensureProductsLoaded().then(() => {
             renderProducts();
-            const match = [...productOwner.publishedItems, ...productOwner.localItems].find(
+            const match = [...productAdmin.publishedItems, ...productAdmin.localItems].find(
               (x) => String(x.sku || '').toLowerCase() === targetSku.toLowerCase() || String(x.id || '') === targetSku
             );
             if (match && resolveItemMediaList(match).length) {
-              openProductLightbox(match.id, productOwner.localItems.includes(match) ? 'local' : 'published', 0);
+              openProductLightbox(match.id, productAdmin.localItems.includes(match) ? 'local' : 'published', 0);
             }
           });
         }
       };
-      checkOwnerAccessHash();
-      window.addEventListener('hashchange', checkOwnerAccessHash);
+      checkAdminAccessHash();
+      window.addEventListener('hashchange', checkAdminAccessHash);
 
-      let ownerSecretBuf = '';
-      let ownerSecretAt = 0;
+      let adminSecretBuf = '';
+      let adminSecretAt = 0;
       document.addEventListener('keydown', (e) => {
         if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
         const el = e.target;
         if (el && ((typeof el.closest === 'function' && el.closest('input, textarea, select, [contenteditable="true"]')) || el.isContentEditable)) return;
         if (typeof e.key !== 'string' || e.key.length !== 1) return;
         const now = Date.now();
-        if (now - ownerSecretAt > 1500) ownerSecretBuf = '';
-        ownerSecretAt = now;
-        ownerSecretBuf = (ownerSecretBuf + e.key.toLowerCase()).slice(-OWNER_ACCESS_SECRET.length);
-        if (ownerSecretBuf !== OWNER_ACCESS_SECRET) return;
-        ownerSecretBuf = '';
-        revealOwnerAccess();
+        if (now - adminSecretAt > 1500) adminSecretBuf = '';
+        adminSecretAt = now;
+        adminSecretBuf = (adminSecretBuf + e.key.toLowerCase()).slice(-ADMIN_ACCESS_SECRET.length);
+        if (adminSecretBuf !== ADMIN_ACCESS_SECRET) return;
+        adminSecretBuf = '';
+        revealAdminAccess();
       });
 
       document.getElementById('btn-toggle-gh-token')?.addEventListener('click', () => {
-        const input = document.getElementById('owner-gh-token');
+        const input = document.getElementById('admin-gh-token');
         const btn = document.getElementById('btn-toggle-gh-token');
         if (!input || !btn) return;
         const show = input.type === 'password';
@@ -8400,26 +8400,26 @@
         btn.textContent = show ? 'Hide' : 'Show';
       });
 
-      document.getElementById('owner-panel-github')?.addEventListener('submit', async (e) => {
+      document.getElementById('admin-panel-github')?.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const tokenInput = document.getElementById('owner-gh-token');
-        const remember = Boolean(document.getElementById('owner-gh-remember')?.checked);
-        const errEl = document.getElementById('owner-gh-error');
-        const btn = document.getElementById('btn-owner-gh-verify');
+        const tokenInput = document.getElementById('admin-gh-token');
+        const remember = Boolean(document.getElementById('admin-gh-remember')?.checked);
+        const errEl = document.getElementById('admin-gh-error');
+        const btn = document.getElementById('btn-admin-gh-verify');
         if (errEl) { errEl.classList.add('hidden'); errEl.textContent = ''; }
         if (btn) { btn.disabled = true; btn.textContent = 'Verifying...'; }
         try {
           const verified = await verifyGitHubToken(tokenInput?.value || '');
-          productOwner.ghToken = verified.token;
-          productOwner.ghLogin = verified.login;
-          productOwner.ghConnected = true;
-          productOwner.unlocked = true;
+          productAdmin.ghToken = verified.token;
+          productAdmin.ghLogin = verified.login;
+          productAdmin.ghConnected = true;
+          productAdmin.unlocked = true;
           storeGitHubToken(verified.token, remember);
-          closeOwnerAuthModal();
+          closeAdminAuthModal();
           await loadLocalProductsFromDB();
           loadInlineOrders();
           renderProducts();
-          showToast(`Owner verified (@${verified.login}). You can now publish jewellery live!`, 'success');
+          showToast(`Admin verified (@${verified.login}). You can now publish jewellery live!`, 'success');
         } catch (err) {
           if (errEl) {
             errEl.textContent = err?.message || 'Verification failed.';
@@ -8430,24 +8430,24 @@
         }
       });
 
-      document.getElementById('btn-owner-gh-disconnect')?.addEventListener('click', () => {
+      document.getElementById('btn-admin-gh-disconnect')?.addEventListener('click', () => {
         storeGitHubToken('', false);
-        productOwner.ghToken = '';
-        productOwner.ghLogin = '';
-        productOwner.ghConnected = false;
-        productOwner.unlocked = false;
-        concealOwnerAccess();
-        closeOwnerAuthModal();
+        productAdmin.ghToken = '';
+        productAdmin.ghLogin = '';
+        productAdmin.ghConnected = false;
+        productAdmin.unlocked = false;
+        concealAdminAccess();
+        closeAdminAuthModal();
         renderProducts();
-        showToast('GitHub token removed and Owner Mode locked.', 'info');
+        showToast('GitHub token removed and Admin Mode locked.', 'info');
       });
 
-      document.getElementById('btn-owner-lock')?.addEventListener('click', () => {
-        productOwner.unlocked = false;
-        productOwner.ghConnected = false;
-        productOwner.ghToken = '';
-        concealOwnerAccess();
-        const tokenInput = document.getElementById('owner-gh-token');
+      document.getElementById('btn-admin-lock')?.addEventListener('click', () => {
+        productAdmin.unlocked = false;
+        productAdmin.ghConnected = false;
+        productAdmin.ghToken = '';
+        concealAdminAccess();
+        const tokenInput = document.getElementById('admin-gh-token');
         if (tokenInput) {
           tokenInput.value = '';
           tokenInput.type = 'password';
@@ -8457,7 +8457,7 @@
         clearPendingMedia();
         revokeLightboxObjectUrls();
         renderProducts();
-        showToast('Owner Mode locked. Showing customer gallery view.', 'info');
+        showToast('Admin Mode locked. Showing customer gallery view.', 'info');
       });
 
       const dropzone = document.getElementById('product-dropzone');
@@ -8479,9 +8479,9 @@
         const btn = e.target.closest('.pending-remove');
         if (!btn) return;
         const idx = Number(btn.dataset.removePending);
-        if (Number.isInteger(idx) && productOwner.pendingFiles[idx]) {
-          try { URL.revokeObjectURL(productOwner.pendingFiles[idx].previewUrl); } catch { /* ignore */ }
-          productOwner.pendingFiles.splice(idx, 1);
+        if (Number.isInteger(idx) && productAdmin.pendingFiles[idx]) {
+          try { URL.revokeObjectURL(productAdmin.pendingFiles[idx].previewUrl); } catch { /* ignore */ }
+          productAdmin.pendingFiles.splice(idx, 1);
           renderPendingMediaPreviews();
         }
       });
@@ -8492,16 +8492,16 @@
       });
       document.getElementById('btn-save-local-product')?.addEventListener('click', handleSaveLocalProduct);
       document.getElementById('btn-publish-all-drafts')?.addEventListener('click', async () => {
-        if (!productOwner.ghConnected || productOwner.busy) return;
-        const ids = productOwner.localItems.map((x) => x.id);
+        if (!productAdmin.ghConnected || productAdmin.busy) return;
+        const ids = productAdmin.localItems.map((x) => x.id);
         for (const id of ids) {
           await handlePublishSingleDraft(id);
         }
       });
 
-      // Inline Owner Suite: Tabs, Auto-Pricing, Batch Reprice, CSV/JSON Backup, GST Bill Slip & Order Book
-      document.querySelectorAll('[data-owner-tab]').forEach((btn) => {
-        btn.addEventListener('click', () => switchOwnerSuiteTab(btn.dataset.ownerTab));
+      // Inline Admin Suite: Tabs, Auto-Pricing, Batch Reprice, CSV/JSON Backup, GST Bill Slip & Order Book
+      document.querySelectorAll('[data-admin-tab]').forEach((btn) => {
+        btn.addEventListener('click', () => switchAdminSuiteTab(btn.dataset.adminTab));
       });
 
       ['product-category', 'product-purity', 'product-weight', 'product-making'].forEach((id) => {
@@ -8510,7 +8510,7 @@
       });
 
       document.getElementById('btn-product-autoprice')?.addEventListener('click', () => {
-        const prices = getActiveOwnerPrices();
+        const prices = getActiveAdminPrices();
         if (!prices) return showToast('Waiting for live bullion rates…', 'alert');
         const w = Math.max(0, Number(document.getElementById('product-weight')?.value) || 0);
         if (!(w > 0)) return showToast('Enter item weight (g) first.', 'alert');
@@ -8528,8 +8528,8 @@
       });
 
       document.getElementById('btn-inline-reprice')?.addEventListener('click', async () => {
-        if (!productOwner.unlocked || !productOwner.ghConnected || productOwner.busy) return;
-        productOwner.busy = true;
+        if (!productAdmin.unlocked || !productAdmin.ghConnected || productAdmin.busy) return;
+        productAdmin.busy = true;
         try {
           const count = await repriceAllInlinePublishedOnGitHub();
           renderProducts();
@@ -8537,12 +8537,12 @@
         } catch (err) {
           showToast(err?.message || 'Batch reprice failed.', 'alert');
         } finally {
-          productOwner.busy = false;
+          productAdmin.busy = false;
         }
       });
 
       document.getElementById('btn-inline-export-csv')?.addEventListener('click', () => {
-        const all = [...productOwner.publishedItems, ...productOwner.localItems];
+        const all = [...productAdmin.publishedItems, ...productAdmin.localItems];
         if (!all.length) return showToast('No inventory items to export.', 'alert');
         const cols = ['id', 'name', 'category', 'purity', 'weight_g', 'making_pct', 'price_inr', 'stock_status', 'featured', 'sku', 'note'];
         const esc = (v) => {
@@ -8561,8 +8561,8 @@
       });
 
       document.getElementById('btn-inline-export-json')?.addEventListener('click', () => {
-        const payload = { exportedAt: new Date().toISOString(), gstin: SHOP_GSTIN, published: productOwner.publishedItems, orders: productOwner.orders };
-        downloadInlineExport(`sj-owner-backup-${todayIstIsoInline()}.json`, `${JSON.stringify(payload, null, 2)}\n`, 'application/json;charset=utf-8');
+        const payload = { exportedAt: new Date().toISOString(), gstin: SHOP_GSTIN, published: productAdmin.publishedItems, orders: productAdmin.orders };
+        downloadInlineExport(`sj-admin-backup-${todayIstIsoInline()}.json`, `${JSON.stringify(payload, null, 2)}\n`, 'application/json;charset=utf-8');
         showToast('Downloaded JSON backup (Inventory + Orders).', 'success');
       });
 
@@ -8591,7 +8591,7 @@
         const wt = Math.max(0, Number(document.getElementById('inline-bill-wt')?.value) || 0);
         if (!desc) return showToast('Enter item description.', 'alert');
         if (!(wt > 0)) return showToast('Enter net weight in grams.', 'alert');
-        productOwner.bill.lines.push({
+        productAdmin.bill.lines.push({
           id: `ibl-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`,
           desc,
           metal: document.getElementById('inline-bill-metal')?.value || '22K',
@@ -8609,34 +8609,34 @@
       document.getElementById('inline-bill-lines')?.addEventListener('click', (e) => {
         const btn = e.target.closest('[data-del-inline-line]');
         if (!btn) return;
-        productOwner.bill.lines = productOwner.bill.lines.filter((l) => l.id !== btn.dataset.delInlineLine);
+        productAdmin.bill.lines = productAdmin.bill.lines.filter((l) => l.id !== btn.dataset.delInlineLine);
         renderInlineBill();
       });
 
       document.getElementById('btn-inline-bill-reset')?.addEventListener('click', () => {
-        productOwner.bill.lines = [];
-        productOwner.bill.billNo = nextInlineBillNo(true);
-        document.getElementById('inline-bill-no').value = productOwner.bill.billNo;
+        productAdmin.bill.lines = [];
+        productAdmin.bill.billNo = nextInlineBillNo(true);
+        document.getElementById('inline-bill-no').value = productAdmin.bill.billNo;
         document.getElementById('inline-bill-cust').value = '';
         document.getElementById('inline-bill-phone').value = '';
         document.getElementById('inline-bill-old').value = '0';
         document.getElementById('inline-bill-disc').value = '0';
         document.getElementById('inline-bill-adv').value = '0';
         renderInlineBill();
-        showToast(`Started new slip ${productOwner.bill.billNo}.`, 'info');
+        showToast(`Started new slip ${productAdmin.bill.billNo}.`, 'info');
       });
 
       document.getElementById('btn-inline-bill-print')?.addEventListener('click', () => {
         syncInlineBillInputs();
-        const t = computeInlineBillTotals(productOwner.bill);
-        printInlineOwnerSheet(`<div class="owner-bill-paper" style="max-width:42rem;margin:0 auto">${buildInlineBillHtml(productOwner.bill, t)}</div>`);
+        const t = computeInlineBillTotals(productAdmin.bill);
+        printInlineAdminSheet(`<div class="admin-bill-paper" style="max-width:42rem;margin:0 auto">${buildInlineBillHtml(productAdmin.bill, t)}</div>`);
       });
 
       document.getElementById('btn-inline-bill-wa')?.addEventListener('click', () => {
         syncInlineBillInputs();
-        const t = computeInlineBillTotals(productOwner.bill);
-        const text = buildInlineBillShareText(productOwner.bill, t);
-        const digits = (productOwner.bill.customerPhone || '').replace(/\D/g, '');
+        const t = computeInlineBillTotals(productAdmin.bill);
+        const text = buildInlineBillShareText(productAdmin.bill, t);
+        const digits = (productAdmin.bill.customerPhone || '').replace(/\D/g, '');
         const ph = digits.length === 10 ? `91${digits}` : digits;
         const base = ph.length >= 10 ? `https://wa.me/${ph}` : 'https://wa.me/';
         window.open(`${base}?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
@@ -8644,9 +8644,9 @@
 
       document.getElementById('btn-inline-bill-copy')?.addEventListener('click', async () => {
         syncInlineBillInputs();
-        const t = computeInlineBillTotals(productOwner.bill);
+        const t = computeInlineBillTotals(productAdmin.bill);
         try {
-          await navigator.clipboard.writeText(buildInlineBillShareText(productOwner.bill, t));
+          await navigator.clipboard.writeText(buildInlineBillShareText(productAdmin.bill, t));
           showToast('Bill slip copied to clipboard.', 'success');
         } catch {
           showToast('Clipboard unavailable.', 'alert');
@@ -8655,7 +8655,7 @@
 
       // Inline Order Book Events
       document.getElementById('btn-inline-ord-lock')?.addEventListener('click', () => {
-        const prices = getActiveOwnerPrices();
+        const prices = getActiveAdminPrices();
         if (!prices) return showToast('Waiting for live bullion rates…', 'alert');
         const metal = document.getElementById('inline-ord-metal')?.value || '22K';
         const rate = Math.round(perGramExGstForMetal(metal, prices));
@@ -8668,7 +8668,7 @@
         const customerName = (document.getElementById('inline-ord-name')?.value || '').trim();
         const item = (document.getElementById('inline-ord-item')?.value || '').trim();
         if (!customerName || !item) return showToast('Enter customer name and jewellery item.', 'alert');
-        productOwner.orders.unshift({
+        productAdmin.orders.unshift({
           id: `ord-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
           customerName,
           phone: (document.getElementById('inline-ord-phone')?.value || '').replace(/[^\d+]/g, '').slice(0, 15),
@@ -8690,7 +8690,7 @@
       document.getElementById('inline-ord-list')?.addEventListener('change', (e) => {
         const sel = e.target.closest('[data-inline-ord-status]');
         if (!sel) return;
-        const ord = productOwner.orders.find((o) => o.id === sel.dataset.inlineOrdStatus);
+        const ord = productAdmin.orders.find((o) => o.id === sel.dataset.inlineOrdStatus);
         if (!ord) return;
         ord.status = sel.value;
         saveInlineOrders();
@@ -8700,7 +8700,7 @@
       document.getElementById('inline-ord-list')?.addEventListener('click', (e) => {
         const wa = e.target.closest('[data-inline-ord-wa]');
         if (wa) {
-          const ord = productOwner.orders.find((o) => o.id === wa.dataset.inlineOrdWa);
+          const ord = productAdmin.orders.find((o) => o.id === wa.dataset.inlineOrdWa);
           if (!ord) return;
           const msg = [
             `Namaskar ${ord.customerName}, Greetings from *Satyanarayan Jewellers (Cuttack)*!`,
@@ -8718,12 +8718,12 @@
         }
         const toBill = e.target.closest('[data-inline-ord-bill]');
         if (toBill) {
-          const ord = productOwner.orders.find((o) => o.id === toBill.dataset.inlineOrdBill);
+          const ord = productAdmin.orders.find((o) => o.id === toBill.dataset.inlineOrdBill);
           if (!ord) return;
           document.getElementById('inline-bill-cust').value = ord.customerName;
           document.getElementById('inline-bill-phone').value = ord.phone || '';
           document.getElementById('inline-bill-adv').value = String(ord.advance || 0);
-          productOwner.bill.lines.push({
+          productAdmin.bill.lines.push({
             id: `ibl-${Date.now()}`,
             desc: ord.item,
             metal: ord.metal || '22K',
@@ -8733,26 +8733,26 @@
             makingVal: 10,
             makingType: 'pct'
           });
-          switchOwnerSuiteTab('bill');
+          switchAdminSuiteTab('bill');
           showToast(`Loaded ${ord.customerName}'s order into GST Bill Slip.`, 'success');
           return;
         }
         const del = e.target.closest('[data-inline-ord-del]');
         if (del) {
-          productOwner.orders = productOwner.orders.filter((o) => o.id !== del.dataset.inlineOrdDel);
+          productAdmin.orders = productAdmin.orders.filter((o) => o.id !== del.dataset.inlineOrdDel);
           saveInlineOrders();
           showToast('Order entry removed.', 'info');
         }
       });
 
-      // Inline Owner Edit & QR Modals
-      document.getElementById('btn-close-owner-edit')?.addEventListener('click', closeInlineEditModal);
-      document.getElementById('btn-cancel-owner-edit')?.addEventListener('click', closeInlineEditModal);
-      document.getElementById('owner-edit-item-modal')?.addEventListener('click', (e) => {
-        if (e.target.id === 'owner-edit-item-modal') closeInlineEditModal();
+      // Inline Admin Edit & QR Modals
+      document.getElementById('btn-close-admin-edit')?.addEventListener('click', closeInlineEditModal);
+      document.getElementById('btn-cancel-admin-edit')?.addEventListener('click', closeInlineEditModal);
+      document.getElementById('admin-edit-item-modal')?.addEventListener('click', (e) => {
+        if (e.target.id === 'admin-edit-item-modal') closeInlineEditModal();
       });
       document.getElementById('btn-oedit-autoprice')?.addEventListener('click', () => {
-        const prices = getActiveOwnerPrices();
+        const prices = getActiveAdminPrices();
         if (!prices) return showToast('Waiting for live bullion rates…', 'alert');
         const w = Math.max(0, Number(document.getElementById('oedit-wt')?.value) || 0);
         if (!(w > 0)) return showToast('Enter item weight (g) first.', 'alert');
@@ -8766,9 +8766,9 @@
         document.getElementById('oedit-price').value = String(est.grandTotal);
         showToast(`Filled live ${est.metal} price: ${formatShopPrice(est.grandTotal)}`, 'success');
       });
-      document.getElementById('owner-edit-item-form')?.addEventListener('submit', async (e) => {
+      document.getElementById('admin-edit-item-form')?.addEventListener('submit', async (e) => {
         e.preventDefault();
-        if (!productOwner.unlocked || !productOwner.ghConnected || productOwner.busy) return;
+        if (!productAdmin.unlocked || !productAdmin.ghConnected || productAdmin.busy) return;
         const id = document.getElementById('oedit-id').value;
         const src = document.getElementById('oedit-source').value;
         const name = document.getElementById('oedit-name').value.trim();
@@ -8786,8 +8786,8 @@
           featured: Boolean(document.getElementById('oedit-featured').checked),
           note: document.getElementById('oedit-note').value.trim()
         };
-        const btn = document.getElementById('btn-save-owner-edit');
-        productOwner.busy = true;
+        const btn = document.getElementById('btn-save-admin-edit');
+        productAdmin.busy = true;
         if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
         try {
           if (src === 'local') {
@@ -8795,7 +8795,7 @@
             if (!existing) throw new Error('Draft not found.');
             const merged = { ...existing, ...updated };
             await saveLocalProductToDB(merged);
-            productOwner.localItems = productOwner.localItems.map((x) => (x.id === id ? merged : x));
+            productAdmin.localItems = productAdmin.localItems.map((x) => (x.id === id ? merged : x));
             showToast('Local draft updated.', 'success');
           } else {
             await updatePublishedItemOnGitHub(updated);
@@ -8806,36 +8806,36 @@
         } catch (err) {
           showToast(err?.message || 'Could not save changes.', 'alert');
         } finally {
-          productOwner.busy = false;
+          productAdmin.busy = false;
           if (btn) { btn.disabled = false; btn.textContent = 'Save Changes'; }
         }
       });
 
       document.getElementById('btn-close-qr-tag')?.addEventListener('click', closeInlineQrModal);
-      document.getElementById('owner-qr-tag-modal')?.addEventListener('click', (e) => {
-        if (e.target.id === 'owner-qr-tag-modal') closeInlineQrModal();
+      document.getElementById('admin-qr-tag-modal')?.addEventListener('click', (e) => {
+        if (e.target.id === 'admin-qr-tag-modal') closeInlineQrModal();
       });
       document.getElementById('btn-qr-tag-bill')?.addEventListener('click', () => {
-        const it = productOwner.qrTagItem;
+        const it = productAdmin.qrTagItem;
         closeInlineQrModal();
         if (it) addCatalogItemToInlineBill(it);
       });
       document.getElementById('btn-qr-tag-print')?.addEventListener('click', () => {
-        if (!productOwner.qrTagItem) return;
-        printInlineOwnerSheet(`<div style="display:flex;justify-content:center;padding:1rem">${buildInlineTagHtml(productOwner.qrTagItem)}</div>`);
+        if (!productAdmin.qrTagItem) return;
+        printInlineAdminSheet(`<div style="display:flex;justify-content:center;padding:1rem">${buildInlineTagHtml(productAdmin.qrTagItem)}</div>`);
       });
 
       document.getElementById('product-category-pills')?.addEventListener('click', (e) => {
         const btn = e.target.closest('.prod-cat-btn');
         if (!btn) return;
-        productOwner.activeCategory = btn.dataset.prodCat || 'all';
+        productAdmin.activeCategory = btn.dataset.prodCat || 'all';
         renderProducts();
       });
 
       document.getElementById('product-list')?.addEventListener('click', async (event) => {
         const thumbBtn = event.target.closest('.product-thumb-btn');
         if (thumbBtn) {
-          productOwner.activeMediaIndex.set(thumbBtn.dataset.productId, Number(thumbBtn.dataset.mediaIdx) || 0);
+          productAdmin.activeMediaIndex.set(thumbBtn.dataset.productId, Number(thumbBtn.dataset.mediaIdx) || 0);
           renderProducts();
           return;
         }
@@ -8854,18 +8854,18 @@
           enquireSingleProduct(waBtn.dataset.productId, waBtn.dataset.source || 'published');
           return;
         }
-        const editBtn = event.target.closest('.product-owner-edit');
-        if (editBtn && productOwner.unlocked) {
+        const editBtn = event.target.closest('.product-admin-edit');
+        if (editBtn && productAdmin.unlocked) {
           openInlineEditModal(editBtn.dataset.productId, editBtn.dataset.source || 'published');
           return;
         }
-        const qrBtn = event.target.closest('.product-owner-qr');
-        if (qrBtn && productOwner.unlocked) {
+        const qrBtn = event.target.closest('.product-admin-qr');
+        if (qrBtn && productAdmin.unlocked) {
           openInlineQrModal(qrBtn.dataset.productId, qrBtn.dataset.source || 'published');
           return;
         }
-        const addBillBtn = event.target.closest('.product-owner-bill');
-        if (addBillBtn && productOwner.unlocked) {
+        const addBillBtn = event.target.closest('.product-admin-bill');
+        if (addBillBtn && productAdmin.unlocked) {
           const item = findCatalogItem(addBillBtn.dataset.productId, addBillBtn.dataset.source || 'published');
           if (item) addCatalogItemToInlineBill(item);
           return;
@@ -8876,18 +8876,18 @@
           return;
         }
         const deleteBtn = event.target.closest('.product-delete');
-        if (deleteBtn && productOwner.unlocked && productOwner.ghConnected && !productOwner.busy) {
+        if (deleteBtn && productAdmin.unlocked && productAdmin.ghConnected && !productAdmin.busy) {
           const id = deleteBtn.dataset.productId;
           const source = deleteBtn.dataset.source;
           if (source === 'local') {
             await deleteLocalProductFromDB(id).catch(() => {});
-            productOwner.localItems = productOwner.localItems.filter((p) => p.id !== id);
+            productAdmin.localItems = productAdmin.localItems.filter((p) => p.id !== id);
             renderProducts();
             showToast('Local draft removed.', 'success');
           } else if (source === 'published') {
-            const target = productOwner.publishedItems.find((p) => p.id === id);
+            const target = productAdmin.publishedItems.find((p) => p.id === id);
             if (!target) return;
-            productOwner.busy = true;
+            productAdmin.busy = true;
             try {
               setUploadProgress(true, `Removing "${target.name}" from live website...`, 55);
               await deletePublishedItemFromGitHub(target);
@@ -8897,7 +8897,7 @@
             } catch (err) {
               showToast(err?.message || 'Could not remove published item.', 'alert');
             } finally {
-              productOwner.busy = false;
+              productAdmin.busy = false;
               setTimeout(() => setUploadProgress(false), 1000);
             }
           }
@@ -8908,7 +8908,7 @@
         const saveBtn = e.target.closest('.product-save-btn');
         if (saveBtn) {
           toggleProductSaved(saveBtn.dataset.productId);
-          const ctx = productOwner.lightboxItem;
+          const ctx = productAdmin.lightboxItem;
           if (ctx) renderLightboxStage();
           return;
         }
@@ -8920,21 +8920,21 @@
         if (e.target.id === 'product-lightbox') closeProductLightbox();
       });
       document.getElementById('btn-lightbox-prev')?.addEventListener('click', () => {
-        if (!productOwner.lightboxItem) return;
-        const n = productOwner.lightboxItem.media.length;
-        productOwner.lightboxIdx = (productOwner.lightboxIdx - 1 + n) % n;
+        if (!productAdmin.lightboxItem) return;
+        const n = productAdmin.lightboxItem.media.length;
+        productAdmin.lightboxIdx = (productAdmin.lightboxIdx - 1 + n) % n;
         renderLightboxStage();
       });
       document.getElementById('btn-lightbox-next')?.addEventListener('click', () => {
-        if (!productOwner.lightboxItem) return;
-        const n = productOwner.lightboxItem.media.length;
-        productOwner.lightboxIdx = (productOwner.lightboxIdx + 1) % n;
+        if (!productAdmin.lightboxItem) return;
+        const n = productAdmin.lightboxItem.media.length;
+        productAdmin.lightboxIdx = (productAdmin.lightboxIdx + 1) % n;
         renderLightboxStage();
       });
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
           closeProductLightbox();
-          closeOwnerAuthModal();
+          closeAdminAuthModal();
           closeInlineEditModal();
           closeInlineQrModal();
         }
@@ -9376,7 +9376,7 @@
       if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
         navigator.serviceWorker.register('sw.js').catch(() => { /* offline shell optional */ });
       }
-      // In-app PWA install prompt (enables side-by-side install alongside SJ Owner on Android Chrome)
+      // In-app PWA install prompt (enables side-by-side install alongside SJ Admin on Android Chrome)
       const installBtn = document.getElementById('btn-install-customer-pwa');
       if (installBtn) {
         let deferredInstallPrompt = null;

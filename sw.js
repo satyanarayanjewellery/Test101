@@ -15,14 +15,14 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(key => key !== CACHE && !key.startsWith('sj-owner-desk-')).map(key => caches.delete(key))))
+      .then(keys => Promise.all(keys.filter(key => key !== CACHE && !key.startsWith('sj-admin-desk-')).map(key => caches.delete(key))))
       .then(() => self.clients.claim())
       .then(() => self.clients.matchAll({ type: 'window', includeUncontrolled: true }))
       .then(clients => Promise.all(clients
         .filter(client => {
           const url = new URL(client.url);
-          // Do not reload the separately-scoped Owner PWA when the customer shell updates.
-          return url.origin === self.location.origin && !url.pathname.includes('/owner/') && !url.pathname.endsWith('/owner');
+          // Do not reload the separately-scoped Admin PWA when the customer shell updates.
+          return url.origin === self.location.origin && !url.pathname.includes('/admin/') && !url.pathname.endsWith('/admin');
         })
         .map(client => client.navigate(client.url).catch(() => null))))
   );
@@ -34,8 +34,8 @@ self.addEventListener('fetch', event => {
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
 
-  // Never intercept the dedicated Owner PWA scope; owner/sw.js manages /owner/ independently.
-  if (url.pathname.includes('/owner/') || url.pathname.endsWith('/owner')) return;
+  // Never intercept the dedicated Admin PWA scope; admin/sw.js manages /admin/ independently.
+  if (url.pathname.includes('/admin/') || url.pathname.endsWith('/admin')) return;
 
   // Always fetch live catalogue manifest from network so newly published jewellery appears immediately;
   // cache under pathname (stripping ?t= cache-buster) so offline visitors still see the last good catalog.

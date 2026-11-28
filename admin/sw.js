@@ -1,7 +1,7 @@
-// Offline-ready Service Worker for the Satyanarayan Jewellers Owner PWA (/owner/).
-// Scoped independently to ./ so the Owner PWA installs side-by-side with the customer
+// Offline-ready Service Worker for the Satyanarayan Jewellers Admin PWA (/admin/).
+// Scoped independently to ./ so the Admin PWA installs side-by-side with the customer
 // Price Desk PWA without interfering with customer caching or live GitHub API calls.
-const CACHE = 'sj-owner-desk-v4';
+const CACHE = 'sj-admin-desk-v4';
 const SHELL = [
   './index.html',
   './styles.css',
@@ -18,8 +18,8 @@ function isCacheable(res) {
 }
 
 function isCoreShellAsset(pathname) {
-  return pathname.endsWith('/owner/styles.css')
-    || pathname.endsWith('/owner/app.js')
+  return pathname.endsWith('/admin/styles.css')
+    || pathname.endsWith('/admin/app.js')
     || pathname.endsWith('/styles.css')
     || pathname.endsWith('/app.js');
 }
@@ -42,7 +42,7 @@ self.addEventListener('activate', (event) => {
     caches.keys()
       .then((keys) => Promise.all(
         keys
-          .filter((key) => key.startsWith('sj-owner-desk-') && key !== CACHE)
+          .filter((key) => key.startsWith('sj-admin-desk-') && key !== CACHE)
           .map((key) => caches.delete(key))
       ))
       .then(() => self.clients.claim())
@@ -54,7 +54,7 @@ self.addEventListener('activate', (event) => {
           .filter((client) => {
             const url = new URL(client.url);
             return url.origin === self.location.origin
-              && (url.pathname.includes('/owner/') || url.pathname.endsWith('/owner'));
+              && (url.pathname.includes('/admin/') || url.pathname.endsWith('/admin'));
           })
           .map((client) => (typeof client.navigate === 'function' ? client.navigate(client.url).catch(() => null) : null))
       ))
@@ -74,7 +74,7 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== self.location.origin) return;
 
   // Live catalogue manifest: always hit network first so newly published items appear immediately;
-  // fall back to last good cached manifest when offline so the owner can still inspect inventory.
+  // fall back to last good cached manifest when offline so the admin can still inspect inventory.
   if (url.pathname.endsWith('/catalog/products.json') || url.pathname === '/catalog/products.json') {
     event.respondWith(
       fetch(req)
@@ -105,7 +105,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Keep Owner manifest.webmanifest network-first so updated PWA id/scope/icons reach phones immediately.
+  // Keep Admin manifest.webmanifest network-first so updated PWA id/scope/icons reach phones immediately.
   if (url.pathname.endsWith('/manifest.webmanifest') || url.pathname === '/manifest.webmanifest') {
     event.respondWith(
       fetch(req)
@@ -122,8 +122,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Navigations inside the Owner PWA: network-first so updates arrive right away, offline fallback
-  // to cached owner shell.
+  // Navigations inside the Admin PWA: network-first so updates arrive right away, offline fallback
+  // to cached admin shell.
   if (req.mode === 'navigate') {
     event.respondWith(
       fetch(req)
@@ -140,7 +140,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Core JS & CSS shell files: network-first with cache: 'no-cache' so owner app.js and styles.css
+  // Core JS & CSS shell files: network-first with cache: 'no-cache' so admin app.js and styles.css
   // always stay in sync with network-first index.html navigations, falling back to cache offline.
   if (isCoreShellAsset(url.pathname)) {
     const cacheKey = url.pathname.endsWith('styles.css') ? './styles.css' : './app.js';

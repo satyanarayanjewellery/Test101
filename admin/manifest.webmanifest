@@ -1,8 +1,8 @@
 {
-  "name": "Satyanarayan Jewellers — Owner Desk",
-  "short_name": "SJ Owner",
-  "description": "Private Owner PWA for Satyanarayan Jewellers, Cuttack: upload & edit jewellery, monitor live bullion rates, compare global markets, calibrate accuracy, and update statutory duty & GST.",
-  "id": "/shop/owner/index.html",
+  "name": "Satyanarayan Jewellers — Admin Desk",
+  "short_name": "SJ Admin",
+  "description": "Private Admin PWA for Satyanarayan Jewellers, Cuttack: upload & edit jewellery, monitor live bullion rates, compare global markets, calibrate accuracy, and update statutory duty & GST.",
+  "id": "/shop/admin/index.html",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

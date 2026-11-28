@@ -5,7 +5,7 @@
   // CONSTANTS & SHARED REPO CONFIGURATION
   // =========================================================================
   const SHOP_GSTIN = '21AFNPP7926E1ZC';
-  const CATALOG_REPO_OWNER = 'satyanarayanjewellery';
+  const CATALOG_REPO_ADMIN = 'satyanarayanjewellery';
   const CATALOG_REPO_NAME = 'shop';
   const CATALOG_REPO_BRANCH = 'main';
   const CATALOG_MANIFEST_REPO_PATH = 'catalog/products.json';
@@ -14,14 +14,14 @@
   const STATUTORY_REPO_PATH = 'catalog/statutory-rates.json';
   const STATUTORY_FETCH_PATH = '../catalog/statutory-rates.json';
 
-  const OWNER_GH_TOKEN_KEY = 'sj_product_owner_gh_token_v1';
-  const OWNER_VERIFIED_META_KEY = 'sj_owner_verified_meta_v1';
+  const ADMIN_GH_TOKEN_KEY = 'sj_product_admin_gh_token_v1';
+  const ADMIN_VERIFIED_META_KEY = 'sj_admin_verified_meta_v1';
   const STORAGE_KEYS = {
     lastRates: 'satyanarayan_last_rates_v1',
     rateOfDay: 'satyanarayan_rate_of_day_v1',
     statutoryRates: 'satyanarayan_statutory_rates_v1',
-    orderBook: 'satyanarayan_owner_orders_v1',
-    billSeq: 'satyanarayan_owner_bill_seq_v1'
+    orderBook: 'satyanarayan_admin_orders_v1',
+    billSeq: 'satyanarayan_admin_bill_seq_v1'
   };
 
   const MAX_MEDIA_PER_ITEM = 6;
@@ -310,7 +310,7 @@
     statutoryRaw: null,
     prices: null,
     prevPrices: null,
-    owner: {
+    admin: {
       unlocked: false,
       offlineSession: false,
       token: '',
@@ -641,8 +641,8 @@
     return '';
   }
 
-  // Convert canonical repo path (`catalog/media/...`) into owner-page-relative display path (`../catalog/media/...`).
-  function toOwnerMediaSrc(src) {
+  // Convert canonical repo path (`catalog/media/...`) into admin-page-relative display path (`../catalog/media/...`).
+  function toAdminMediaSrc(src) {
     const safe = sanitizeCatalogMediaUrl(src);
     if (!safe) return '';
     return safe.startsWith('catalog/media/') ? `../${safe}` : safe;
@@ -804,7 +804,7 @@
   }
 
   // =========================================================================
-  // OWNER SUITE PURE HELPERS: AUTO-PRICING, BILL SLIPS, ORDERS & QR SVG
+  // ADMIN SUITE PURE HELPERS: AUTO-PRICING, BILL SLIPS, ORDERS & QR SVG
   // =========================================================================
   function inferMetalCode(category = 'Gold', purity = '') {
     const cat = String(category || '').toLowerCase();
@@ -1222,7 +1222,7 @@
 
   function getStoredGitHubToken() {
     try {
-      return sessionStorage.getItem(OWNER_GH_TOKEN_KEY) || localStorage.getItem(OWNER_GH_TOKEN_KEY) || '';
+      return sessionStorage.getItem(ADMIN_GH_TOKEN_KEY) || localStorage.getItem(ADMIN_GH_TOKEN_KEY) || '';
     } catch {
       return '';
     }
@@ -1230,11 +1230,11 @@
 
   function storeGitHubToken(token, remember) {
     try {
-      sessionStorage.removeItem(OWNER_GH_TOKEN_KEY);
-      localStorage.removeItem(OWNER_GH_TOKEN_KEY);
+      sessionStorage.removeItem(ADMIN_GH_TOKEN_KEY);
+      localStorage.removeItem(ADMIN_GH_TOKEN_KEY);
       if (!token) return;
-      if (remember) localStorage.setItem(OWNER_GH_TOKEN_KEY, token);
-      else sessionStorage.setItem(OWNER_GH_TOKEN_KEY, token);
+      if (remember) localStorage.setItem(ADMIN_GH_TOKEN_KEY, token);
+      else sessionStorage.setItem(ADMIN_GH_TOKEN_KEY, token);
     } catch { /* ignore */ }
   }
 
@@ -1250,7 +1250,7 @@
   }
 
   function saveVerifiedMeta(token, login) {
-    lsSet(OWNER_VERIFIED_META_KEY, JSON.stringify({
+    lsSet(ADMIN_VERIFIED_META_KEY, JSON.stringify({
       login,
       fp: tokenFingerprint(token),
       verifiedAt: Date.now()
@@ -1259,7 +1259,7 @@
 
   function readVerifiedMeta() {
     try {
-      const parsed = JSON.parse(lsGet(OWNER_VERIFIED_META_KEY, 'null'));
+      const parsed = JSON.parse(lsGet(ADMIN_VERIFIED_META_KEY, 'null'));
       return parsed && typeof parsed === 'object' ? parsed : null;
     } catch {
       return null;
@@ -1276,7 +1276,7 @@
     };
     let repoRes;
     try {
-      repoRes = await fetchImpl(`https://api.github.com/repos/${CATALOG_REPO_OWNER}/${CATALOG_REPO_NAME}`, { headers, cache: 'no-store' });
+      repoRes = await fetchImpl(`https://api.github.com/repos/${CATALOG_REPO_ADMIN}/${CATALOG_REPO_NAME}`, { headers, cache: 'no-store' });
     } catch {
       const err = new Error('Could not reach GitHub API. Check your internet connection.');
       err.networkError = true;
@@ -1299,7 +1299,7 @@
       err.authError = true;
       throw err;
     }
-    let login = CATALOG_REPO_OWNER;
+    let login = CATALOG_REPO_ADMIN;
     try {
       const userRes = await fetchImpl('https://api.github.com/user', { headers, cache: 'no-store' });
       if (userRes.ok) {
@@ -1341,12 +1341,12 @@
   }
 
   async function ghContentsRequest(method, repoPath, body = null) {
-    if (!state.owner.token) throw new Error('Not signed in with a GitHub Owner Token.');
-    const url = `https://api.github.com/repos/${CATALOG_REPO_OWNER}/${CATALOG_REPO_NAME}/contents/${repoPath}`;
+    if (!state.admin.token) throw new Error('Not signed in with a GitHub Admin Token.');
+    const url = `https://api.github.com/repos/${CATALOG_REPO_ADMIN}/${CATALOG_REPO_NAME}/contents/${repoPath}`;
     const opts = {
       method,
       headers: {
-        Authorization: `Bearer ${state.owner.token}`,
+        Authorization: `Bearer ${state.admin.token}`,
         Accept: 'application/vnd.github+json',
         'X-GitHub-Api-Version': '2022-11-28'
       },
@@ -1395,9 +1395,9 @@
         req.onerror = () => reject(req.error);
       });
       rows.sort((a, b) => Date.parse(b.createdAt || 0) - Date.parse(a.createdAt || 0));
-      state.owner.localItems = rows;
+      state.admin.localItems = rows;
     } catch {
-      state.owner.localItems = [];
+      state.admin.localItems = [];
     }
   }
 
@@ -1940,11 +1940,11 @@
     }
 
     if (offlineBanner && offlineText) {
-      if (!online || state.owner.offlineSession) {
+      if (!online || state.admin.offlineSession) {
         offlineBanner.classList.remove('hidden');
         offlineText.textContent = !online
           ? 'You are offline. Viewing cached rates & catalogue — new jewellery can still be saved as Local Drafts and published once back online.'
-          : 'Offline Owner Session active. Tap Sync or Publish once internet reconnects to re-verify with GitHub.';
+          : 'Offline Admin Session active. Tap Sync or Publish once internet reconnects to re-verify with GitHub.';
       } else {
         offlineBanner.classList.add('hidden');
       }
@@ -2117,7 +2117,7 @@
       repriceAndRender(true);
       renderStatutoryNotice();
       renderStatutoryPreview();
-      showToast('Published catalog/statutory-rates.json! Both Customer & Owner PWAs will use the new rates.', 'success');
+      showToast('Published catalog/statutory-rates.json! Both Customer & Admin PWAs will use the new rates.', 'success');
     } catch (err) {
       showToast(err?.message || 'Could not publish statutory rates.', 'error');
     } finally {
@@ -2134,7 +2134,7 @@
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data)) {
-          state.owner.publishedItems = data
+          state.admin.publishedItems = data
             .filter((p) => p && typeof p === 'object' && typeof p.id === 'string' && typeof p.name === 'string')
             .map((p) => ({
               ...p,
@@ -2161,12 +2161,12 @@
   async function refreshAllCatalog() {
     await Promise.all([loadPublishedCatalog(), loadLocalDrafts()]);
     renderCatalog();
-    updateOwnerKpis();
+    updateAdminKpis();
   }
 
-  function updateOwnerKpis() {
-    const liveN = state.owner.publishedItems.length;
-    const draftN = state.owner.localItems.length;
+  function updateAdminKpis() {
+    const liveN = state.admin.publishedItems.length;
+    const draftN = state.admin.localItems.length;
     const set = (id, v) => { const el = $(id); if (el) el.textContent = String(v); };
     set('kpi-live-items', liveN);
     set('kpi-draft-items', draftN);
@@ -2204,13 +2204,13 @@
   function renderPendingFiles() {
     const wrap = $('upload-previews');
     if (!wrap) return;
-    if (!state.owner.pendingFiles.length) {
+    if (!state.admin.pendingFiles.length) {
       wrap.classList.add('hidden');
       wrap.innerHTML = '';
       return;
     }
     wrap.classList.remove('hidden');
-    wrap.innerHTML = state.owner.pendingFiles.map((f, idx) => {
+    wrap.innerHTML = state.admin.pendingFiles.map((f, idx) => {
       const tag = f.type === 'video'
         ? `<video src="${escapeHtml(f.previewUrl)}" muted playsinline></video>`
         : `<img src="${escapeHtml(f.previewUrl)}" alt="${escapeHtml(f.file.name)}" />`;
@@ -2225,8 +2225,8 @@
   }
 
   function clearPendingFiles() {
-    state.owner.pendingFiles.forEach((f) => { try { URL.revokeObjectURL(f.previewUrl); } catch { /* ignore */ } });
-    state.owner.pendingFiles = [];
+    state.admin.pendingFiles.forEach((f) => { try { URL.revokeObjectURL(f.previewUrl); } catch { /* ignore */ } });
+    state.admin.pendingFiles = [];
     if ($('upload-media-input')) $('upload-media-input').value = '';
     if ($('upload-camera-input')) $('upload-camera-input').value = '';
     renderPendingFiles();
@@ -2235,7 +2235,7 @@
   function addPendingFiles(fileList) {
     const files = Array.from(fileList || []);
     for (const file of files) {
-      if (state.owner.pendingFiles.length >= MAX_MEDIA_PER_ITEM) {
+      if (state.admin.pendingFiles.length >= MAX_MEDIA_PER_ITEM) {
         showToast(`Maximum ${MAX_MEDIA_PER_ITEM} files per item.`, 'alert');
         break;
       }
@@ -2253,7 +2253,7 @@
         showToast(`Video "${file.name}" exceeds 50 MB.`, 'alert');
         continue;
       }
-      state.owner.pendingFiles.push({
+      state.admin.pendingFiles.push({
         file,
         type: isVid ? 'video' : 'image',
         mime: file.type,
@@ -2380,9 +2380,9 @@
     setUploadProgress(true, 'Published live!', 100);
 
     const previewMedia = publishedMedia.map((m, idx) => ({ ...m, _previewBlob: mediaBlobs[idx]?.blob || null }));
-    state.owner.publishedItems = [
+    state.admin.publishedItems = [
       { ...record, media: previewMedia },
-      ...state.owner.publishedItems.filter((x) => x.id !== safeId)
+      ...state.admin.publishedItems.filter((x) => x.id !== safeId)
     ];
     return record;
   }
@@ -2416,7 +2416,7 @@
     if (remote.sha) putPayload.sha = remote.sha;
     await ghContentsRequest('PUT', CATALOG_MANIFEST_REPO_PATH, putPayload);
 
-    state.owner.publishedItems = state.owner.publishedItems.map((x) => (
+    state.admin.publishedItems = state.admin.publishedItems.map((x) => (
       x.id === updatedFields.id ? { ...x, ...updatedFields } : x
     ));
   }
@@ -2446,7 +2446,7 @@
     };
     if (remote.sha) putPayload.sha = remote.sha;
     await ghContentsRequest('PUT', CATALOG_MANIFEST_REPO_PATH, putPayload);
-    state.owner.publishedItems = state.owner.publishedItems.map((x) => {
+    state.admin.publishedItems = state.admin.publishedItems.map((x) => {
       const match = updatedList.find((u) => u && u.id === x.id);
       return match ? { ...x, price: match.price, makingPct: match.makingPct } : x;
     });
@@ -2480,7 +2480,7 @@
         }
       } catch { /* ignore cleanup failure */ }
     }
-    state.owner.publishedItems = state.owner.publishedItems.filter((x) => x.id !== item.id);
+    state.admin.publishedItems = state.admin.publishedItems.filter((x) => x.id !== item.id);
   }
 
   function collectUploadForm() {
@@ -2489,7 +2489,7 @@
     const price = rawPrice === '' ? 0 : Number(rawPrice);
     if (!name) { showToast('Enter a jewellery name.', 'alert'); return null; }
     if (!Number.isFinite(price) || price < 0) { showToast('Enter a valid price or leave blank.', 'alert'); return null; }
-    if (!state.owner.pendingFiles.length) { showToast('Select at least one photo or video.', 'alert'); return null; }
+    if (!state.admin.pendingFiles.length) { showToast('Select at least one photo or video.', 'alert'); return null; }
     return {
       id: `prod-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       name,
@@ -2531,16 +2531,16 @@
   }
 
   function revokeItemObjectUrls() {
-    state.owner.objectUrls.forEach((u) => { try { URL.revokeObjectURL(u); } catch { /* ignore */ } });
-    state.owner.objectUrls = [];
+    state.admin.objectUrls.forEach((u) => { try { URL.revokeObjectURL(u); } catch { /* ignore */ } });
+    state.admin.objectUrls = [];
   }
 
   function revokeLightboxObjectUrls() {
-    state.owner.lightboxObjectUrls.forEach((u) => { try { URL.revokeObjectURL(u); } catch { /* ignore */ } });
-    state.owner.lightboxObjectUrls = [];
+    state.admin.lightboxObjectUrls.forEach((u) => { try { URL.revokeObjectURL(u); } catch { /* ignore */ } });
+    state.admin.lightboxObjectUrls = [];
   }
 
-  function resolveDisplayMedia(item, urlPool = state.owner.objectUrls) {
+  function resolveDisplayMedia(item, urlPool = state.admin.objectUrls) {
     return (Array.isArray(item.media) ? item.media : []).map((m) => {
       if (m && m._previewBlob instanceof Blob) {
         const u = URL.createObjectURL(m._previewBlob);
@@ -2552,7 +2552,7 @@
         urlPool.push(u);
         return { type: m.type === 'video' ? 'video' : 'image', src: u };
       }
-      const src = toOwnerMediaSrc(m && m.src);
+      const src = toAdminMediaSrc(m && m.src);
       return src ? { type: m.type === 'video' ? 'video' : 'image', src } : null;
     }).filter(Boolean);
   }
@@ -2561,14 +2561,14 @@
     const grid = $('catalog-grid');
     if (!grid) return;
     revokeItemObjectUrls();
-    updateOwnerKpis();
+    updateAdminKpis();
 
     const all = [
-      ...state.owner.localItems.map((x) => ({ ...x, _source: 'local' })),
-      ...state.owner.publishedItems.map((x) => ({ ...x, _source: 'published' }))
+      ...state.admin.localItems.map((x) => ({ ...x, _source: 'local' })),
+      ...state.admin.publishedItems.map((x) => ({ ...x, _source: 'published' }))
     ];
-    const q = state.owner.search.trim().toLowerCase();
-    const f = state.owner.filter;
+    const q = state.admin.search.trim().toLowerCase();
+    const f = state.admin.filter;
     const filtered = all.filter((p) => {
       if (f === 'live' && p._source !== 'published') return false;
       if (f === 'draft' && p._source !== 'local') return false;
@@ -2579,7 +2579,7 @@
       return [p.name, p.category, p.purity, p.sku, p.note].some((v) => String(v || '').toLowerCase().includes(q));
     });
 
-    const sortMode = state.owner.sort;
+    const sortMode = state.admin.sort;
     filtered.sort((a, b) => {
       if (Boolean(b.featured) !== Boolean(a.featured)) return b.featured ? 1 : -1;
       if (sortMode === 'name') return String(a.name || '').localeCompare(String(b.name || ''), 'en');
@@ -2595,10 +2595,10 @@
     });
 
     const lbl = $('catalog-count-label');
-    if (lbl) lbl.textContent = `Showing ${filtered.length} of ${all.length} item${all.length === 1 ? '' : 's'} (${state.owner.publishedItems.length} live · ${state.owner.localItems.length} local drafts)`;
+    if (lbl) lbl.textContent = `Showing ${filtered.length} of ${all.length} item${all.length === 1 ? '' : 's'} (${state.admin.publishedItems.length} live · ${state.admin.localItems.length} local drafts)`;
 
     if (!filtered.length) {
-      grid.innerHTML = `<div class="empty-state">${all.length ? 'No jewellery matches this filter.' : 'No jewellery items yet. Upload photos or videos in the Owner Upload Studio above.'}</div>`;
+      grid.innerHTML = `<div class="empty-state">${all.length ? 'No jewellery matches this filter.' : 'No jewellery items yet. Upload photos or videos in the Admin Upload Studio above.'}</div>`;
       return;
     }
 
@@ -2653,7 +2653,7 @@
   }
 
   function findItem(id, src) {
-    const pool = src === 'local' ? state.owner.localItems : state.owner.publishedItems;
+    const pool = src === 'local' ? state.admin.localItems : state.admin.publishedItems;
     return pool.find((x) => x.id === id) || null;
   }
 
@@ -2680,18 +2680,18 @@
     const item = findItem(id, src);
     if (!item) return;
     revokeLightboxObjectUrls();
-    const media = resolveDisplayMedia(item, state.owner.lightboxObjectUrls);
+    const media = resolveDisplayMedia(item, state.admin.lightboxObjectUrls);
     if (!media.length) return;
-    state.owner.lightboxItem = { item, media };
-    state.owner.lightboxIdx = 0;
+    state.admin.lightboxItem = { item, media };
+    state.admin.lightboxIdx = 0;
     renderLightbox();
     $('lightbox-modal').classList.remove('hidden');
   }
 
   function renderLightbox() {
-    const ctx = state.owner.lightboxItem;
+    const ctx = state.admin.lightboxItem;
     if (!ctx) return;
-    const cur = ctx.media[state.owner.lightboxIdx] || ctx.media[0];
+    const cur = ctx.media[state.admin.lightboxIdx] || ctx.media[0];
     $('lb-title').textContent = ctx.item.name;
     $('lb-meta').textContent = [ctx.item.category, ctx.item.purity, ctx.item.weight ? `${ctx.item.weight}g` : '', ctx.item.price ? fmtINR(ctx.item.price) : 'Price on request'].filter(Boolean).join(' · ');
     $('lb-stage').innerHTML = cur.type === 'video'
@@ -2700,7 +2700,7 @@
     const nav = $('lb-nav');
     if (nav) {
       nav.classList.toggle('hidden', ctx.media.length <= 1);
-      $('lb-counter').textContent = `${state.owner.lightboxIdx + 1} / ${ctx.media.length}`;
+      $('lb-counter').textContent = `${state.admin.lightboxIdx + 1} / ${ctx.media.length}`;
     }
   }
 
@@ -2937,7 +2937,7 @@
   }
 
   // =========================================================================
-  // OWNER SUITE: GST BILL SLIP, ORDER BOOK, QR PRICE TAG & EXPORTS
+  // ADMIN SUITE: GST BILL SLIP, ORDER BOOK, QR PRICE TAG & EXPORTS
   // =========================================================================
   function nextBillNumber(bump = false) {
     const year = todayIstIso().slice(0, 4);
@@ -2953,8 +2953,8 @@
     const sel = $('bill-pick-catalog');
     if (!sel) return;
     const all = [
-      ...state.owner.publishedItems.map((x) => ({ ...x, _src: 'Live' })),
-      ...state.owner.localItems.map((x) => ({ ...x, _src: 'Draft' }))
+      ...state.admin.publishedItems.map((x) => ({ ...x, _src: 'Live' })),
+      ...state.admin.localItems.map((x) => ({ ...x, _src: 'Draft' }))
     ];
     sel.innerHTML = '<option value="">+ Pick from Catalogue…</option>' + all.map((p) => (
       `<option value="${escapeHtml(p.id)}">${escapeHtml(p.name)} (${escapeHtml(p.purity || p.category || 'Gold')}${Number(p.weight) > 0 ? ` · ${Number(p.weight).toFixed(2)}g` : ''})</option>`
@@ -3089,7 +3089,7 @@
   }
 
   function printHtmlInSlipSheet(innerHtml) {
-    const sheet = $('owner-print-sheet');
+    const sheet = $('admin-print-sheet');
     if (!sheet) { window.print(); return; }
     sheet.innerHTML = innerHtml;
     document.body.classList.add('printing-slip');
@@ -3221,7 +3221,7 @@
   function openTagModal(id, src) {
     const item = findItem(id, src);
     if (!item) return;
-    state.owner.tagItem = item;
+    state.admin.tagItem = item;
     const stage = $('tag-preview-stage');
     if (stage) stage.innerHTML = buildTagCardHtml(item);
     $('tag-modal')?.classList.remove('hidden');
@@ -3248,8 +3248,8 @@
   }
 
   function updateInstallUI() {
-    if (!state.pwa.deferredPrompt && typeof window !== 'undefined' && window.__ownerDeferredPrompt) {
-      state.pwa.deferredPrompt = window.__ownerDeferredPrompt;
+    if (!state.pwa.deferredPrompt && typeof window !== 'undefined' && window.__adminDeferredPrompt) {
+      state.pwa.deferredPrompt = window.__adminDeferredPrompt;
     }
     const installed = isStandaloneMode();
     const hasPrompt = Boolean(state.pwa.deferredPrompt);
@@ -3260,7 +3260,7 @@
     const status = $('pwa-install-status');
     if (status) {
       status.textContent = installed
-        ? 'SJ Owner Desk is installed and running in standalone app mode.'
+        ? 'SJ Admin Desk is installed and running in standalone app mode.'
         : hasPrompt
           ? 'Ready to install as a standalone app on this device.'
           : 'Open directly in Chrome (not an in-app tab). If an older SJ Price Desk copy is installed, remove it once, then install both via their in-app Install buttons (or Chrome 157+).';
@@ -3274,25 +3274,25 @@
     promptEvt.prompt();
     const choice = await promptEvt.userChoice.catch(() => ({ outcome: 'dismissed' }));
     state.pwa.deferredPrompt = null;
-    if (typeof window !== 'undefined') window.__ownerDeferredPrompt = null;
+    if (typeof window !== 'undefined') window.__adminDeferredPrompt = null;
     updateInstallUI();
     if (choice && choice.outcome === 'accepted') {
-      showToast('Installing SJ Owner Desk to your home screen!', 'success');
+      showToast('Installing SJ Admin Desk to your home screen!', 'success');
     }
   }
 
   function updateDiagnostics() {
     const set = (id, v) => { const el = $(id); if (el) el.textContent = v; };
     const swStatus = state.pwa.swReg
-      ? (state.pwa.swReg.active ? 'Active (offline ready · scope /owner/)' : 'Installing…')
+      ? (state.pwa.swReg.active ? 'Active (offline ready · scope /admin/)' : 'Installing…')
       : ('serviceWorker' in navigator ? 'Not registered' : 'Unsupported');
     set('diag-sw', swStatus);
     set('diag-display', isStandaloneMode() ? 'Installed Standalone PWA' : 'Browser Tab');
     set('diag-net', navigator.onLine ? 'Online' : 'Offline');
-    set('sec-session-meta', `Signed in as @${state.owner.login || 'owner'} · ${CATALOG_REPO_OWNER}/${CATALOG_REPO_NAME} (${CATALOG_REPO_BRANCH})`);
+    set('sec-session-meta', `Signed in as @${state.admin.login || 'admin'} · ${CATALOG_REPO_ADMIN}/${CATALOG_REPO_NAME} (${CATALOG_REPO_BRANCH})`);
   }
 
-  function registerOwnerServiceWorker() {
+  function registerAdminServiceWorker() {
     if (!('serviceWorker' in navigator)) return;
     const isSecure = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
     if (!isSecure) return;
@@ -3336,14 +3336,14 @@
   let liveStarted = false;
 
   function unlockWorkspace({ token, login, offline = false }) {
-    state.owner.token = token;
-    state.owner.login = login;
-    state.owner.unlocked = true;
-    state.owner.offlineSession = offline;
+    state.admin.token = token;
+    state.admin.login = login;
+    state.admin.unlocked = true;
+    state.admin.offlineSession = offline;
     $('auth-gate')?.classList.add('hidden');
-    $('owner-app')?.classList.remove('hidden');
-    $('owner-user-label').textContent = `@${login}`;
-    const pill = $('owner-user-pill');
+    $('admin-app')?.classList.remove('hidden');
+    $('admin-user-label').textContent = `@${login}`;
+    const pill = $('admin-user-pill');
     if (pill) {
       pill.className = `pill ${offline ? 'pill-gold' : 'pill-green'}`;
       pill.innerHTML = `<span class="dot ${offline ? 'dot-gold' : 'dot-green'}"></span><span>@${escapeHtml(login)}${offline ? ' (Offline)' : ''}</span>`;
@@ -3378,7 +3378,7 @@
   function lockWorkspace(clearToken = false) {
     if (clearToken) {
       storeGitHubToken('', false);
-      lsRemove(OWNER_VERIFIED_META_KEY);
+      lsRemove(ADMIN_VERIFIED_META_KEY);
     }
     const tokenInp = $('auth-token-input');
     if (tokenInp) {
@@ -3387,13 +3387,13 @@
     }
     const toggleBtn = $('btn-auth-toggle-vis');
     if (toggleBtn) toggleBtn.textContent = 'Show';
-    state.owner.unlocked = false;
-    state.owner.offlineSession = false;
-    state.owner.token = '';
-    if (clearToken) state.owner.login = '';
+    state.admin.unlocked = false;
+    state.admin.offlineSession = false;
+    state.admin.token = '';
+    if (clearToken) state.admin.login = '';
     revokeLightboxObjectUrls();
     clearPendingFiles();
-    $('owner-app')?.classList.add('hidden');
+    $('admin-app')?.classList.add('hidden');
     $('auth-gate')?.classList.remove('hidden');
     $('auth-error')?.classList.add('hidden');
   }
@@ -3409,14 +3409,14 @@
     } catch (err) {
       if (err && err.authError) {
         storeGitHubToken('', false);
-        lsRemove(OWNER_VERIFIED_META_KEY);
+        lsRemove(ADMIN_VERIFIED_META_KEY);
         const errEl = $('auth-error');
         if (errEl) { errEl.textContent = err.message; errEl.classList.remove('hidden'); }
       } else {
-        // Offline resilience: allow cached owner desk ONLY if this exact token was verified before.
+        // Offline resilience: allow cached admin desk ONLY if this exact token was verified before.
         const meta = readVerifiedMeta();
         if (meta && meta.fp === tokenFingerprint(saved)) {
-          unlockWorkspace({ token: saved, login: meta.login || CATALOG_REPO_OWNER, offline: true });
+          unlockWorkspace({ token: saved, login: meta.login || CATALOG_REPO_ADMIN, offline: true });
         }
       }
     } finally {
@@ -3450,7 +3450,7 @@
         const verified = await verifyGitHubToken(raw);
         storeGitHubToken(verified.token, remember);
         if (remember) saveVerifiedMeta(verified.token, verified.login);
-        else lsRemove(OWNER_VERIFIED_META_KEY);
+        else lsRemove(ADMIN_VERIFIED_META_KEY);
         unlockWorkspace({ token: verified.token, login: verified.login, offline: false });
         showToast(`Welcome back, @${verified.login}!`, 'success');
       } catch (err) {
@@ -3458,7 +3458,7 @@
         errEl.classList.remove('hidden');
       } finally {
         btn.disabled = false;
-        btn.textContent = 'Verify & Open Owner Desk';
+        btn.textContent = 'Verify & Open Admin Desk';
       }
     });
 
@@ -3479,10 +3479,10 @@
       btn.addEventListener('click', () => switchSubtab(btn.dataset.subtab));
     });
 
-    $('btn-lock-owner')?.addEventListener('click', () => { lockWorkspace(false); showToast('Owner Desk locked.', 'info'); });
-    $('btn-sec-lock')?.addEventListener('click', () => { lockWorkspace(false); showToast('Owner Desk locked.', 'info'); });
+    $('btn-lock-admin')?.addEventListener('click', () => { lockWorkspace(false); showToast('Admin Desk locked.', 'info'); });
+    $('btn-sec-lock')?.addEventListener('click', () => { lockWorkspace(false); showToast('Admin Desk locked.', 'info'); });
     $('btn-sec-disconnect')?.addEventListener('click', () => {
-      openConfirm('Disconnect Owner Token?', 'Your GitHub token will be removed from this device and you will need to paste it again to sign in.', 'Disconnect', () => {
+      openConfirm('Disconnect Admin Token?', 'Your GitHub token will be removed from this device and you will need to paste it again to sign in.', 'Disconnect', () => {
         closeConfirm();
         lockWorkspace(true);
         showToast('GitHub token disconnected.', 'info');
@@ -3563,9 +3563,9 @@
       const btn = e.target.closest('[data-remove-pending]');
       if (!btn) return;
       const idx = Number(btn.dataset.removePending);
-      if (state.owner.pendingFiles[idx]) {
-        try { URL.revokeObjectURL(state.owner.pendingFiles[idx].previewUrl); } catch { /* ignore */ }
-        state.owner.pendingFiles.splice(idx, 1);
+      if (state.admin.pendingFiles[idx]) {
+        try { URL.revokeObjectURL(state.admin.pendingFiles[idx].previewUrl); } catch { /* ignore */ }
+        state.admin.pendingFiles.splice(idx, 1);
         renderPendingFiles();
       }
     });
@@ -3613,8 +3613,8 @@
         'Reprice Live',
         async () => {
           closeConfirm();
-          if (state.owner.busy) return;
-          state.owner.busy = true;
+          if (state.admin.busy) return;
+          state.admin.busy = true;
           try {
             const count = await repriceAllPublishedOnGitHub();
             renderCatalog();
@@ -3622,14 +3622,14 @@
           } catch (err) {
             showToast(err?.message || 'Batch reprice failed.', 'error');
           } finally {
-            state.owner.busy = false;
+            state.admin.busy = false;
           }
         }
       );
     });
 
     $('btn-export-csv')?.addEventListener('click', () => {
-      const all = [...state.owner.publishedItems, ...state.owner.localItems];
+      const all = [...state.admin.publishedItems, ...state.admin.localItems];
       if (!all.length) return showToast('No inventory items to export.', 'alert');
       const csv = catalogItemsToCsv(all);
       downloadTextFile(`sj-inventory-${todayIstIso()}.csv`, csv, 'text/csv;charset=utf-8');
@@ -3640,22 +3640,22 @@
       const payload = {
         exportedAt: new Date().toISOString(),
         gstin: SHOP_GSTIN,
-        published: state.owner.publishedItems,
+        published: state.admin.publishedItems,
         orders: state.orders.items
       };
-      downloadTextFile(`sj-owner-backup-${todayIstIso()}.json`, `${JSON.stringify(payload, null, 2)}\n`, 'application/json;charset=utf-8');
+      downloadTextFile(`sj-admin-backup-${todayIstIso()}.json`, `${JSON.stringify(payload, null, 2)}\n`, 'application/json;charset=utf-8');
       showToast('Downloaded JSON backup (Inventory + Orders).', 'success');
     });
 
     $('btn-save-draft')?.addEventListener('click', async () => {
-      if (state.owner.busy) return;
+      if (state.admin.busy) return;
       const item = collectUploadForm();
       if (!item) return;
-      state.owner.busy = true;
+      state.admin.busy = true;
       try {
-        item.media = state.owner.pendingFiles.map((f) => ({ type: f.type, mime: f.mime, name: f.file.name, blob: f.file }));
+        item.media = state.admin.pendingFiles.map((f) => ({ type: f.type, mime: f.mime, name: f.file.name, blob: f.file }));
         await saveLocalDraft(item);
-        state.owner.localItems.unshift(item);
+        state.admin.localItems.unshift(item);
         $('upload-form').reset();
         clearPendingFiles();
         renderCatalog();
@@ -3663,17 +3663,17 @@
       } catch (err) {
         showToast(err?.message || 'Could not save draft.', 'error');
       } finally {
-        state.owner.busy = false;
+        state.admin.busy = false;
       }
     });
 
     $('upload-form')?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      if (state.owner.busy) return;
+      if (state.admin.busy) return;
       const item = collectUploadForm();
       if (!item) return;
-      state.owner.busy = true;
-      const blobs = state.owner.pendingFiles.map((f) => ({ type: f.type, mime: f.mime, name: f.file.name, blob: f.file }));
+      state.admin.busy = true;
+      const blobs = state.admin.pendingFiles.map((f) => ({ type: f.type, mime: f.mime, name: f.file.name, blob: f.file }));
       try {
         await publishItemToGitHub(item, blobs);
         $('upload-form').reset();
@@ -3683,24 +3683,24 @@
       } catch (err) {
         showToast(err?.message || 'Upload failed.', 'error');
       } finally {
-        state.owner.busy = false;
+        state.admin.busy = false;
         setTimeout(() => setUploadProgress(false), 1200);
       }
     });
 
     const publishAllDrafts = async () => {
-      if (state.owner.busy || !state.owner.localItems.length) return;
-      state.owner.busy = true;
+      if (state.admin.busy || !state.admin.localItems.length) return;
+      state.admin.busy = true;
       let count = 0;
       try {
-        const snapshot = state.owner.localItems.slice();
+        const snapshot = state.admin.localItems.slice();
         for (const draft of snapshot) {
           const blobs = (draft.media || [])
             .filter((m) => m && m.blob instanceof Blob)
             .map((m) => ({ type: m.type === 'video' ? 'video' : 'image', mime: m.mime || m.blob.type, name: m.name || '', blob: m.blob }));
           await publishItemToGitHub(draft, blobs);
           await deleteLocalDraft(draft.id);
-          state.owner.localItems = state.owner.localItems.filter((x) => x.id !== draft.id);
+          state.admin.localItems = state.admin.localItems.filter((x) => x.id !== draft.id);
           count += 1;
         }
         renderCatalog();
@@ -3708,7 +3708,7 @@
       } catch (err) {
         showToast(err?.message || 'Stopped publishing drafts due to an error.', 'error');
       } finally {
-        state.owner.busy = false;
+        state.admin.busy = false;
         setTimeout(() => setUploadProgress(false), 1200);
       }
     };
@@ -3720,12 +3720,12 @@
     $('catalog-filters')?.addEventListener('click', (e) => {
       const btn = e.target.closest('[data-cat-filter]');
       if (!btn) return;
-      state.owner.filter = btn.dataset.catFilter;
+      state.admin.filter = btn.dataset.catFilter;
       document.querySelectorAll('[data-cat-filter]').forEach((b) => b.classList.toggle('is-active', b === btn));
       renderCatalog();
     });
-    $('catalog-search')?.addEventListener('input', (e) => { state.owner.search = e.target.value; renderCatalog(); });
-    $('catalog-sort')?.addEventListener('change', (e) => { state.owner.sort = e.target.value; renderCatalog(); });
+    $('catalog-search')?.addEventListener('input', (e) => { state.admin.search = e.target.value; renderCatalog(); });
+    $('catalog-sort')?.addEventListener('change', (e) => { state.admin.sort = e.target.value; renderCatalog(); });
 
     $('catalog-grid')?.addEventListener('click', async (e) => {
       const lb = e.target.closest('[data-open-lb]');
@@ -3754,30 +3754,30 @@
       }
 
       const pub = e.target.closest('[data-pub-draft]');
-      if (pub && !state.owner.busy) {
+      if (pub && !state.admin.busy) {
         const draft = findItem(pub.dataset.pubDraft, 'local');
         if (!draft) return;
-        state.owner.busy = true;
+        state.admin.busy = true;
         try {
           const blobs = (draft.media || [])
             .filter((m) => m && m.blob instanceof Blob)
             .map((m) => ({ type: m.type === 'video' ? 'video' : 'image', mime: m.mime || m.blob.type, name: m.name || '', blob: m.blob }));
           await publishItemToGitHub(draft, blobs);
           await deleteLocalDraft(draft.id);
-          state.owner.localItems = state.owner.localItems.filter((x) => x.id !== draft.id);
+          state.admin.localItems = state.admin.localItems.filter((x) => x.id !== draft.id);
           renderCatalog();
           showToast(`Published "${draft.name}" live!`, 'success');
         } catch (err) {
           showToast(err?.message || 'Publish failed.', 'error');
         } finally {
-          state.owner.busy = false;
+          state.admin.busy = false;
           setTimeout(() => setUploadProgress(false), 1200);
         }
         return;
       }
 
       const del = e.target.closest('[data-del-item]');
-      if (del && !state.owner.busy) {
+      if (del && !state.admin.busy) {
         const id = del.dataset.delItem;
         const src = del.dataset.srcType;
         const item = findItem(id, src);
@@ -3790,11 +3790,11 @@
           'Delete',
           async () => {
             closeConfirm();
-            state.owner.busy = true;
+            state.admin.busy = true;
             try {
               if (src === 'local') {
                 await deleteLocalDraft(id);
-                state.owner.localItems = state.owner.localItems.filter((x) => x.id !== id);
+                state.admin.localItems = state.admin.localItems.filter((x) => x.id !== id);
                 showToast('Local draft removed.', 'success');
               } else {
                 setUploadProgress(true, `Removing "${item.name}"…`, 50);
@@ -3806,7 +3806,7 @@
             } catch (err) {
               showToast(err?.message || 'Delete failed.', 'error');
             } finally {
-              state.owner.busy = false;
+              state.admin.busy = false;
               setTimeout(() => setUploadProgress(false), 1000);
             }
           }
@@ -3836,7 +3836,7 @@
     });
     $('edit-form')?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      if (state.owner.busy) return;
+      if (state.admin.busy) return;
       const id = $('edit-id').value;
       const src = $('edit-source').value;
       const name = $('edit-name').value.trim();
@@ -3855,7 +3855,7 @@
         note: $('edit-note').value.trim()
       };
       const btn = $('btn-save-edit');
-      state.owner.busy = true;
+      state.admin.busy = true;
       btn.disabled = true;
       btn.textContent = 'Saving…';
       try {
@@ -3864,7 +3864,7 @@
           if (!existing) throw new Error('Draft not found.');
           const merged = { ...existing, ...updated };
           await saveLocalDraft(merged);
-          state.owner.localItems = state.owner.localItems.map((x) => (x.id === id ? merged : x));
+          state.admin.localItems = state.admin.localItems.map((x) => (x.id === id ? merged : x));
           showToast('Local draft updated.', 'success');
         } else {
           await updatePublishedItemOnGitHub(updated);
@@ -3875,7 +3875,7 @@
       } catch (err) {
         showToast(err?.message || 'Could not save changes.', 'error');
       } finally {
-        state.owner.busy = false;
+        state.admin.busy = false;
         btn.disabled = false;
         btn.textContent = 'Save Changes';
       }
@@ -3885,37 +3885,37 @@
     const closeLb = () => {
       $('lightbox-modal')?.classList.add('hidden');
       if ($('lb-stage')) $('lb-stage').innerHTML = '';
-      state.owner.lightboxItem = null;
+      state.admin.lightboxItem = null;
       revokeLightboxObjectUrls();
     };
     $('btn-close-lb')?.addEventListener('click', closeLb);
     $('lightbox-modal')?.addEventListener('click', (e) => { if (e.target.id === 'lightbox-modal') closeLb(); });
     $('btn-lb-prev')?.addEventListener('click', () => {
-      if (!state.owner.lightboxItem) return;
-      const n = state.owner.lightboxItem.media.length;
-      state.owner.lightboxIdx = (state.owner.lightboxIdx - 1 + n) % n;
+      if (!state.admin.lightboxItem) return;
+      const n = state.admin.lightboxItem.media.length;
+      state.admin.lightboxIdx = (state.admin.lightboxIdx - 1 + n) % n;
       renderLightbox();
     });
     $('btn-lb-next')?.addEventListener('click', () => {
-      if (!state.owner.lightboxItem) return;
-      const n = state.owner.lightboxItem.media.length;
-      state.owner.lightboxIdx = (state.owner.lightboxIdx + 1) % n;
+      if (!state.admin.lightboxItem) return;
+      const n = state.admin.lightboxItem.media.length;
+      state.admin.lightboxIdx = (state.admin.lightboxIdx + 1) % n;
       renderLightbox();
     });
     const closeTag = () => {
       $('tag-modal')?.classList.add('hidden');
-      state.owner.tagItem = null;
+      state.admin.tagItem = null;
     };
     $('btn-close-tag')?.addEventListener('click', closeTag);
     $('tag-modal')?.addEventListener('click', (e) => { if (e.target.id === 'tag-modal') closeTag(); });
     $('btn-tag-bill')?.addEventListener('click', () => {
-      const it = state.owner.tagItem;
+      const it = state.admin.tagItem;
       closeTag();
       if (it) addCatalogItemToBill(it);
     });
     $('btn-tag-print')?.addEventListener('click', () => {
-      if (!state.owner.tagItem) return;
-      printHtmlInSlipSheet(`<div style="display:flex;justify-content:center;padding:1rem;">${buildTagCardHtml(state.owner.tagItem)}</div>`);
+      if (!state.admin.tagItem) return;
+      printHtmlInSlipSheet(`<div style="display:flex;justify-content:center;padding:1rem;">${buildTagCardHtml(state.admin.tagItem)}</div>`);
     });
 
     $('btn-confirm-cancel')?.addEventListener('click', closeConfirm);
@@ -4260,7 +4260,7 @@
     $('btn-check-sw-update')?.addEventListener('click', async () => {
       if (!state.pwa.swReg) return showToast('Service worker is not active in this environment.', 'info');
       await state.pwa.swReg.update().catch(() => {});
-      showToast('Checked for Owner PWA updates.', 'success');
+      showToast('Checked for Admin PWA updates.', 'success');
     });
     $('btn-sec-clear-cache')?.addEventListener('click', () => {
       lsRemove(STORAGE_KEYS.lastRates);
@@ -4278,22 +4278,22 @@
     window.addEventListener('appinstalled', () => {
       state.pwa.deferredPrompt = null;
       updateInstallUI();
-      showToast('SJ Owner Desk installed!', 'success');
+      showToast('SJ Admin Desk installed!', 'success');
     });
     window.addEventListener('online', () => {
       renderLiveStatusBadge();
       updateDiagnostics();
-      if (state.owner.unlocked) {
-        if (state.owner.offlineSession && state.owner.token) {
-          verifyGitHubToken(state.owner.token).then((v) => {
-            state.owner.offlineSession = false;
+      if (state.admin.unlocked) {
+        if (state.admin.offlineSession && state.admin.token) {
+          verifyGitHubToken(state.admin.token).then((v) => {
+            state.admin.offlineSession = false;
             saveVerifiedMeta(v.token, v.login);
             unlockWorkspace({ token: v.token, login: v.login, offline: false });
-            showToast('Back online · GitHub owner session verified.', 'success');
+            showToast('Back online · GitHub admin session verified.', 'success');
           }).catch((err) => {
             if (err && err.authError) {
               lockWorkspace(true);
-              showToast(err.message || 'Owner token revoked or invalid. Please sign in again.', 'error');
+              showToast(err.message || 'Admin token revoked or invalid. Please sign in again.', 'error');
             }
           });
         }
@@ -4306,7 +4306,7 @@
       updateDiagnostics();
     });
     window.addEventListener('hashchange', () => {
-      if (!state.owner.unlocked) return;
+      if (!state.admin.unlocked) return;
       const hash = (location.hash || '').replace(/^#/, '').toLowerCase();
       if (['desk', 'catalog', 'exchanges', 'accuracy', 'settings'].includes(hash)) {
         switchView(hash);
@@ -4315,7 +4315,7 @@
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
         clearTimeout(state.live.fxTimer);
-      } else if (state.owner.unlocked) {
+      } else if (state.admin.unlocked) {
         scheduleFxHeartbeat();
         syncMetalsRest(false);
       }
@@ -4324,14 +4324,14 @@
 
   // Expose pure helpers for automated unit tests without affecting browser behavior.
   if (typeof globalThis !== 'undefined') {
-    globalThis.__OWNER_PWA_API__ = {
+    globalThis.__ADMIN_PWA_API__ = {
       computeCityPrices,
       computeExchangeRows,
       computeQuoteMath,
       computeOldExchangeMath,
       buildRatesShareText,
       sanitizeCatalogMediaUrl,
-      toOwnerMediaSrc,
+      toAdminMediaSrc,
       sanitizeStatutoryPayload,
       validateStatutoryDraft,
       statutoryRatesFor,
@@ -4358,7 +4358,7 @@
 
   if (typeof document !== 'undefined') {
     bindEvents();
-    registerOwnerServiceWorker();
+    registerAdminServiceWorker();
     updateInstallUI();
     tryAutoRestoreSession();
   }
