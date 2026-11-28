@@ -1,12 +1,14 @@
 {
   "name": "satyanarayan-jewellers-price-desk",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Zero-build live gold & silver bullion price desk PWA for Satyanarayan Jewellers, Cuttack.",
   "engines": {
     "node": ">=22.0.0"
   },
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "version:bump": "node scripts/bump-version.mjs",
+    "version:verify": "node scripts/bump-version.mjs --verify"
   }
 }

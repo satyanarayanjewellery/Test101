@@ -11,9 +11,16 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Verify version sync across Customer and Admin apps
+        run: npm run version:verify
+      - name: Enforce +1 trailing version bump on pull requests
+        if: github.event_name == 'pull_request'
+        run: node scripts/bump-version.mjs --check-updated "origin/${{ github.base_ref }}"
       - name: Run test suite
         run: node --test
       - name: Validate HTML inline scripts syntax
