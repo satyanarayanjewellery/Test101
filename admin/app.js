@@ -1980,7 +1980,10 @@
   // =========================================================================
   async function loadStatutoryRates(populateForm = true) {
     try {
-      const cached = sanitizeStatutoryPayload(JSON.parse(lsGet(STORAGE_KEYS.statutoryRates, 'null')));
+      // Tolerate both cache shapes: the shared localStorage key is read by both PWAs, and the
+      // customer desk stores { fetchedAt, rates } while older admin builds stored the bare payload.
+      const parsed = JSON.parse(lsGet(STORAGE_KEYS.statutoryRates, 'null'));
+      const cached = sanitizeStatutoryPayload(parsed && (parsed.rates || parsed));
       if (cached && !state.statutory) state.statutory = cached;
     } catch { /* ignore */ }
 
@@ -1992,7 +1995,7 @@
         if (clean) {
           state.statutory = clean;
           state.statutoryRaw = raw;
-          lsSet(STORAGE_KEYS.statutoryRates, JSON.stringify(clean));
+          lsSet(STORAGE_KEYS.statutoryRates, JSON.stringify({ fetchedAt: Date.now(), rates: clean }));
         }
       }
     } catch { /* keep cached or default */ }
@@ -2114,7 +2117,7 @@
       await ghContentsRequest('PUT', STATUTORY_REPO_PATH, putBody);
 
       state.statutory = check.payload;
-      lsSet(STORAGE_KEYS.statutoryRates, JSON.stringify(check.payload));
+      lsSet(STORAGE_KEYS.statutoryRates, JSON.stringify({ fetchedAt: Date.now(), rates: check.payload }));
       repriceAndRender(true);
       renderStatutoryNotice();
       renderStatutoryPreview();

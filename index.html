@@ -2832,6 +2832,10 @@
     function persistCachedRates(spotGold, spotSilver, usdInr, force = false) {
       const now = Date.now();
       if (!force && now - state.ws.lastPersistTs < 5000) return;
+      // Never persist a half-priced or out-of-domain snapshot: a restored board must only ever
+      // repaint a previously coherent state (catalog prices and cached FX included).
+      if (!spotInBand(spotGold, 'gold') || !spotInBand(spotSilver, 'silver')) return;
+      if (!validateUsdInr(usdInr, null).ok) return;
       state.ws.lastPersistTs = now;
       try {
         // Persist a normalized (rounded) snapshot so a restore compares exactly equal to the live
@@ -3829,8 +3833,10 @@
     function readCachedStatutory() {
       try {
         const parsed = JSON.parse(lsGet(STORAGE_KEYS.statutoryRates, ''));
-        if (!parsed || !parsed.rates) return null;
-        const rates = sanitizeStatutoryPayload(parsed.rates);
+        if (!parsed || typeof parsed !== 'object') return null;
+        // Tolerate both cache shapes on the shared localStorage key: this desk writes
+        // { fetchedAt, rates }; older admin builds wrote the bare { gold, silver } payload.
+        const rates = sanitizeStatutoryPayload(parsed.rates || parsed);
         if (!rates) return null;
         return { rates, fetchedAt: Number(parsed.fetchedAt) || 0, source: 'cache' };
       } catch { return null; }
